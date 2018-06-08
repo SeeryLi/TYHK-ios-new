@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>设置</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user.css" />
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/encryption.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+
+</head>
+
+<body>
+
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+      <div></div>
+        <div>
+            <div class="aui-pull-left aui-btn">
+                <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+            </div>
+            <div class="aui-title head-title"><b>设置<b></div>
+        </div>
+    </header>
+
+      <div class="border-se"></div>
+        <ul class="aui-list aui-list-in">
+
+            <li id="settingLiPhoneNumber" class="aui-list-item">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title user-setting-list-left">手机号码</div>
+                    <div class="aui-list-item-right user-setting-list-right">
+                        <span id="settingPhoneNumber"> 小明 </span>
+                    </div>
+                </div>
+            </li>
+
+          <!--  <li id="settingLiWeinXinBound" class="aui-list-item">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title user-setting-list-left">微信绑定</div>
+                    <div class="aui-list-item-right user-setting-list-right">
+                        <span id="settingWeinXinBound"> 未绑定 </span>
+                    </div>
+                </div>
+            </li>-->
+
+            <li id="settingLiPasswordChange" class="aui-list-item" onclick="pageJump('password_change','password_change.html','setting')">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title user-setting-list-left">密码修改</div>
+                </div>
+            </li>
+
+            <div class="border-se"></div>
+
+            <li id="settingLiConectCustomerService" class="aui-list-item" onclick="conectService()">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title user-setting-list-left">联系客服</div>
+                    <div class="aui-list-item-right user-setting-list-right" id="settingCustomerService">
+                        400-8230023
+                    </div>
+                </div>
+            </li>
+
+        </ul>
+
+</body>
+
+<script type="text/javascript">
+    apiready = function() {
+      var header = document.querySelector('#header');
+      $api.fixStatusBar(header);
+      $api.byId('settingPhoneNumber').innerText = getStorage('userPhone');
+    };
+
+    /** 联系客服*/
+    function conectService(){
+      var phoneNum = $api.trimAll($api.text($api.byId('settingCustomerService')));
+      api.confirm({
+          title: '拨打电话',
+          msg: '是否允许应用拨打电话？',
+          button:["取消","确定"]
+      }, function(ret, err){
+          if( ret ){
+              console.log(JSON.stringify(phoneNum));
+
+               if (ret.buttonIndex == 1) {
+
+               }else{
+                 api.call({
+                     type: 'tel_prompt',
+                     number: phoneNum + ''
+                 });
+               }
+          }
+      });
+    }
+
+</script>
+
+</html>

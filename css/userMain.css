@@ -1,0 +1,92 @@
+/*.aui-list .aui-list-item-text{color: #fff;}*/
+body{
+  background-color: #EFF2F7;
+}
+
+.aui-bg-info {
+    background-color: #fff !important;
+}
+
+.aui-w-h-img{
+  display: none;
+}
+
+.aui-w-h-img>img {
+    display: inline-block;
+    width: 0.65rem;
+    height: 0.65rem;
+    margin-left: 0.1rem;
+    vertical-align: middle;
+}
+
+.aui-w-h-img>span {
+    position: relative;
+    top: 0.1rem;
+    font-size: 0.75rem;
+    color: #555 !important;
+}
+
+.aui-media-list-item-inner {
+    height: 4rem;
+}
+
+.top-head {
+    color: #222 !important;
+}
+
+.user-main-list-icon {
+    max-height: 0.75rem !important;
+    max-width: 0.75rem !important;
+}
+
+.mar_span{
+  margin-left: 0.3rem;
+}
+
+.aui-img-round{
+  border: 1px solid #EBEBEB;
+}
+
+#userMainName,#doctor-main-name{
+  font-weight: bold;
+  color: #222;
+  font-size: 0.85rem;
+}
+
+.aui-list-item-inner{
+  font-size: 0.75rem !important;
+  color: #222 !important;
+}
+
+.none_border{
+  background-image: none !important;
+}
+
+.par_div{
+  position: relative;
+  overflow: hidden;
+}
+
+.qr_code{
+  max-width: 1.5rem !important;
+  max-height: 1.5rem !important;
+  position: absolute;
+  right: 1.51rem;
+  top: calc(50% - 0.75rem);
+}
+
+.show{display: block !important;}
+
+.examine_div{
+  display: inline-block;
+  margin-left: 0.1rem;
+  padding: 0 0.35rem;
+  height: 0.85rem;
+  line-height: 0.85rem;
+  border-radius: 0.42rem;
+  text-align: center;
+  background-color: #E64B4B;
+  color: #fff;
+  max-width: 3.5rem;
+  font-size: 0.5rem;
+}

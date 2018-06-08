@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>快速咨询</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui-slide.css" />
+
+</head>
+
+<body>
+
+    <div class="aui-content">
+        <ul class="aui-list aui-form-list">
+            <li onclick="pageJump('doctor_category','doctor_category.html','add_confult_frame')">
+                <div class="first-div">
+                    <span><b>医生等级</b></span>
+                    <div class="category">
+                        <span id="selectDoctorLevel">未选择</span>
+                        <img src="../../image/mylistin.png" width="15px" />
+                    </div>
+                </div>
+                <div class="border-se"></div>
+            </li>
+            <li>
+                <div class="box-div-title">
+                    <span><b>咨询内容</b></span>
+                </div>
+                <div class="textarea-div">
+                    <textarea class="bd-ys3" id="consultContent" oninput="wordsDeal(this)" name="mechanism.researchObjectives" placeholder="请详细描述您的症状、疾病和身体状况，便于医生准确的分析，我们将确保您的隐私安全"></textarea>
+                    <p><span id="textCount">0</span>/200</p>
+                </div>
+                <div class="border-se"></div>
+            </li>
+            <li>
+                <div class="box-div-title">
+                    <span><b>语音咨询</b></span>
+                    <div class="box-div-voice" id='consult-add-record-voice' onclick="dialogVoice()">
+                        <img src="../../image/home_form_rec.png" width="30px" />
+                    </div>
+                    <div class="timer-div">
+                        <img id='consult-add-play-voice' src="../../image/home_form_sus.png" alt="ply">
+                        <span id="voiceTime">0s</span>
+                    </div>
+                </div>
+                <div class="border-se"></div>
+            </li>
+            <li>
+                <div class="box-div-title">
+                    <span><b>照片（选填）</b></span>
+                </div>
+            </li>
+            <li>
+                <div class="aui-row-padded">
+                    <div class="aui-col-xs-12">
+                        <div class="con-box">
+                            <div id='consult1' class="aui-col-xs-4 add-files dis" onclick="removeImage(1)">
+                                <img id="consultImg1" />
+                                <div class="delete-div">
+                                    <img src="../../image/home_form_add_del.png" />
+                                </div>
+                            </div>
+                            <div id='consult2' class="aui-col-xs-4 add-files dis" onclick="removeImage(2)">
+                                <img id="consultImg2" />
+                                <div class="delete-div">
+                                    <img src="../../image/home_form_add_del.png" />
+                                </div>
+                            </div>
+                            <div id='consult3' class="aui-col-xs-4 add-files dis" onclick="removeImage(3)">
+                                <img id="consultImg3" />
+                                <div class="delete-div">
+                                    <img src="../../image/home_form_add_del.png" />
+                                </div>
+                            </div>
+                            <div id="add-file" class="add-files" onclick="addPicture()">
+                                <img src="../../image/home_form_add.png" height="100%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <div class="aui-content-padded bth-log1" onclick="getUserCurrency()">
+                    <div class="aui-btn aui-btn-success aui-btn-block ">
+                        提交
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="shade_div">
+        <div class="bottom_dialog">
+            <div id="record-time" class="dialog-title">
+                点击录音
+            </div>
+            <img src="../../image/home_form_add_a.png" width="90px" height="90px;" alt="" onclick="recordVoice()">
+            <img class="dis" src="../../image/home_form_add_b.png" width="90px" height="90px;" alt="" onclick="stopRecordVoice()">
+            <div class="bottom-div">
+                <div class="goBack" onclick="cancleVoice()">取消</div>
+                <div class="" onclick="dialogSureClick()">确定</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-popup.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-range.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/fileUtil.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/db/dbSyncUtils.js"></script>
+<script type="text/javascript" src="../../script/modules/consult/consultFileUtils.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript">
+    var imgCount = 0;
+    var imgArr = new Array();
+    var pathArr = new Array();
+    var consultId;
+    var recordVoicePath = '';
+    var fileUploadSuccess = false;
+    var consultUploadSuccess = false;
+    var clickDoctor = '';
+    var voiceTime = 0;
+    var recordTimer;
+    var rankCost;
+
+    apiready = function() {
+        consultId = getUUID();
+        setFileUploadListener();
+    };
+
+    /**获取点击的医生*/
+    function getDoctor(doctor) {
+        if (doctor) {
+            clickDoctor = doctor;
+            $api.byId("selectDoctorLevel").innerText = doctor.name;
+            rankCost = doctor.rankCost;
+        }
+    }
+
+    /** 文字限制*/
+    function wordsDeal(this_) {
+        var count = $(this_).val().length;
+        $('#textCount').text(count);
+        if (count > 200) {
+            defaultToast('字数太多啦');
+        }
+    }
+
+    // 弹窗
+    function dialogVoice() {
+        api.stopPlay();
+        $('#consult-add-play-voice').attr('src', '../../image/home_form_sus.png');
+        var pardiv = $(".shade_div");
+        var frameH = api.frameHeight;
+        if (!(pardiv.hasClass("show"))) {
+            // 取消touchmove
+            pardiv.bind('touchmove', function(event) {
+                return false;
+            });
+            pardiv.height(frameH);
+            pardiv.addClass("show");
+            $(".bottom_dialog").animate({
+                "bottom": "0"
+            }, 200);
+        }
+    }
+
+    /**播放录音*/
+    function playVoice() {
+        if (recordVoicePath) {
+          if ($('#consult-add-play-voice').attr("alt") == "ply") {
+              $('#consult-add-play-voice').attr("src", "../../image/home_form_play.png");
+              $('#consult-add-play-voice').attr("alt", "gb");
+          } else {
+              $('#consult-add-play-voice').attr("src", "../../image/home_form_sus.png");
+              $('#consult-add-play-voice').attr("alt", "ply");
+              api.stopPlay();
+              return;
+          }
+          console.log(JSON.stringify(recordVoicePath));
+            //$("#consult-add-record-voice").attr("onclick", "defaultToast('录音正在播放，请稍后');");
+            api.startPlay({
+                path: recordVoicePath
+            }, function(ret, err) {
+                $('#consult-add-play-voice').attr('src', '../../image/home_form_sus.png');
+                //$("#consult-add-record-voice").attr("onclick", "dialogVoice();");
+                if (ret) {
+                    console.log(JSON.stringify(ret));
+                } else {
+                    defaultToast(JSON.stringify(err));
+                    console.log(JSON.stringify(err));
+                }
+            });
+        }
+    }
+
+    /**取消录音*/
+    function cancleVoice() {
+        stopRecordVoice();
+        $(".bottom_dialog").animate({
+            "bottom": "-10rem"
+        }, 200);
+        setTimeout(function() {
+            $(".shade_div").removeClass("show");
+        }, 200);
+        deleteFile(recordVoicePath);
+        recordVoicePath = '';
+        voiceTime = 0;
+        $('#voiceTime').text('0s');
+        $("#record-time").text("0s");
+    }
+
+    /** 添加图片*/
+    function addPicture() {
+        api.getPicture({
+            sourceType: 'album',
+            encodingType: 'png',
+            mediaValue: 'pic',
+            destinationType: 'url',
+        }, function(ret, err) {
+            if (ret && ret.data) {
+                if (imgCount >= 3) {
+                    defaultToast("最多只能添加三张图片");
+                    return;
+                }
+
+                /**if (pathArr.lengh > 0) {
+
+                    for (var i = 0; i < pathArr.length; i++) {
+                        var path = array[i];
+                        if (ret.data == path) {
+                            defaultToast("图片已经存在啦");
+                            return;
+                        }
+                    }
+                }*/
+                boundObj(ret.data, "image");
+
+            } else {
+                console.log("err-->" + JSON.stringify(err));
+            }
+        });
+    }
+
+    /** 设置图片显示*/
+    function setImageShowType() {
+        $(".con-box>div").eq(0).removeClass("show");
+        $(".con-box>div").eq(0).addClass("dis");
+        $(".con-box>div").eq(1).removeClass("show");
+        $(".con-box>div").eq(1).addClass("dis");
+        $(".con-box>div").eq(2).removeClass("show");
+        $(".con-box>div").eq(2).addClass("dis");
+        if (imgCount == 0) {
+            $api.attr($api.byId("consultImg1"), 'src', imgArr[0].filePath);
+            $(".con-box>div").eq(0).removeClass("dis");
+            $(".con-box>div").eq(0).addClass("show");
+            $("#add-file").css("margin-left", "0.5rem");
+        } else if (imgCount == 1) {
+            $api.attr($api.byId("consultImg1"), 'src', imgArr[0].filePath);
+            $(".con-box>div").eq(0).removeClass("dis");
+            $(".con-box>div").eq(0).addClass("show");
+            $("#add-file").css("margin-left", "0.5rem");
+            $api.attr($api.byId("consultImg2"), 'src', imgArr[1].filePath);
+            $(".con-box>div").eq(1).removeClass("dis");
+            $(".con-box>div").eq(1).addClass("show");
+        } else if (imgCount == 2) {
+            $api.attr($api.byId("consultImg1"), 'src', imgArr[0].filePath);
+            $(".con-box>div").eq(0).removeClass("dis");
+            $(".con-box>div").eq(0).addClass("show");
+            $("#add-file").css("margin-left", "0.5rem");
+            $api.attr($api.byId("consultImg2"), 'src', imgArr[1].filePath);
+            $(".con-box>div").eq(1).removeClass("dis");
+            $(".con-box>div").eq(1).addClass("show");
+            $api.attr($api.byId("consultImg3"), 'src', imgArr[2].filePath);
+            $(".con-box>div").eq(2).removeClass("dis");
+            $(".con-box>div").eq(2).addClass("show");
+            $("#add-file").removeClass("show");
+            $("#add-file").addClass("dis");
+        }
+        imgCount++;
+    }
+
+    /** 获取绑定对象*/
+    function boundObj(path, type) {
+        var fs = api.require('fs');
+        var pathArrs = path.split("/");
+        var fileSize = 0;
+        if (type == "image") {
+            fs.getAttribute({
+                path: path
+            }, function(ret, err) {
+                if (ret.status) {
+                    console.log(JSON.stringify(ret));
+                    fileSize = ret.attribute.size;
+                } else {
+                    console.log(JSON.stringify(err));
+                }
+            });
+        } else {
+            fileSize = voiceTime;
+        }
+
+        var fileBean = new Object();
+        fileBean.filePath = path;
+        fileBean.id = getUUID();
+        fileBean.fileSize = fileSize;
+        fileBean.fileName = pathArrs[pathArrs.length - 1];
+        fileBean.requestId = consultId;
+        fileBean.fileType = type;
+        pathArr.push(fileBean);
+        bunodFile(fileBean);
+        if (type == "image") {
+            imgArr.push(fileBean);
+            setImageShowType();
+        }
+    }
+
+    /** 录音*/
+    function recordVoice() {
+        $("#consult-add-play-voice").attr("onclick", "defaultToast('请先结束录音');");
+        voiceTime = 0;
+        if (recordVoicePath) {
+            deleteFile(recordVoicePath);
+        }
+        recordVoicePath = 'fs://' + new Date().getTime() + '.aac';
+        api.startRecord({
+            path: recordVoicePath
+        });
+        recordTimeOut();
+        $(".bottom_dialog>img").eq(0).addClass("dis");
+        $(".bottom_dialog>img").eq(1).removeClass("dis");
+    }
+
+    /** 停止录音*/
+    function stopRecordVoice() {
+        $("#consult-add-play-voice").attr("onclick", "playVoice();");
+        recordTimeOver();
+        api.stopRecord(function(ret, err) {});
+        $("#record-time").text(voiceTime + "s");
+        $("#voiceTime").text(voiceTime + "s");
+        $(".bottom_dialog>img").eq(1).addClass("dis");
+        $(".bottom_dialog>img").eq(0).removeClass("dis");
+    }
+
+    /**点击确定对话框*/
+    function dialogSureClick() {
+        stopRecordVoice();
+        $("#record-time").text("0s");
+        $(".bottom_dialog").animate({
+            "bottom": "-10rem"
+        }, 200);
+        setTimeout(function() {
+            $(".shade_div").removeClass("show");
+        }, 200);
+    }
+
+    /** 移除图片*/
+    function removeImage(index) {
+        var id;
+        var parentId;
+        if (index == 1) {
+            id = "consultImg1";
+            parentId = '#consult1';
+        } else if (index == 2) {
+            id = "consultImg2";
+            parentId = '#consult2';
+        } else if (index == 3) {
+            id = "consultImg3";
+            parentId = '#consult3';
+        }
+        var path = $api.trimAll($api.attr($api.byId(id), 'src'));
+        if (path) {
+            for (var i = 0; i < pathArr.length; i++) {
+                var fileBean = pathArr[i];
+                if (fileBean.filePath == path) {
+                    pathArr.splice(i, 1);
+                    imgArr.splice(i, 1);
+                    $(parentId).removeClass("show");
+                    $(parentId).addClass("dis");
+                    $("#add-file").removeClass("dis");
+                    $("#add-file").addClass("show");
+                    unboundFile(fileBean.id);
+                    imgCount--;
+                    return;
+                }
+            }
+        }
+    }
+
+    /** 提交咨询，涉及快速咨询和专业咨询*/
+    function addConsult() {
+        var timestamp = new Date().getTime();
+        var userId = getStorage("userId");
+        var consultContent = $api.trimAll($api.val($api.byId("consultContent")));
+
+        if ((typeof(consultContent) == 'undefined' || consultContent == '' || isFileExist(recordVoicePath) == 0) && recordVoicePath == '') {
+            defaultToast('语音和咨询内容请至少填写一项');
+            return;
+        }
+
+        if (consultContent.length > 200) {
+            defaultToast('内容字数超出范围了');
+            return;
+        }
+
+        if (pathArr.length == 0 && recordVoicePath == '') {
+            fileUploadSuccess = true;
+        }
+
+        if (recordVoicePath) {
+            boundObj(recordVoicePath, "voice");
+        }
+        showToast("");
+        /** 上传文件*/
+        uoploadConsultFile(consultId);
+        api.ajax({
+            url: consultAddSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": userId,
+                    "time": timestamp,
+                    "requestId": consultId,
+                    "questionContent": consultContent,
+                    "questionVoiceId": "",
+                    "questionPictureIds": "",
+                    "assignDoctorId": "",
+                    "deviceId": api.deviceId,
+                    "type": '1',
+                    "doctorRank": clickDoctor.id,
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.success) {
+                    consultUploadSuccess = true;
+                    if (fileUploadSuccess) {
+                        toast.hide();
+                        jumpToRecord();
+                    }
+                } else {
+                    toast.hide();
+                    defaultToast("上传出错了，请稍后再试");
+                }
+            } else {
+                //console.log('addConsult err-->' + JSON.stringify(err));
+                defaultToast("上传出错了，请稍后再试");
+                toast.hide();
+            }
+        });
+    }
+
+    /** 跳转到咨询聊天界面*/
+    function jumpToRecord() {
+        api.openWin({
+            name: 'user_consult_record_win',
+            url: './user_consult_record_win.html',
+            pageParam: {
+                name: 'add_profession_consult_frm'
+            }
+        });
+        api.sendEvent({
+            name: 'getUserInfo',
+            extra: {
+                userId: getStorage('userId'),
+            }
+        });
+        api.closeWin();
+    }
+
+    /** 录音计时*/
+    function recordTimeOut() {
+        voiceTime = voiceTime + 1;
+        $("#record-time").text(voiceTime + 's');
+        $("#voiceTime").text(voiceTime + "s");
+        recordTimer = setTimeout("recordTimeOut()", 1000);
+        if (voiceTime >= 60) {
+            $("#record-time").text(voiceTime + 's');
+            $("#voiceTime").text(voiceTime + "s");
+            stopRecordVoice();
+            recordTimeOver();
+            defaultToast("录音超时了");
+        }
+    }
+
+    /** 停止计时*/
+    function recordTimeOver() {
+        clearTimeout(recordTimer);
+    }
+
+    /** 设置监听*/
+    function setFileUploadListener() {
+        api.addEventListener({
+            name: 'consultUploadSuccess'
+        }, function(ret, err) {
+            fileUploadSuccess = true;
+            if (consultUploadSuccess) {
+                toast.hide();
+                jumpToRecord();
+            }
+        });
+
+        api.addEventListener({
+            name: 'keyback'
+        }, function(ret, err) {
+            if (!(fileUploadSuccess && consultUploadSuccess)) {
+                unboundConsult(consultId);
+            }
+            goBack();
+        });
+    }
+
+    /** 获取用户剩余的币*/
+    function getUserCurrency() {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: getMyCurrencySer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "time": new Date().getTime(),
+                        "deviceId": api.deviceId,
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                //console.log("getMyCurrencySer-->" + JSON.stringify(ret));
+                if (ret) {
+                    if (ret.success) {
+                        showDialog(ret.data.sunGold);
+                    } else {
+                        defaultToast('获取用户阳光币失败，请稍后再试');
+                    }
+
+                } else {
+                    defaultToast('获取用户阳光币失败，请稍后再试');
+                }
+            });
+        } else {
+            pageJump('login', '../login.html', 'add_consult_frame');
+        }
+    }
+
+    // dialog
+    function showDialog(allnumber) {
+        if (clickDoctor == '') {
+            defaultToast("请选择医生等级");
+            return;
+        }
+        var dialog = new auiDialog();
+        dialog.alert({
+            title: "支付阳光币",
+            msg: '<h2 style="color:#ECB368;">-' + (rankCost || 0) + '</h2><p style="color:#999999;font-size:0.75rem;margin-top:0.75rem;">当前阳光币' + (allnumber || 0) + '</p>',
+            buttons: ['<img src="../../image/home_form_pop_close.png"/>', '确定']
+        }, function(ret) {
+            console.log(JSON.stringify(ret));
+            if (ret.buttonIndex == 2) { //点击确定
+                addConsult();
+            }
+        })
+    }
+</script>
+
+</html>

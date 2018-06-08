@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>服药单</title>
+      <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+      <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+      <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/remind.css">
+  </head>
+
+  <body style="background:rgb(239,242,247);">
+    <div class="med-note-main">
+        <div class="border-se"></div>
+        <ul class="medicinalList" id='remind-main-list'>
+        </ul>
+    </div>
+
+    <div id="noDate" class="noDate" style="display: none;"></div>
+
+    <script id="medicinalDataScript" type="text/template">
+      {{for(var i = 0;i< it.length;i++){ }}
+      <li>
+          <div class="main-title">
+            {{if(i == 0){}}
+            <div class="title-left">
+              <img class='consult-record-img' src='../../image/remind/pill_blue.png' />
+              <span class="name-box">第一次服药</span>
+            </div>
+            {{ }else if(i == 1){ }}
+            <div class="title-left">
+              <img class='consult-record-img' src='../../image/remind/pill_green.png' />
+              <span class="name-box">第二次服药</span>
+            </div>
+            {{ }else if(i == 2){ }}
+            <div class="title-left">
+              <img class='consult-record-img' src='../../image/remind/pill_yellow.png' />
+              <span class="name-box">第三次服药</span>
+            </div>
+            {{ }else if(i == 3){ }}
+            <div class="title-left">
+              <img class='consult-record-img' src='../../image/remind/rem_list_d.png' />
+              <span class="name-box">第四次服药</span>
+            </div>
+            {{}}}
+            <div class="title-right">
+                <span>{{=it[i].time}}</span>
+            </div>
+          </div>
+          {{var drugNews = '{{=it[i].drugNews}}' + '';}}
+          {{var drugNewsList = drugNews.split(',');}}
+          <ul>
+          {{for(var n = 0 ;n < drugNewsList.length; n++){ }}
+              <li class="each-med">
+                  <div class="each-med-left">{{=drugNewsList[n]}}</div>
+                   <div class="each-med-right">{{=drugNewsList[++n]}}</div>
+              </li>
+          {{ }}}
+        </ul>
+      </li>
+      {{}}}
+    </script>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+  <script type="text/javascript" src="../../script/commit/utils.js"></script>
+  <script type="text/javascript" src="../../script/doT.min.js"></script>
+  <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+  <script type="text/javascript">
+      var takeDrugId = getStorage('takeDrugId');
+      var takeDrugNews;
+      apiready = function(){
+        getPatientPaper();
+        api.addEventListener({
+            name: 'updateRemind'
+        }, function(ret, err){
+            if( ret ){
+              getPatientPaper();
+            }
+        });
+      };
+
+      /**获取患者的服药单*/
+      function getPatientPaper(){
+        var userId = getStorage('userId');
+        if (userId) {
+          showToast('');
+          api.ajax({
+              url: getUserTakeDrugSer,
+              method: 'post',
+              data: {
+                  values: {
+                    "userId": userId,
+                    "deviceId": api.deviceId,
+                    "patientId": api.pageParam.patientId,
+                    "time": new Date().getTime(),
+                    "sign": ""
+                  },
+              }
+          },function(ret, err){
+              toast.hide();
+              if (ret) {
+                  if (ret.success) {
+                    $api.html($api.byId('remind-main-list'), '');
+                    takeDrugNews = ret.data.takeDrugNewsList;
+                    takeDrugId = ret.data.takeDrugId;
+                    if (typeof(takeDrugNews) != 'undefined' && takeDrugNews.length > 0) {
+                      $api.append($api.byId('remind-main-list'), doT.template($api.html($api.byId("medicinalDataScript")))(takeDrugNews));
+                    }
+                  }
+              } else {
+                  console.log('getpatientPaper-->' + JSON.stringify(err));
+              }
+          });
+        }
+      }
+
+      /** 处理添加药品跳转*/
+      function jumpAddMedicina(){
+        if (takeDrugId && typeof(takeDrugId) != 'undefined') {
+          api.openWin({
+              name: 'add_new_med_win',
+              url: './add_new_med_win.html',
+              pageParam: {
+                  takeDrugId: takeDrugId,
+                  patientId:api.pageParam.patientId,
+                  consultId:api.pageParam.consultId
+              }
+          });
+        }
+      }
+
+      /** 处理跳转修改服药单*/
+      function jumpChangeMedicina(){
+        if (takeDrugId && typeof(takeDrugId) != 'undefined') {
+            if(takeDrugNews.length == 0){
+                defaultToast('没有可修改的服药单！');
+            }else{
+                api.openWin({
+                    name: 'revamp_medicine_win',
+                    url: './revamp_medicine_win.html',
+                    pageParam: {
+                        takeDrugId: takeDrugId,
+                        patientId:api.pageParam.patientId,
+                        consultId:api.pageParam.consultId
+                    }
+                });
+            }
+        }
+      }
+  </script>
+  </html>

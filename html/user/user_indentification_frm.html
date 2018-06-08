@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>患者认证</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user/user_indentification.css" />
+</head>
+
+<body>
+    <div class="user-indentification-margin">
+        <span class="user-indentificaion-title">提醒：完成认证需要核对您的就诊卡信息，请拍摄您本人的就诊卡，并保证就诊卡号字迹清晰可见。</span>
+        <div class="user-indentification-img">
+            <img class="user-indentificaion-pic" src=''/>
+            <img onclick="getPicture('camera')" class="user-indentificaion-camera" src="../../image/user/log_photo.png" />
+        </div>
+        <div class="aui-btn aui-btn-success aui-btn-block" onclick="userIndentification()">提交</div>
+    </div>
+
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-popup.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-range.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    var picUrl;
+    var fileName;
+    apiready = function() {
+
+    };
+
+    /** 进行患者认证*/
+    function userIndentification() {
+        var userId = getStorage("userId");
+        if (typeof(picUrl) == 'undefined' || picUrl == '') {
+            defaultToast('请选择图片');
+            return;
+        }
+        if (userId) {
+            api.ajax({
+                url: patientIdentificationSer,
+                method: 'post',
+                data: {
+                    values: {
+                        'userId': userId,
+                        'time': new Date().getTime(),
+                        "sign": "",
+                        "fileName":fileName,
+                        'deviceId': api.deviceId
+                    },
+                    files: {
+                        file: picUrl
+                    }
+                }
+            }, function(ret, err) {
+                if (ret) {
+                  if (ret.success) {
+                    setStorage('userType', '3');
+                    api.openWin({
+                        name: 'index',
+                        url: '../../index.html',
+                    });
+                  }
+                } else {
+                }
+            });
+        } else {
+            pageJump('login', '../login.html', 'user_name_change');
+        }
+    }
+
+    /** 获取图片*/
+    function getPicture(source) {
+        api.getPicture({
+            sourceType: source,
+            encodingType: 'jpg',
+            mediaValue: 'pic',
+            destinationType: 'url',
+            quality: 50,
+            saveToPhotoAlbum: false
+        }, function(ret, err) {
+            console.log("ret-->" + JSON.stringify(ret));
+            if (ret) {
+                picUrl = ret.data;
+                fileNameSplit = ret.data.split("/");
+                fileName = fileNameSplit[fileNameSplit.length - 1];
+                $api.attr($api.dom('.user-indentificaion-pic'), 'src', ret.data);
+                console.log("err-->" + JSON.stringify(err));
+            }
+        });
+    }
+</script>
+
+</html>

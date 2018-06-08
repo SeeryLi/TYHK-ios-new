@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>添加药品</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/remind.css">
+    <link rel="stylesheet" type="text/css" href="../../css/common/color.css">
+</head>
+
+<body style="background:rgb(239,242,247);">
+    <div class="border-se"></div>
+    <div class="aui-list-item aui-list" style="background-image:none;border-bottom:1px solid #ebebeb;">
+        <div class="aui-list-item-inner aui-list-item-arrow" onclick="addNewDrugJump()">
+            <div class="aui-list-item-title info-title med-title">药品名称</div>
+            <div class="aui-list-item-right">
+                <span id='add-medicines-name' class="info-text my-address med-name">  </span>
+            </div>
+        </div>
+    </div>
+    <ul class="add-med-list">
+        <li class="add-med-each bor_solid" style="height:2.5rem;">
+            <div class="each-med-left col153">总剂量</div>
+            <div>
+                <div id='add-medicines-dosage-unit' class="each-med-right add-med-text">盒</div>
+                <div class="aui-bar aui-bar-btn aui-bar-btn-sm bar-btn-style">
+                    <div class="aui-bar-btn-item" onclick="totalChange('min')">
+                        <i class="aui-iconfont aui-icon-minus"></i>
+                    </div>
+                    <div class="aui-bar-btn-item">
+                        <input id='add-medicines-dosage' type="text" oninput="getTotleMoney(this)" readonly class="aui-input aui-text-center" value="0">
+                    </div>
+                    <div class="aui-bar-btn-item" onclick="totalChange('add')">
+                        <i class="aui-iconfont aui-icon-plus"></i>
+                    </div>
+                </div>
+            </div>
+        </li>
+
+        <li class="add-med-each bor_solid">
+            <div class="each-med-left col153">每日服药次数</div>
+            <div class="each-med-right add-med-text">次</div>
+            <div class="aui-bar aui-bar-btn aui-bar-btn-sm bar-btn-style">
+                <div class="aui-bar-btn-item" onclick="timesChange('min')">
+                    <i class="aui-iconfont aui-icon-minus"></i>
+                </div>
+                <div class="aui-bar-btn-item">
+                    <input id='add-medicines-number' oninput="getTotleMoney(this)" type="text" readonly class="aui-input aui-text-center" value="睡前">
+                </div>
+                <div class="aui-bar-btn-item" onclick="timesChange('add')">
+                    <i class="aui-iconfont aui-icon-plus"></i>
+                </div>
+            </div>
+        </li>
+
+        <li class="add-med-each bor_solid">
+            <div class="each-med-left col153">每次服药数量</div>
+            <div id='add-medicines-unit' class="each-med-right add-med-text">片</div>
+            <input id='add-medicines-count' type="text" class="col34" oninput="checkTakedDays()"  placeholder="输入每次服药数量"></input>
+        </li>
+    </ul>
+
+    <div class="col153 take-drug-days">
+        服药天数:
+        <span id='takeDays'>
+          0
+      </span> 天
+    </div>
+    <div id="noDate" class="noDate" style="display: none;"></div>
+
+    <script id="medicinalDataScript" type="text/template">
+
+    </script>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript">
+    var medicinObj = new Object();
+    var medicinesInfo = new Object();
+    var medSmallNorms;
+    var medMidNorms;
+    var days;
+    var addNewDrugJump;
+    apiready = function() {
+    };
+
+    function addNewDrugJump(){
+      $api.byId('add-medicines-dosage').value = "0";
+      $('#takeDays').text('0');
+      $api.byId('add-medicines-number').value = "睡前";
+      $api.byId('add-medicines-count').value =  "";
+      api.execScript({
+          name: 'add_med_win',
+          script: 'ResetMoney()'
+      });
+      pageJump('choice_list_win','./choice_list_win.html','add_med_frm');
+    }
+
+    /** 正则验证小数*/
+    function check() {
+        var patrn = /^\d+(\.\d+)?$/;
+        var result = true;
+        $("#add-medicines-count").each(function() {
+            if (!patrn.exec(this.value)) {
+                alert("请输入正确的服药数量！");
+                result = false;
+            }
+        })
+        return result;
+    }
+
+    /** 获取小计*/
+    function getTotleMoney(_this) {
+        if (medicinesInfo == null || medicinObj == null) {
+            return;
+        }
+        var number = $api.trimAll($api.val($api.byId("add-medicines-dosage")));
+        if (!medicinesInfo.price) {
+            return;
+        }
+        var totleMoney = number * medicinesInfo.price;
+        totleMoney = totleMoney.toFixed(2); //取小数点后两位
+        medicinObj.boxNum = number;
+        medicinesInfo.dosage = number;
+        medicinesInfo.money = totleMoney;
+        checkTakedDays();
+        /** 设置当前页面的总价*/
+        api.execScript({
+            name: 'add_med_win',
+            script: 'setTotleMoney(' + JSON.stringify(totleMoney) + ');'
+        });
+    }
+
+    //*剩余服药天数*/
+    function checkTakedDays() {
+        var checkResult;
+        var patrn = /^\d+(\.\d+)?$/;
+        $("#add-medicines-count").each(function() {
+            if (!patrn.exec(this.value)) {
+                checkResult = false;
+            }else{
+                checkResult = true;
+            }
+        })
+        var eachTimes;
+        var number = $api.trimAll($api.val($api.byId("add-medicines-dosage")));
+        var eachNumber = $api.trimAll($api.val($api.byId("add-medicines-count")));
+        if ($api.val($api.byId('add-medicines-number')) == "睡前") {
+            eachTimes = 1
+        } else {
+            eachTimes = $api.trimAll($api.val($api.byId("add-medicines-number")));
+        }
+        if (eachNumber == 0) {
+            $api.text($api.byId('takeDays'), 0);
+            return;
+        }
+        if (typeof(medSmallNorms) == "undefined" || typeof(medMidNorms) == "undefined" || number == 0 || number == '' || eachTimes == 0 || eachTimes == '' || !checkResult) {
+            days = 0
+        } else {
+            days = Math.floor(medSmallNorms * medMidNorms * number / (eachNumber * eachTimes));
+        }
+        $api.text($api.byId('takeDays'), days);
+    }
+
+    /** 点击确定*/
+    function meidicinesSure() {
+        if (!check()) {
+          return;
+        }
+        var eatNumber = $api.trimAll($api.val($api.byId('add-medicines-number')));
+        var eatCount = $api.trimAll($api.val($api.byId('add-medicines-count')));
+        var eatTotal = $api.trimAll($api.val($api.byId('add-medicines-dosage')));
+
+        if (typeof(medicinesInfo.goodName) == 'undefined' || medicinesInfo.goodName == '') {
+            defaultToast('请选择药品');
+            return;
+        }
+        if (eatTotal == 'undefined' || eatTotal == '' || eatTotal == '0') {
+            defaultToast('请填写服药总剂量');
+            return;
+        }
+        if (eatNumber == 'undefined' || eatNumber == '' || eatNumber == '0') {
+            defaultToast('请填写服药次数');
+            return;
+        }
+        if (eatCount == 'undefined' || eatCount == '' || eatCount == '0') {
+            defaultToast('请填写服药数量');
+            return;
+        }
+        if (eatNumber > 4) {
+            defaultToast('服药次数不能大于4');
+            return;
+        }
+        if (medicinObj.boxNum == 'undefined' || medicinObj.boxNum == '' || medicinObj.boxNum == '0') {
+            defaultToast('请填写服药剂量');
+            return;
+        }
+
+        medicinObj.drugName = medicinesInfo.goodName;
+        medicinObj.smallUnit = medicinesInfo.smallUnit;
+        medicinObj.everydayNum = eatNumber;
+        medicinObj.eatSig = eatCount;
+        medicinesInfo.takedays = days;
+        medicinObj.id = 1;
+        medicinesInfo.eatCount = 3;
+        medicinesInfo.eatNumber = eatNumber;
+        api.execScript({
+            name: 'add_new_med_win',
+            script: 'addMedicines(' + JSON.stringify(medicinObj) + ' ' + ',' + ' ' + JSON.stringify(medicinesInfo) + ');'
+        });
+        goBack();
+    }
+
+    /** 药品添加回调*/
+    function addMedicines(medicines) {
+        medicinesInfo = medicines;
+        medSmallNorms = medicinesInfo.smallNorms
+        medMidNorms = medicinesInfo.midNorms
+        $api.text($api.byId('add-medicines-name'), medicinesInfo.goodName);
+        $api.text($api.byId('add-medicines-unit'), medicinesInfo.smallUnit);
+        $api.text($api.byId('add-medicines-dosage-unit'), medicinesInfo.bigUnit);
+    }
+
+    function totalChange(arg) {
+        if (typeof(medicinesInfo.goodName) == 'undefined' || medicinesInfo.goodName == '') {
+            defaultToast('请先选择药品!');
+            return;
+        }
+        var eatNumber = $api.trimAll($api.val($api.byId('add-medicines-dosage')));
+        if (arg == "add") {
+            $api.byId('add-medicines-dosage').value = Number(eatNumber) + 1;
+        } else {
+            if (Number(eatNumber) < 2) {
+                return;
+            } else {
+                $api.byId('add-medicines-dosage').value = Number(eatNumber) - 1;
+            }
+        }
+        getTotleMoney();
+        checkTakedDays();
+    }
+
+    //修改天数
+    function timesChange(arg) {
+        var eatCount = $api.trimAll($api.val($api.byId('add-medicines-number')));
+        if (arg == "add") {
+            if ($api.val($api.byId('add-medicines-number')) == "睡前") {
+                $api.byId('add-medicines-number').value = 1;
+            } else if ($api.val($api.byId('add-medicines-number')) == "4") {
+                return;
+            } else {
+                $api.byId('add-medicines-number').value = Number(eatCount) + 1;
+            }
+        } else {
+            if ($api.val($api.byId('add-medicines-number')) == "睡前") {
+                return;
+            } else if ($api.val($api.byId('add-medicines-number')) == 1) {
+                $api.byId('add-medicines-number').value = "睡前";
+            } else {
+                $api.byId('add-medicines-number').value = Number(eatCount) - 1;
+            }
+        }
+        getTotleMoney();
+        checkTakedDays();
+    }
+</script>
+
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>添加药品</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/remind.css">
+</head>
+
+<body>
+    <header id='header' class="aui-bar aui-bar-nav aui-bar-light title-a">
+      <div class="aui-pull-left aui-btn">
+          <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+      </div>
+      <div class="aui-title"><b>添加药品<b></div>
+    </header>
+
+    <footer id="footer" class="nav-footer sure-block">
+        <div id="medicinal-money" class="subtotal">小计：¥0</div>
+        <div class="confirm" onclick="addMedicinesSure()">确认</div>
+    </footer>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+  <script type="text/javascript" src="../../script/commit/utils.js"></script>
+  <script type="text/javascript">
+      apiready = function(){
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        var header = $api.byId('header');
+        var headerH = $api.offset(header).h;
+        var footer = $api.byId('footer');
+        var footerH = $api.offset(footer).h;
+        api.openFrame({
+            name: 'add_med_frm',
+            url: 'add_med_frm.html',
+            rect: {
+              x: 0,
+              y: headerH,
+              w: "auto",
+              h: api.winHeight - headerH - footerH
+            }
+        });
+      };
+
+      /** 设置总金额*/
+      function setTotleMoney(money){
+        $api.text($api.byId('medicinal-money'), '小计：' + money + '￥');
+      }
+
+
+      /** 设置金额为0*/
+      function ResetMoney(){
+        $api.text($api.byId('medicinal-money'), '小计：' + 0 + '￥');
+      }
+
+
+
+      /** 返回添加的药品*/
+      function addMedicines(clickMedicines){
+        api.execScript({
+            frameName: 'add_med_frm',
+            script: 'addMedicines('+JSON.stringify(clickMedicines)+')'
+        });
+
+      }
+
+      /** 点击确定添加*/
+      function addMedicinesSure(){
+        api.execScript({
+            frameName: 'add_med_frm',
+            script: 'meidicinesSure();'
+        });
+      }
+  </script>
+  </html>

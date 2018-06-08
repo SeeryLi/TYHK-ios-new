@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>专业咨询--聊天界面</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/consult_profession_chat_frm.css" />
+    <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+    <script type="text/javascript" src="../../script/fastclick.js"></script>
+</head>
+
+<body>
+    <header id="header" class="aui-bar aui-bar-nav aui-bar-light title-a" style="margin-bottom:30px;position:relative;">
+        <div class="aui-pull-left aui-btn" onclick="backClick()">
+            <span class="aui-iconfont aui-icon-left  back-span-green"></span>
+        </div>
+        <div id="consult-chat-title" class="aui-title"><b>咨询</b></div>
+        <div class="aui-pull-right aui-btn" onclick="">
+            <span id="evaluate" class="back-span-green dis">评价</span>
+        </div>
+        <div class="left_time">
+          <p id="LeftTime"></p>
+        </div>
+    </header>
+    <div id="bottom_div" class="dis" onclick="askAgain()">
+        <span>继续咨询（￥<span id="consultMoney"></span>）</span>
+    </div>
+</body>
+<script type="text/javascript">
+    var evaluateStatus = 0;
+    var doctorId;
+    var requirePrice;
+    var userId = getStorage("userId");
+    var userAppType = getStorage("userAppType");
+    apiready = function() {
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        var headerPos = $api.offset($api.dom('header'));
+        // 取消点击300毫秒延迟
+        FastClick.attach(document.body);
+        if (api.pageParam.consultType == '1') {
+            $('#consult-chat-title').text('快速咨询');
+        } else {
+            $('#consult-chat-title').text('专业咨询');
+        }
+        changeFooter();
+        api.openFrame({
+            name: 'consult_profession_chat_frm',
+            url: 'consult_profession_chat_frm.html',
+            rect: {
+                x: 0,
+                y: headerPos.h + 15,
+                w: 'auto',
+                h: api.winHeight - headerPos.h - 60
+
+            },
+            pageParam: {
+                consultId: api.pageParam.consultId,
+                name: api.pageParam.name,
+                consultType: api.pageParam.consultType,
+            },
+            reload:true,
+            bounces: false,
+            bgColor: 'RGBA(239, 242, 247, 1)',
+            vScrollBarEnabled: false,
+            hScrollBarEnabled: false
+        });
+
+        api.addEventListener({
+            name: 'consultVoicePlay'
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.value.position == 'left') {
+                    api.execScript({
+                        frameName: 'consult_profession_chat_frm',
+                        script: 'leftIco(' + JSON.stringify(ret.value.id) + ');'
+                    });
+                } else {
+                    api.execScript({
+                        frameName: 'consult_profession_chat_frm',
+                        script: 'rightIco(' + JSON.stringify(ret.value.id) + ');'
+                    });
+                }
+                api.stopPlay();
+                api.startPlay({
+                    path: ret.value.url
+                }, function(ret, err) {
+                    api.execScript({
+                        frameName: 'consult_profession_chat_frm',
+                        script: 'stopPlay();'
+                    });
+                    if (ret) {} else {
+                        console.log('playConsultVoice-->' + JSON.stringify(err));
+                    }
+                });
+            }
+        });
+        api.addEventListener({
+            name: 'endDoctorConsult'
+        }, function(ret, err) {
+            if (ret) {
+                endConsult();
+            }
+        });
+    };
+
+    //患者评价导致咨询结束咨询
+    function endFromComment(){
+      endConsult();
+      showEvaluate(4,1);
+      if(getStorage("userAppType") == '4'){
+        if($('#bottom_div').hasClass("dis")){
+          $('#bottom_div').removeClass("dis");
+          $('#bottom_div').addClass("show");
+          $('#bottom_div').attr('onclick', "");
+          $api.byId("bottom_div").innerText = "咨询已结束";
+        }
+      }else{
+        if($('#bottom_div').hasClass("dis")){
+          $('#bottom_div').removeClass("dis");
+          $('#bottom_div').addClass("show");
+        }
+      }
+    }
+
+    //获取医生咨询money
+    function getConsultMoney(requirePrice){
+      if($api.byId('consultMoney')){
+        $api.byId('consultMoney').innerText = requirePrice;
+      }
+    }
+
+    //医生暂停咨询设置
+    function doctorStopConsult(){
+      if($('#bottom_div').hasClass("dis")){
+        $('#bottom_div').removeClass("dis");
+        $('#bottom_div').addClass("show");
+        $('#bottom_div').attr('onclick', "");
+        $api.byId("bottom_div").innerText = "咨询已暂停";
+        $("#LeftTime").css('display','none');
+      }
+    }
+
+    /***显示咨询评价 consultStatus：咨询状态  status:评价类型*/
+    function showEvaluate(consultStatus, status) {
+        evaluateStatus = status;
+        if (status == '1') {
+            $('#evaluate').removeClass("dis");
+            $('#evaluate').addClass("show");
+            $('#evaluate').attr('onclick', 'openEvaluate()');
+        } else {
+            if (consultStatus != '1') {
+                var userType = getStorage('userAppType');
+                if (userType == '4') {
+                    $('#evaluate').removeClass("show");
+                    $('#evaluate').addClass("dis");
+                } else {
+                    $('#evaluate').removeClass("dis");
+                    $('#evaluate').addClass("show");
+                    $('#evaluate').attr('onclick', 'openEvaluate()');
+                }
+            }
+        }
+        if (consultStatus == '4' || consultStatus == '3') {
+            $('#bottom_div').removeClass("dis");
+            $('#bottom_div').addClass("show");
+            // $('#evaluate').removeClass("show");
+            // $('#evaluate').addClass("dis");
+        }
+    }
+
+    /** 将状态设置为咨询结束*/
+    function endConsult() {
+        evaluateStatus = 1;
+        getCountDown('+ 0 +');
+        $('#bottom_div').removeClass("dis");
+        $('#bottom_div').addClass("show");
+        api.execScript({
+            frameName: 'consult_profession_chat_frm',
+            script: 'closePop()'
+        });
+    }
+
+    /** 跳转到咨询评价*/
+    function openEvaluate() {
+        api.openWin({
+            name: 'user_evaluate',
+            url: './user_evaluate.html',
+            pageParam: {
+                consultId: api.pageParam.consultId,
+                consultType: api.pageParam.consultType,
+                evaluateStatus: evaluateStatus,
+            }
+        });
+    }
+
+    /** 点击返回键*/
+    function backClick() {
+        api.stopPlay();
+        api.execScript({
+            frameName: 'consult_profession_chat_frm',
+            script: 'clearChatCheck()'
+        });
+        if(api.pageParam.IfDoctorPageEnter){
+          api.openWin({
+              name: 'index',
+              url: '../../index.html',
+          });
+        }else{
+          goBack();
+        }
+    }
+
+    function changeFooter(){
+        if(userAppType!=2){
+            $api.byId("bottom_div").innerText = "咨询已结束";
+        }
+    }
+    /** 跳转到服药界面*/
+    function jumpToMedicinal(){
+      api.execScript({
+          frameName: 'consult_profession_chat_frm',
+          script: 'jumpToMedicinalRemind();'
+      });
+    }
+    // 关闭遮罩
+    function offDia(){
+      $(".dmw_div").removeClass("show");
+    }
+    /** 继续咨询*/
+    function askAgain(){
+      if(userAppType != 2){
+          return;
+      }
+      api.execScript({
+          frameName: 'consult_profession_chat_frm',
+          script: 'dmfDialog();'
+      });
+      $(".dmw_div").addClass("show");
+      // 取消touchmove
+      $(".dmw_div").bind('touchmove', function(event) {
+          return false;
+      });
+    }
+    // 时间倒计时
+    function getCountDown(timestamp){
+      if(timestamp == 0){
+        $("#LeftTime").css('display','none');
+      }else{
+        setInterval(function(){
+            var nowTime = new Date();
+            var endTime = new Date(timestamp);
+            var t = endTime.getTime() - nowTime.getTime();
+            if(t > 0){
+            //var d=Math.floor(t/1000/60/60/24);
+              var hour=Math.floor(t/1000/60/60%24);
+              var min=Math.floor(t/1000/60%60);
+              var sec=Math.floor(t/1000%60);
+
+              if (hour < 10) {
+                   hour = "0" + hour;
+              }
+              if (min < 10) {
+                   min = "0" + min;
+              }
+              if (sec < 10) {
+                   sec = "0" + sec;
+              }
+              var countDownTime = hour + ":" + min + ":" + sec;
+              $("#LeftTime").html("剩余咨询时间" + countDownTime);
+            }else{
+              // backClick();
+            }
+        },1000);
+      }
+    }
+
+</script>
+
+</html>

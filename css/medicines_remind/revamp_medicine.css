@@ -1,0 +1,74 @@
+body{
+  background-color: #EFF2F7;
+}
+
+.box_div_par{
+  position: relative;
+  width: 100%;
+  min-height: 6.75rem;
+}
+
+.border-se {
+    width: 100%;
+    height: 0.5rem;
+    background-color: #EFF2F7;
+}
+
+.delete_ico_div{
+  display: inline-block;
+  position: absolute;
+  right: 0.75rem;
+  top: 1.25rem;
+  width: 2rem;
+  height: 1.5rem;
+}
+
+.delete_ico{
+  display: inline-block;
+  float: right;
+  max-width: 0.75rem;
+  max-height: 0.75rem;
+}
+
+.child_div{
+  padding: 0 0.75rem;
+  width: 100%;
+  height: 2.5rem;
+  line-height: 2.5rem;
+  background-color: #fff;
+}
+
+.bottom_bar{
+  border-bottom: 1px solid #EBEBEB;
+}
+
+.dot_div{
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 0.5rem;
+  border: 2px solid #78B0FF;
+}
+
+.name_span{
+  margin-left: 0.5rem;
+  color: #222;
+  font-size: 0.75rem;
+}
+
+
+.base_num{
+  color: #999;
+  font-size: 0.75rem;
+}
+
+.box_input{
+  float: right;
+  color: #999;
+}
+
+.box_input>input{
+  text-align: right;
+  display: inline-block;
+  width: 4rem;
+}

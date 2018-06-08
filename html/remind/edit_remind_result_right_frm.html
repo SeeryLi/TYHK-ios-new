@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>服药提醒</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/mobiscroll/mobiscroll.core-2.5.2.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/mobiscroll/mobiscroll.android-ics-2.5.2.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/remind.css">
+</head>
+
+<body style="background:rgb(239,242,247);">
+    <div class="border-se"></div>
+    <p class="no_drug" id="noDrugNotice" style="display:none;">暂无服药提醒</p>
+    <div class="med-note-main">
+        <ul class="medicinalList" id='remind-right-list'>
+        </ul>
+    </div>
+    <!-- <div id="noDate" class="noDate" style="display: none;"></div> -->
+    <script id="remindRightScript" type="text/template">
+      {{for(var i = 0;i< it.length;i++){ }}
+      <li>
+          <div class="main-title">
+            {{if(i == 0){}}
+            <div class="title-left">
+              <img class='consult-record-img' src='../../image/remind/pill_blue.png' />
+              <span class="name-box">第一次服药</span>
+            </div>
+            <div class="title-right timer_inp">
+                <input  class="{{=it[i].type}}" type="text" name="firsttake" id="firsttake" readonly value="{{=it[i].time}}"/>
+            </div>
+            {{ }else if(i == 1){ }}
+             <div class="title-left">
+               <img class='consult-record-img' src='../../image/remind/pill_green.png' />
+               <span class="name-box">第二次服药</span>
+             </div>
+              <div class="title-right timer_inp">
+                  <input  class="{{=it[i].type}}" type="text" name="secondtake" id="secondtake" readonly value="{{=it[i].time}}"/>
+              </div>
+            {{ }else if(i == 2){ }}
+            <div class="title-left">
+              <img class='consult-record-img' src='../../image/remind/pill_yellow.png' />
+              <span class="name-box">第三次服药</span>
+            </div>
+            <div class="title-right timer_inp">
+              <input  class="{{=it[i].type}}" type="text" name="thirdtake" id="thirdtake" readonly value="{{=it[i].time}}"/>
+            </div>
+            {{ }else if(i == 3){ }}
+            <div class="title-left">
+              <img class='consult-record-img' src='../../image/remind/rem_list_d.png' />
+              <span class="name-box">第四次服药</span>
+            </div>
+            <div class="title-right timer_inp">
+                <input  class="{{=it[i].type}}" type="text" name="fourthtake" id="fourthtake" readonly value="{{=it[i].time}}"/>
+            </div>
+            {{}}}
+
+          </div>
+          {{var drugNews = '{{=it[i].drugNews}}' + '';}}
+          {{var drugNewsList = drugNews.split(',');}}
+          <ul>
+          {{for(var n = 0 ;n < drugNewsList.length; n++){ }}
+              <li class="each-med">
+                  <div class="each-med-left">{{=drugNewsList[n]}}</div>
+                   <div class="each-med-right">{{=drugNewsList[++n]}}</div>
+              </li>
+          {{ }}}
+        </ul>
+      </li>
+      {{}}}
+    </script>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/mobiscroll/mobiscroll.core-2.5.2.js"></script>
+<script type="text/javascript" src="../../script/mobiscroll/mobiscroll.core-2.5.2-zh.js"></script>
+<script type="text/javascript" src="../../script/mobiscroll/mobiscroll.datetime-2.5.1.js"></script>
+<script type="text/javascript" src="../../script/mobiscroll/mobiscroll.datetime-2.5.1-zh.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    var takeDrugNews;
+    var clock = null;
+    var takeDrugTypeList={};
+    apiready = function() {
+      clock = api.require('clock');
+      clock.getPermission(function(ret, err) {
+      });
+      api.addEventListener({
+          name: 'updateRemind'
+      }, function(ret, err){
+          if( ret ){
+            getPatientPaper();
+          }
+      });
+      getPatientPaper();
+    };
+
+    function mobi(){
+      var opt={};
+      opt.time = {preset : 'time'};
+      opt.default = {
+          theme: 'android-ics light', //皮肤样式
+          display: 'modal', //显示方式
+          mode: 'scroller', //日期选择模式
+          lang:'zh',
+      };
+      var optTime = $.extend(opt['time'], opt['default']);
+      $("#firsttake").mobiscroll(optTime).time(optTime);
+      $("#secondtake").mobiscroll(optTime).time(optTime);
+      $("#thirdtake").mobiscroll(optTime).time(optTime);
+      $('#fourthtake').mobiscroll(optTime).time(optTime);
+    }
+
+    /**获取患者的服药单*/
+    function getPatientPaper(){
+      var userId = getStorage('userId');
+      if (userId) {
+        showToast("loading");
+        api.ajax({
+            url: getUserTakeDrugSer,
+            method: 'post',
+            data: {
+                values: {
+                  "userId": userId,
+                  "patientId":userId,
+                  "deviceId": api.deviceId,
+                  "time": new Date().getTime(),
+                  "sign": ""
+                },
+            }
+        },function(ret, err){
+            toast.hide();
+            if (ret) {
+              if (ret.success) {
+                takeDrugNews = ret.data.takeDrugNewsList;
+                if(takeDrugNews.length == 0){
+                    document.getElementById('noDrugNotice').style.display = "";
+                }
+                takeDrugId = ret.data.takeDrugId;
+                $api.html($api.byId('remind-right-list'), '');
+                $api.append($api.byId('remind-right-list'), doT.template($api.html($api.byId("remindRightScript")))(takeDrugNews));
+                mobi();
+              }
+            } else {
+                console.log('getpatientPaper-->' + JSON.stringify(err));
+            }
+        });
+
+      }
+    }
+
+    // 增加一天的时间
+
+    /** 修改提醒时间*/
+  function changeRemindTime() {
+      var userId = getStorage('userId');
+      var thisYear = new Date().getFullYear();
+      var thisMonth = new Date().getMonth() + 1;
+      var thisDay = new Date().getDate();
+      var time1Clocker, time2Clocker, time3Clocker, time4Clocker, note1, note2, note3, note4, clockId1 ='', clockId2 ='', clockId3 ='', clockId4 ='';
+      var time1 = '08:00:00', time2 = '11:00:00', time3 = '16:00:00', time4 = '20:00:00';
+      var knockAllTime = {mon:true,tue:true,wed:true,thu:true,sat:true,sun:true};
+      var timeList = [];
+      for( var i = 0;i<takeDrugNews.length;i++){
+          switch (takeDrugNews[i].type)
+          {
+          case '1':
+            time1=takeDrugNews[i].time+':00';
+            if($('.1').val()){
+                time1=$('.1').val()+':00';
+                timeList.push(time1);
+              }
+            break;
+          case '2':
+          time2=takeDrugNews[i].time+':00';
+              if($('.2').val()){
+                  time2=$('.2').val()+':00';
+                  timeList.push(time2);
+              }
+            break;
+          case '3':
+          time3=takeDrugNews[i].time+':00';
+              if($('.3').val()){
+                  time3=$('.3').val()+':00';
+                  timeList.push(time3);
+              }
+                break;
+          case '4':
+          time4=takeDrugNews[i].time+':00';
+              if($('.4').val()){
+                  time4=$('.4').val()+':00';
+                  timeList.push(time4);
+              }
+            break;
+          }
+      }
+
+      if(!(time1<time2 && time2<time3 && time3<time4)){
+          defaultToast('时间修改错误！');
+          return;
+      }
+      var addOneDay = function (num){
+        if(num < new Date().getTime()){
+           num += 86400000;
+        }
+          return num;
+      };
+      if(takeDrugNews.length == 1){
+        time1Clocker = new Date(thisYear+'/'+thisMonth+'/'+thisDay+' '+ timeList[0]).getTime();
+        time1Clocker = addOneDay(time1Clocker);
+        note1 = takeDrugNews[0].drugNews;
+      }
+      if(takeDrugNews.length == 2){
+        time1Clocker = new Date(thisYear+'/'+thisMonth+'/'+thisDay+' '+timeList[0]).getTime();
+        time2Clocker = new Date(thisYear+'/'+thisMonth+'/'+thisDay+' '+timeList[1]).getTime();
+        time1Clocker = addOneDay(time1Clocker);
+        time2Clocker = addOneDay(time2Clocker);
+        note1 = takeDrugNews[0].drugNews;
+        note2 = takeDrugNews[1].drugNews;
+
+      }
+      if(takeDrugNews.length == 3){
+        time1Clocker = new Date(thisYear+'/'+thisMonth+'/'+thisDay+' '+timeList[0]).getTime();
+        time2Clocker = new Date(thisYear+'/'+thisMonth+'/'+thisDay+' '+timeList[1]).getTime();
+        time3Clocker = new Date(thisYear+'/'+thisMonth+'/'+thisDay+' '+timeList[2]).getTime();
+        time1Clocker = addOneDay(time1Clocker);
+        time2Clocker = addOneDay(time2Clocker);
+        time3Clocker = addOneDay(time3Clocker);
+        note1 = takeDrugNews[0].drugNews;
+        note2 = takeDrugNews[1].drugNews;
+        note3 = takeDrugNews[2].drugNews;
+
+      }
+      if(takeDrugNews.length == 4){
+        time1Clocker = new Date(thisYear+'/'+thisMonth+'/'+thisDay+' '+timeList[0]).getTime();
+        time2Clocker = new Date(thisYear+'/'+thisMonth+'/'+thisDay+' '+timeList[1]).getTime();
+        time3Clocker = new Date(thisYear+'/'+thisMonth+'/'+thisDay+' '+timeList[2]).getTime();
+        time4Clocker = new Date(thisYear+'/'+thisMonth+'/'+thisDay+' '+timeList[3]).getTime();
+        time1Clocker = addOneDay(time1Clocker);
+        time2Clocker = addOneDay(time2Clocker);
+        time3Clocker = addOneDay(time3Clocker);
+        time4Clocker = addOneDay(time4Clocker);
+        note1 = takeDrugNews[0].drugNews;
+        note2 = takeDrugNews[1].drugNews;
+        note3 = takeDrugNews[2].drugNews;
+        note4 = takeDrugNews[3].drugNews;
+      }
+      if (userId && typeof(takeDrugId) != 'undefined' && takeDrugId) {
+          showToast("loadingFy");
+          api.ajax({
+              url: updateUserSendTimeSer,
+              method: 'post',
+              data: {
+                  values: {
+                      'userId': userId,
+                      'time': new Date().getTime(),
+                      'deviceId': api.deviceId,
+                      'takeDrugId': takeDrugId,
+                      'time1': time1,
+                      'time2': time2,
+                      'time3': time3,
+                      'time4': time4,
+                      'sign': '',
+                  },
+              }
+          }, function(ret, err) {
+              toast.hide();
+              if (ret) {
+                if (ret.success) {
+                  api.sendEvent({
+                      name: 'updateRemind',
+                  });
+                  defaultToast('修改成功');
+                  setTimeout(function(){
+                      api.closeWin();
+                  },1000)
+                }else{
+                  defaultToast('修改失败，请稍后重试');
+                }
+              }
+              if(err){
+                  defaultToast('修改失败，请稍后重试');
+                }
+              })
+            }
+          var clockInner = [{"id": 1,"buttonTitle": "稍后提醒"},{"id": 2,"buttonTitle":"查看服药"}];
+          if(takeDrugNews.length == 1){
+            if(clockId1 == ''){
+              var param1 = {
+                    title: note1,
+                    content:"请按时吃药",
+                    dateTime: time1Clocker,
+                    buttonTitleList:clockInner,
+                    cancelTitle:"我已服药",
+                    duration: 30,
+                    repeating: knockAllTime
+              }
+              clock.setClock(param1, function(ret, err) {
+                  if(ret){
+                    clockId1 = ret.id;
+                  }
+              })
+            }else{
+              var param1 = {
+                    id: clockId1,
+                    title: note1,
+                    content:"请按时吃药",
+                    dateTime: time1Clocker,
+                    buttonTitleList:clockInner,
+                    cancelTitle:"我已服药",
+                    duration: 30,
+                    repeating: knockAllTime
+              }
+              clock.setClock(param1, function(ret, err) {
+                  if(ret){
+                    clockId1 = ret.id;
+                  }
+              })
+            }
+
+          }else if(takeDrugNews.length == 2){
+            var param1 = {
+                  title: note1,
+                  content:"请按时吃药",
+                  dateTime: time1Clocker,
+                  buttonTitleList:clockInner,
+                  cancelTitle:"我已服药",
+                  duration: 30,
+                  repeating: knockAllTime
+            }
+            var param2 = {
+                  title: note2,
+                  content:"请按时吃药",
+                  dateTime: time2Clocker,
+                  buttonTitleList:clockInner,
+                  cancelTitle:"我已服药",
+                  duration: 30,
+                  repeating: knockAllTime
+            }
+            clock.setClock(param1, function(ret, err) { })
+            clock.setClock(param2, function(ret, err) { })
+          }else if(takeDrugNews.length == 3){
+            var param1 = {
+                  title: note1,
+                  content:"请按时吃药",
+                  dateTime: time1Clocker,
+                  buttonTitleList:clockInner,
+                  cancelTitle:"我已服药",
+                  duration: 30,
+                  repeating: knockAllTime
+            }
+            var param2 = {
+                  title: note2,
+                  content:"请按时吃药",
+                  dateTime: time2Clocker,
+                  buttonTitleList:clockInner,
+                  cancelTitle:"我已服药",
+                  duration: 30,
+                  repeating: knockAllTime
+            }
+            var param3 = {
+                  title: note3,
+                  content:"请按时吃药",
+                  dateTime: time3Clocker,
+                  buttonTitleList:clockInner,
+                  cancelTitle:"我已服药",
+                  duration: 30,
+                  repeating: knockAllTime
+            }
+            clock.setClock(param1, function(ret, err) {})
+            clock.setClock(param2, function(ret, err) {})
+            clock.setClock(param3, function(ret, err) {})
+          }else{
+            var param1 = {
+                  title: note1,
+                  content:"请按时吃药",
+                  dateTime: time1Clocker,
+                  buttonTitleList:clockInner,
+                  cancelTitle:"我已服药",
+                  duration: 30,
+                  repeating: knockAllTime
+            }
+            var param2 = {
+                  title: note2,
+                  content:"请按时吃药",
+                  dateTime: time2Clocker,
+                  buttonTitleList:clockInner,
+                  cancelTitle:"我已服药",
+                  duration: 30,
+                  repeating: knockAllTime
+            }
+            var param3 = {
+                  title: note3,
+                  content:"请按时吃药",
+                  dateTime: time3Clocker,
+                  buttonTitleList:clockInner,
+                  cancelTitle:"我已服药",
+                  duration: 30,
+                  repeating: knockAllTime
+            }
+            var param4 = {
+                  title: note4,
+                  content:"请按时吃药",
+                  dateTime: time4Clocker,
+                  buttonTitleList:clockInner,
+                  cancelTitle:"我已服药",
+                  duration: 30,
+                  repeating: knockAllTime
+            }
+            clock.setClock(param1, function(ret, err) { })
+            clock.setClock(param2, function(ret, err) { })
+            clock.setClock(param3, function(ret, err) { })
+            clock.setClock(param4, function(ret, err) { })
+          }
+  }
+</script>
+
+</html>

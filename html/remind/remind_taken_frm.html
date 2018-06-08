@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>服药确认--未进行确认的列表</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/remind.css">
+</head>
+
+<body style="background:rgb(239,242,247);">
+    <div class="med-note-main">
+        <ul class="medicinalList">
+            <div id="makeSureList"> </div>
+        </ul>
+    </div>
+    <div id="noDate" class="noDate" style="display: none;"></div>
+
+    <script id="medicinalDataScript" type="text/template">
+        {{for(var i = 0;i < it.length; i++){ }} <li>
+            <div class="border-se"></div>
+            <div class="main-title">
+                {{if(i%2 == 0){}}
+                <div class="title-left">
+                    <img class='consult-record-img' src='../../image/remind/pill_blue.png' />
+                </div>
+                {{ }else if(i%2 == 1){ }}
+                <div class="title-left">
+                    <img class='consult-record-img' src='../../image/remind/pill_green.png' />
+                </div>
+                {{}}}
+                <div class="title-mid">
+                    <div class="hour">{{=it[i].time}}</div>
+                    <div class="date">{{=it[i].sendTime}}</div>
+                </div>
+                <div class="title-right radio">
+                    <div class="aui-list-item-inner radioInner">
+                        <label><input class="aui-radio" type="radio" name="{{=i}} + 'radio'" value="2"><span>未服药</span></label>
+                        <span style="width:0.3rem;"></span>
+                        <label><input class="aui-radio" type="radio" name="{{=i}} + 'radio'" value="1"><span>已服药</span></label>
+                    </div>
+                </div>
+            </div>
+            {{var drugNews = '{{=it[i].drugNews}}' + '';}}
+            {{var drugNewsList = drugNews.split(',');}}
+            <ul class="med-list showshow">
+                {{for(var n = 0 ;n < drugNewsList.length; n++){ }}
+                 <li class="each-med">
+                    <div class="each-med-left">{{=drugNewsList[n]}}</div>
+                    <div class="each-med-right">{{=drugNewsList[++n]}}</div>
+                  </li>
+                {{ }}}
+            </ul>
+            <div class="if-show-details" onclick="ifshow(this)">
+                展开详情
+            </div>
+            </li>
+            {{ } }}
+    </script>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/db/dbSyncUtils.js"></script>
+<script type="text/javascript" src="../../script/modules/remind/remindDBUtils.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    var allId = []
+    apiready = function() {
+        getMedicinalList();
+    };
+
+    /**获取未提醒列表数据*/
+    function getMedicinalList() {
+        var dataObj = JSON.stringify(api.pageParam.checkData.data.takeDrugNewsList);
+        var list = JSON.parse(dataObj);
+        for (x in list) {
+            list[x].sendTime = list[x].sendTime.split(' ')[0];
+            allId.push(list[x].id);
+        }
+        $api.html($api.byId('makeSureList'), '');
+        $api.append($api.byId('makeSureList'), doT.template($api.html($api.byId("medicinalDataScript")))(list));
+    }
+
+    /** 服药状态的修改 */
+    function medicinesStatusChange() {
+        var userId = getStorage('userId');
+        var allRadioValue = [];
+        var resultObj = new Array();
+        $(".radioInner").each(function() {
+            allRadioValue.push($(this).find('input:checked:first').val());
+        });
+        for (var i = 0; i < allRadioValue.length; i++) {
+            if (allRadioValue[i] == null) {
+                defaultToast('请确认每一条记录！');
+                return;
+            }
+        }
+        for (var i = 0; i < allRadioValue.length; i++) {
+            if (allRadioValue[i] == null) {
+              continue;
+            }
+            var result = new Object();
+            result.id = allId[i];
+            result.isEat = allRadioValue[i];
+            resultObj.push(result);
+        }
+        resultJson = JSON.stringify(resultObj);
+        api.ajax({
+            url: updateIsEatSer,
+            method: 'post',
+            data: {
+                values: {
+                    'userId': userId,
+                    'patientId': userId,
+                    'TakeDrugNewsFormer1': resultJson,
+                    'time': new Date().getTime(),
+                    'deviceId': api.deviceId,
+                    'sign': '',
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+                api.closeWin();
+            } else {
+                console.log('medicinesStatusChange-->' + JSON.stringify(err));
+            }
+        });
+    }
+
+    function ifshow(self) {
+            if ($(self).prev().hasClass("showshow")) {
+            $(self).text('关闭详情')
+        } else {
+            $(self).text('展开详情')
+        }
+        $(self).prev().toggleClass("showshow");
+    }
+</script>
+
+</html>

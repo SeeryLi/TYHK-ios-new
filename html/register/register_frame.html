@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>快速注册</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/login.css" />
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+    <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+</head>
+<body>
+
+      <div class="aui-content aui-margin-b-15">
+          <ul class="aui-list aui-form-list">
+              <li class="aui-list-item">
+                  <div class="aui-list-item-inner">
+                      <div class="aui-list-item-label">
+                          手机号
+                      </div>
+                      <div class="aui-list-item-input">
+                          <input id="registerPhoneNumber" type="text" onkeyup="(this.v=function(){this.value=this.value.replace(/[^0-9-]+/,'');}).call(this)" oninput="if(value.length>11)value=value.slice(0,11)"  onblur="this.v();" placeholder="输入手机号码">
+                      </div>
+                  </div>
+              </li>
+              <li class="aui-list-item">
+                  <div class="aui-list-item-inner">
+                      <div class="aui-list-item-label">
+                          验证码
+                      </div>
+                      <div class="aui-list-item-input code-inp-span">
+                          <input id="registerverificationCode"  oninput="if(value.length>6)value=value.slice(0,6)" type="text" placeholder="输入验证码">
+                          <span id='register-message-timeout' onclick="sendMessage()">
+                              短信验证
+                          </span>
+                      </div>
+
+                  </div>
+              </li>
+
+              <li class="aui-list-item">
+                  <div class="aui-list-item-inner">
+                      <div class="aui-list-item-label">
+                          密码
+                      </div>
+                      <div class="aui-list-item-input">
+                          <input id="registerPassword" type="password" oninput="if(value.length>20)value=value.slice(0,20)" placeholder="输入密码">
+                      </div>
+                      <div class="aui-list-item-label-icon">
+                          <img id="registerPasswordShow" src="../../image/login/login_pwd_hiden.png" width="30px" height="30px" onclick="changePasswordSatus()" />
+                      </div>
+                  </div>
+              </li>
+
+             <li class="aui-list-item">
+                  <div class="aui-list-item-inner">
+                      <div class="aui-list-item-label">
+                          邀请人
+                      </div>
+                      <div class="aui-list-item-input">
+                          <input id="inviter" type="text" oninput="if(value.length>20)value=value.slice(0,20)" placeholder="输入邀请码领积分，可不输入">
+                      </div>
+                  </div>
+              </li>
+
+              <div class="aui-content-padded">
+                  <p>
+                      <div class="aui-btn aui-btn-success aui-btn-block" onclick="register()">注册</div>
+                  </p>
+              </div>
+          </ul>
+
+      </div>
+
+</body>
+<script type="text/javascript">
+    var messageTimeOut = 60;
+    var messageTimer;
+    apiready = function() {
+
+    };
+
+    /** 点击显示密码*/
+    function changePasswordSatus() {
+        if ($api.attr($api.byId("registerPasswordShow"), 'src') == "../../image/login/login_pwd_show.png") {
+            $api.attr($api.byId("registerPasswordShow"), 'src', '../../image/login/login_pwd_hiden.png');
+            $api.attr($api.byId("registerPassword"), 'type', 'password');
+        } else {
+            $api.attr($api.byId("registerPasswordShow"), 'src', '../../image/login/login_pwd_show.png');
+            $api.attr($api.byId("registerPassword"), 'type', 'text');
+        }
+    }
+
+    /** 发送短信验证码*/
+    function sendMessage() {
+        var phoneNumber = $api.trimAll($api.val($api.byId("registerPhoneNumber")));
+        var timestamp = new Date().getTime();
+        var deviceId = api.deviceId;
+        console.log('sendMessage');
+        if (phoneNumber == "") {
+            defaultToast("手机号不能为空");
+            return;
+        }
+
+        if (phoneNumber.length != 11) {
+            defaultToast("手机号格式不对");
+            return;
+        }
+        api.ajax({
+            url: sendMessageSer,
+            method: 'post',
+            data: {
+                values: {
+                    "phoneNumber": phoneNumber,
+                    "time": timestamp,
+                    "deviceId": deviceId,
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+              defaultToast(ret.message);
+              if (ret.success && ret.message!="该用户已被注册") {
+                  sendMessageTimeOut();
+              }else {
+                recordTimeOver();
+              }
+            } else {
+              recordTimeOver();
+              defaultToast('发送失败，请稍后再试');
+            }
+        });
+    }
+
+    /** 注册*/
+    function register() {
+        var phoneNumber = $api.trimAll($api.val($api.byId("registerPhoneNumber")));
+        var password = $api.trimAll($api.val($api.byId("registerPassword")));
+        var verificationCode = $api.trimAll($api.val($api.byId("registerverificationCode")));
+        //var inviter = $api.trimAll($api.val($api.byId("inviter")));
+        var timestamp = new Date().getTime();
+
+        var deviceId = api.deviceId;
+
+        if (verificationCode == "") {
+            defaultToast("验证码不能为空");
+            return;
+        }
+        if (phoneNumber == "") {
+            defaultToast("手机号不能为空");
+            return;
+        }
+        if (password == "") {
+            defaultToast("密码不能为空");
+            return;
+        }
+        if (phoneNumber.length != 11) {
+            defaultToast("手机号格式不对");
+            return;
+        }
+
+        showToast("register");
+        api.ajax({
+            url: registerSer,
+            method: 'post',
+            cache: false,
+            data: {
+                values: {
+                    "phoneNumber": phoneNumber,
+                    "password": password,
+                    "smsVerificationCode": verificationCode,
+                    "time": timestamp,
+                    "deviceId": deviceId,
+                    "promoCode": ""
+                },
+            }
+        }, function(ret, err) {
+            toast.hide();
+            defaultToast(ret.message);
+            //console.log('register ret--> ' + JSON.stringify(ret));
+            //console.log(JSON.stringify(err));
+            if (ret.success == true) {
+                // if (api.pageParam.name == 'login') { /** 从登录跳转，返回*/
+                    // goBack();
+                // } else { /**跳转到登录*/
+                    pageJump('login', '../login.html', 'home_page_win');
+                    api.closeWin();
+                }
+            })
+    };
+
+    /** 短信发送倒计时*/
+    function sendMessageTimeOut(){
+      $("#register-message-timeout").attr("onclick", "null");
+      $("#register-message-timeout").text(messageTimeOut + 's');
+      messageTimer = setTimeout("sendMessageTimeOut()", 1000);
+      if (messageTimeOut <= 0) {
+          recordTimeOver();
+      }
+      messageTimeOut = messageTimeOut - 1;
+    }
+
+    /** 停止计时*/
+    function recordTimeOver() {
+        clearTimeout(messageTimer);
+        $("#register-message-timeout").text('短信验证');
+        $("#register-message-timeout").attr("onclick", "sendMessage()");
+        messageTimeOut = 60;
+    }
+
+</script>
+</html>

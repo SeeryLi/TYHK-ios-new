@@ -1,0 +1,15 @@
+body{background-color: #EFF2F7;}
+
+div{box-sizing: border-box;}
+
+.title-info{padding: 0.125rem 0.75rem !important;height: 1.6rem;line-height: 1.525rem;background-color: #EFF2F7;color: #999999;font-size: 0.65rem;}
+
+/*.main-div{padding-left: 0.75rem;width: 100%;height: 2.5rem;line-height: 2.5rem;color: #222222;border-top: 1px solid #EBEBEB;font-size: 0.75rem;background-color: #fff;}*/
+
+.aui-list-item-title{width: 100%;}
+
+.first-top{border-top: 0 !important;}
+
+.text-color{color:#47CC9A !important;}
+
+.aui-list .aui-list-header{background-color: #EFF2F7 !important;}

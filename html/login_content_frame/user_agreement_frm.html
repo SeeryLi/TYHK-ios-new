@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>关于我们</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aboutUs_frm.css" />
+    <style media="screen">
+        .box_div {
+            padding: 1rem 0.75rem 0.5rem;
+            width: 100%;
+            line-height: 1rem;
+            border-top: 1px solid #EBEBEB;
+            text-align:justify;
+	          text-justify:inter-word;
+        }
+        .box_div>p{
+          color: #555 !important;
+          font-size: 0.6rem !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box_div">
+        <p id="agreeMentContent"></p>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    apiready = function(){
+        getNoice();
+    };
+
+    function getNoice(){
+      api.ajax({
+          url: getUserProtocolSer,
+          method: 'post'
+      },function(ret, err){
+          if (ret) {
+              if(ret.success){
+                $api.byId("agreeMentContent").innerText = ret.data.userProtocol;
+              }
+          } else {
+              console.log('addMedicinesSure-->' + JSON.stringify(err));
+          }
+      });
+    }
+
+</script>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>添加新的药品</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/remind.css">
+</head>
+
+<body>
+
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+        <div></div>
+        <div class="aui-pull-left aui-btn">
+            <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+        </div>
+        <div class="aui-title head-title"><b>新开药品<b></div>
+        <div class="aui-pull-right aui-btn title-right-text back-span-green" onclick="sureClick()">
+              <span>完成</span>
+        </div>
+      </header>
+
+      <footer class="nav-footer" id="footer" onclick="pageJump('add_med_win','./add_med_win.html','add_new_med_win')" style="height:2.25rem;line-height:2.25rem;">
+        <div class="sure-block">
+            <div class="add-drug">
+                <img src='../../image/remind/drug_add.png' alt="" >
+                <span>添加药品 </span>
+            </div>
+        </div>
+      </footer>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+  <script type="text/javascript" src="../../script/commit/utils.js"></script>
+  <script type="text/javascript">
+    apiready = function(){
+      var header = document.querySelector('#header');
+      $api.fixStatusBar(header);
+      var header = $api.byId('header');
+      var headerH = $api.offset(header).h;
+      var footer = $api.byId('footer');
+      var footerH = $api.offset(footer).h;
+      api.openFrame({
+          name: 'add_new_med_frm',
+          url: './add_new_med_frm.html',
+          rect: {
+              x: 0,
+              y: headerH,
+              w: 'auto',
+              h: api.winHeight - headerH - footerH
+          },
+          pageParam: {
+            takeDrugId: api.pageParam.takeDrugId,
+            patientId:api.pageParam.patientId,
+            consultId:api.pageParam.consultId
+          },
+          bounces: false,
+          bgColor: 'rgba(0,0,0,0)',
+          vScrollBarEnabled: true,
+          hScrollBarEnabled: false
+      });
+    }
+
+    /** 返回添加的药品*/
+    function addMedicines(medicines,medicinesInfo){
+      api.execScript({
+          frameName: 'add_new_med_frm',
+          script: 'addMedicines('+ JSON.stringify(medicines) +' '+','+' '+ JSON.stringify(medicinesInfo) +');'
+      });
+    }
+
+    /** 点击确定*/
+    function sureClick(){
+      api.execScript({
+          frameName: 'add_new_med_frm',
+          script: 'addMedicinesSure();'
+      });
+    }
+
+  </script>
+</html>

@@ -1,0 +1,65 @@
+body {
+    background-color: RGBA(239, 242, 247, 1);
+    padding: 1.5rem 1.5rem 0;
+}
+
+div {
+    background-color: #fff;
+}
+
+img[src=""],img:not([src]){
+
+      opacity:0;
+
+ }
+
+.aui-content {
+    height: 22.5rem;
+    border-radius: 0.5rem;
+}
+
+#ptoto {
+    width: 100%;
+    height: 3rem;
+    display: block;
+    position: relative;
+    margin-top: 2rem;
+}
+
+#ptoto img {
+    max-width: 3rem;
+    max-height: 3rem;
+    border: 1px solid #ebebeb;
+    margin: 0 50%;
+    border-radius: 1.5rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -1.5rem;
+    margin-left: -1.5rem;
+}
+
+#name {
+    width: 100%;
+    height: 1rem;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+#gr-code {
+    width: 100%;
+    height: 10rem;
+    position: relative;
+    margin-top: 2.5rem;
+}
+
+#gr-code img {
+    width: 10rem;
+    height: 10rem;
+    margin: 2.5rem 50% 3.5rem 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -5rem;
+    margin-left: -5rem;
+}

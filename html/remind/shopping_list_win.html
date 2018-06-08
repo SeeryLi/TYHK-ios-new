@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>添加药品--患者付费</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <style media="screen">
+      body{
+        background-color: #EFF2F7;
+      }
+    </style>
+</head>
+
+<body>
+    <header id='header' class="aui-bar aui-bar-nav aui-bar-light title-a">
+      <div class="aui-pull-left aui-btn">
+          <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+      </div>
+      <div class="aui-title"><b>新开药品<b></div>
+    </header>
+
+    <footer class="nav-footer" id="footer" style="height:2.25rem;line-height:2.25rem;font-size:0.85rem;" onclick="goPay()">
+      <div class="sure-block">
+          <div class="add-drug">
+              <span>去支付</span>
+          </div>
+      </div>
+    </footer>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+  <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+  <script type="text/javascript" src="../../script/commit/utils.js"></script>
+  <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+  <script type="text/javascript">
+      apiready = function(){
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        var header = $api.byId('header');
+        var headerH = $api.offset(header).h;
+        var footer = $api.byId('footer');
+        var footerH = $api.offset(footer).h;
+        api.openFrame({
+            name: 'shopping_list_frm',
+            url: './shopping_list_frm.html',
+            rect: {
+              x: 0,
+              y: headerH,
+              w: "auto",
+              h: api.winHeight - headerH - footerH
+            },
+            pageParam: {
+                drugMouldId: api.pageParam.drugMouldId,
+                doctorId :api.pageParam.doctorId
+            },
+            bounces: false,
+            bgColor: 'rgba(0,0,0,0)',
+            vScrollBarEnabled: true,
+            hScrollBarEnabled: false
+        });
+
+        /**医生不显示*/
+        if(getStorage('userAppType') == 4){
+            document.getElementById('footer').style.display = 'none';
+        }
+      };
+
+      /** 已支付*/
+      function changePay(){
+          document.getElementById('footer').innerText = '已支付';
+          $("#footer").attr("onclick", "null");
+      }
+
+      function goPay(){
+        api.ajax({
+            url: getUserInfoSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": getStorage('userId'),
+                    "deviceId": api.deviceId,
+                    "time": new Date().getTime(),
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.success) {
+                    setStorage('newTakeDrugId', ret.data.takeDrugId);
+                    console.log(ret.data.takeDrugId);
+                    api.execScript({
+                        frameName: 'shopping_list_frm',
+                        script: 'goPayMoney();'
+                    });
+                }
+            }
+        });
+      }
+  </script>
+  </html>

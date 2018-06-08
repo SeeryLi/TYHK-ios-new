@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>复诊报告</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main_style.css" />
+</head>
+
+<body>
+    <div class="vrf_warp_box">
+
+        <div class="border-se"></div>
+        <div class="vrf_man_div">
+            <p class="vrf_title">自我测评得分</p>
+            <div class="vrf_fle">
+                <div class="vrf_fle_div">
+                    <p id="jl_num"></p>
+                    <span id="vrf_name1"></span>
+
+                    <div class="vrf_up vrf_num vrf_num1">
+                        ↑ <span></span>
+                    </div>
+
+                    <div class="vrf_down vrf_num vrf_num1">
+                        ↓ <span></span>
+                    </div>
+
+                </div>
+                <div class="vrf_fle_div">
+                    <p id="yy_num"></p>
+                    <span id="vrf_name2"></span>
+
+                    <div class="vrf_up vrf_num vrf_num2">
+                        ↑ <span></span>
+                    </div>
+
+                    <div class="vrf_down vrf_num vrf_num2">
+                        ↓ <span></span>
+                    </div>
+
+                </div>
+                <div class="vrf_fle_div">
+                    <p id="sm_num"></p>
+                    <span id="vrf_name3"></span>
+
+                    <div class="vrf_up vrf_num vrf_num3">
+                        ↑ <span></span>
+                    </div>
+
+                    <div class="vrf_down vrf_num vrf_num3">
+                        ↓ <span></span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="border-se"></div>
+        <!-- 线形图 -->
+        <div id="vrf_linellae_main" class="vrf_linellae">
+
+        </div>
+
+        <div class="border-se"></div>
+        <!-- 服药天数统计环形图 -->
+        <div id="vrf_circle_main" class="vrf_circle">
+
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/echarts.min.js"></script>
+<script type="text/javascript">
+    var myChart1 = null,
+        myChart2 = null;
+
+    apiready = function() {
+        myChart1 = echarts.init(document.getElementById('vrf_linellae_main'));
+        myChart2 = echarts.init(document.getElementById('vrf_circle_main'));
+        scoreNum();
+        differenceNum();
+        circle();
+        myMainData();
+    }
+
+    // 数据请求
+    function myMainData() {
+        var userDifference;
+        var userScore;
+        var userDaysStatistics;
+        var userId = getStorage("userId");
+        if (userId && userId != '') {
+            api.ajax({
+                url: returnReportDisplaySer,
+                method: 'post',
+                data: {
+                    values: {
+                        userId: userId,
+                        "deviceId": api.deviceId,
+                        'sign': ''
+                    }
+                }
+            }, function(ret, err) {
+                if (ret) {
+                  if(ret.success){
+                    var allDayTime = [];
+                    var allEatNum = [];
+                    if (!ret.data.takeDrugStatistics) {
+                        initMyChart([0], [0]);
+                    }else {
+                      var amount = ret.data.takeDrugStatistics;
+                      if (amount.length != 0) {
+                          for (var i = 0; i < amount.length; i++) {
+                              amount[i].dayTime = amount[i].dayTime.substring(5, 10);
+                              allDayTime.push(amount[i].dayTime);
+                              allEatNum.push(amount[i].eatNum);
+                          }
+                      }
+                      initMyChart(allDayTime, allEatNum);
+                    }
+
+                    var userSelfTestStatistics = ret.data.selfTestStatistics;
+                    var inTimeDay = ret.data.daysStatistics.inTimeDay;
+                    var outTimeDay = ret.data.daysStatistics.outTimeDay;
+                    var totalDay = ret.data.daysStatistics.totalDay;
+
+                    var arr = [{
+                        value: inTimeDay,
+                        name: '按时服药天数'
+                    }, {
+                        value: outTimeDay,
+                        name: '未按时服药天数'
+                    }]
+                    console.log("shuju:" + JSON.stringify(ret.data));
+                    setEchart2Data(arr);
+                    $("#vrf_name1").text(userSelfTestStatistics[0].testName);
+                    $("#vrf_name2").text(userSelfTestStatistics[1].testName);
+                    $("#vrf_name3").text(userSelfTestStatistics[2].testName);
+                    $(".vrf_num1>span").text(userSelfTestStatistics[0].difference);
+                    $(".vrf_num2>span").text(userSelfTestStatistics[1].difference);
+                    $(".vrf_num3>span").text(userSelfTestStatistics[2].difference);
+                    $("#jl_num").text(userSelfTestStatistics[0].score);
+                    $("#yy_num").text(userSelfTestStatistics[1].score);
+                    $("#sm_num").text(userSelfTestStatistics[2].score);
+                    scoreNum();
+                    differenceNum();
+                  }
+                } else {
+                    // alert(JSON.stringify(err));
+                }
+            });
+        }
+    }
+
+    // 判断数据显示修改样式
+    function scoreNum() {
+        $(".vrf_fle_div").each(function() {
+            if ($(this).find("p").text() == "未测") {
+                $(this).children("p").addClass("fontSize");
+            }
+        });
+    }
+
+    // 涨浮
+    function differenceNum() {
+        var vrfNumSpan = -1;
+        $(".vrf_num").each(function() {
+            if ($(this).find("span").text() <= vrfNumSpan) {
+                $(this).find("span").parent(".vrf_down").addClass('show');
+            } else if ($(this).find("span").text() > 0) {
+                $(this).find("span").parent(".vrf_up").addClass('show');
+            }
+        });
+
+    }
+
+    //修改chart1数据
+    // function setEchart1Data(data){
+    //   option1.series[0].data = data;
+    //   myChart1.setOption(option1);
+    // }
+    //修改chart2 数据2
+    function setEchart2Data(data) {
+        option2.series[0].data = data;
+        myChart2.setOption(option2);
+    }
+
+
+
+    //线性 初始化MyChart
+    function initMyChart(time, num) {
+        // 基于准备好的dom，初始化echarts实例
+        // var myChart = echarts.init(document.getElementById('vrf_linellae_main'));
+
+        // 指定图表的配置项和数据
+        option1 = {
+            color: ["#FFC57B"],
+            fontSize: 10,
+            title: {
+                text: '服药次数统计',
+                left: 15,
+                top: 15,
+                textStyle: {
+                    color: '#222',
+                    fontSize: 16,
+                    fontWeight: 'normal'
+                },
+            },
+            tooltip: {},
+            xAxis: {
+                type: 'category',
+                data: time,
+            },
+            dataZoom: [{
+                type: 'inside',
+                xAxisIndex: [0],
+                start: 0,
+                end: 50
+            }],
+            yAxis: {
+                min: 0,
+                max: 4,
+            },
+            series: [{
+                name: '服药次数',
+                type: 'bar',
+                data: num,
+                type: 'line'
+            }]
+        };
+        // 使用刚指定的配置项和数据显示图表。
+        myChart1.setOption(option1);
+    }
+
+    // 环形
+    function circle() {
+        // 基于准备好的dom，初始化echarts实例
+
+        option2 = {
+            fontSize: 10,
+            title: {
+                text: '服药天数统计',
+                left: 15,
+                top: 15,
+                textStyle: {
+                    color: '#222',
+                    fontSize: 16,
+                    fontWeight: 'normal'
+                },
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b}: {c} ({d}%)",
+                textStyle: {
+                    fontSize: 12
+                }
+            },
+            legend: {
+                orient: 'vertical',
+                x: 'right',
+                y: 'bottom',
+                data: ['按时服药天数', '未按时服药天数']
+            },
+            series: [{
+                name: '详细天数',
+                type: 'pie',
+                radius: ['30%', '45%'],
+                color: ['#32D086', '#FFC57B'],
+                avoidLabelOverlap: true,
+                label: {
+                    normal: {
+                        show: true,
+                        position: 'left'
+                    },
+                    emphasis: {
+                        show: true,
+                        textStyle: {
+                            fontSize: 12
+                        }
+                    }
+                },
+                data: [{
+                    value: 0,
+                    name: '按时服药天数'
+                }, {
+                    value: 0,
+                    name: '未按时服药天数'
+                }]
+            }]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart2.setOption(option2);
+    }
+</script>
+
+</html>

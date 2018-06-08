@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>全部评价</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/doctor_main.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/starRating.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/consult/consult_record.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/mescroll.min.css">
+    <style media="screen">
+      body{
+        background-color: #fff;
+      }
+    </style>
+</head>
+
+<body>
+    <div id="doctor-comments-mescroll" class="content_div mescroll">
+        <!-- 无评论状态 -->
+        <div id="doctor-comments_empty" class="record-div" style="display:none;">
+          <img src="../../image/con_chat_no@3x.png" alt="" />
+        </div>
+        <ul id="doctor-comments">
+            <!-- 评论列表 -->
+        </ul>
+    </div>
+
+    <script id="doctorCommentsScript" type="text/template">
+      {{for(var i = 0;i< it.length;i++){ }}
+        <li>
+           <div class="info-2">
+               <div class="main-div">
+                   <div class="title_box">
+                       {{ if({{=it[i].patientPortrait}}){ }}
+                       <img id="ph-img" src="{{=it[i].patientPortrait}}" alt="">
+                        {{ }else{ }}
+                       <img id="ph-img" src="../../image/user/user_defult.png" alt="">
+                        {{ }}}
+                         <span class='doctor-comment-name'>{{=it[i].patientName}}</span>
+                         <span class='doctor-comment-data'>{{=it[i].commentDate}}</span>
+                       <!-- 评价等级 -->
+                       <div class="star_level">
+                           {{ if(it[i].rating == '1'){ }}
+                             <img src="../../image/con_chat_eva.png" alt="">
+                           {{ }if(it[i].rating == '2'){ }}
+                             <img src="../../image/con_chat_eva.png" alt="">
+                             <img src="../../image/con_chat_eva.png" alt="">
+                           {{ }if(it[i].rating == '3'){ }}
+                           <img src="../../image/con_chat_eva.png" alt="">
+                           <img src="../../image/con_chat_eva.png" alt="">
+                           <img src="../../image/con_chat_eva.png" alt="">
+                           {{ }if(it[i].rating == '4'){ }}
+                           <img src="../../image/con_chat_eva.png" alt="">
+                           <img src="../../image/con_chat_eva.png" alt="">
+                           <img src="../../image/con_chat_eva.png" alt="">
+                           <img src="../../image/con_chat_eva.png" alt="">
+                           {{ }if(it[i].rating == '5'){ }}
+                             <img src="../../image/con_chat_eva.png" alt="">
+                             <img src="../../image/con_chat_eva.png" alt="">
+                             <img src="../../image/con_chat_eva.png" alt="">
+                             <img src="../../image/con_chat_eva.png" alt="">
+                             <img src="../../image/con_chat_eva.png" alt="">
+                           {{ }}}
+                     </div>
+                   </div>
+                   <div class="cont_text">
+                       <p>{{=it[i].comment}}</p>
+                   </div>
+           </div>
+         </div>
+        </li>
+      {{ }}}
+    </script>
+
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/encryption.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/modules/money/moneyUtil.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript" src="../../script/mescroll.min.js"></script>
+<script type="text/javascript">
+    var mescroll;
+    apiready = function() {
+        //getDoctorComments();
+        //创建MeScroll对象,内部已默认开启下拉刷新,自动执行up.callback,重置列表数据;
+        mescroll = new MeScroll("doctor-comments-mescroll", {
+          up: {
+              auto: false, //是否在初始化时以上拉加载的方式自动加载第一页数据; 默认false
+              clearEmptyId: "doctor-comments",
+              isBounce: false, //此处禁止ios回弹
+              callback: upCallback, //上拉回调,此处可简写; 相当于 callback: function (page) { upCallback(page); }
+              toTop: {
+                  src: "../../image/mescroll-totop.png",
+              },
+          }
+        });
+    };
+
+    /*上拉加载的回调 page = {num:1, size:10}; num:当前页 从1开始, size:每页数据条数 */
+    function upCallback(page) {
+      getDoctorComments(page.num, page.size, function(curPageData) {
+          //mescroll会根据传的参数,自动判断列表如果无任何数据,则提示空;列表无下一页数据,则提示无更多数据;
+          //console.log("page.num=" + page.num + ", page.size=" + page.size + ", curPageData.length=" + curPageData.length);
+          if (curPageData.length < page.num) {
+            mescroll.endSuccess(curPageData.length, false);
+          }else{
+            mescroll.endSuccess(curPageData.length, true);
+          }
+          $api.append($api.byId("doctor-comments"), doT.template($api.html($api.byId("doctorCommentsScript")))(curPageData));
+      }, function() {
+          //联网失败的回调,隐藏下拉刷新和上拉加载的状态;
+          mescroll.endErr();
+      });
+    }
+
+    function getDoctorComments(pageNum, pageSize, successCallback, errorCallback) {
+        var userId = getStorage("userId");
+        if (typeof(userId) == 'undefined') {
+          userId = '';
+        }
+        api.ajax({
+            url: getDoctorCommentsSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": userId,
+                    "doctorId": api.pageParam.doctorId,
+                    'queryStartNumber': (pageNum - 1)*pageSize + 1 + '',
+                    'queryLimit': pageSize + '',
+                    "time": new Date().getTime(),
+                    "deviceId": api.deviceId,
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            console.log("getDoctorCommentsSer-->" + JSON.stringify(ret));
+            if (ret) {
+                if (ret.success) {
+                    var commentsList = ret.data.comment;
+                    successCallback && successCallback(commentsList);
+                } else {
+                    defaultToast(ret.message);
+                    errorCallback && errorCallback();
+                }
+            } else {
+                defaultToast("获取评价失败");
+                errorCallback && errorCallback();
+            }
+        });
+
+    }
+</script>
+
+</html>

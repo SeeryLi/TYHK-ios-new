@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>知识库搜索</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+</head>
+
+<body>
+    <header id="header" class="aui-bar aui-bar-nav">
+        <div class="aui-pull-left aui-btn" onclick="goBack()">
+            <span class="aui-iconfont aui-icon-left back-span-green"></span>
+        </div>
+        <div class="aui-title" style="left:2rem; right: 2rem;">
+            <div class="aui-searchbar">
+                <div class="aui-searchbar-input aui-border-radius">
+                    <i class="aui-iconfont aui-icon-search"></i>
+                    <input type="search" placeholder="搜索知识文章" id="search-input">
+                    <div class="aui-searchbar-clear-btn">
+                        <i class="aui-iconfont aui-icon-close"></i>
+                    </div>
+                </div>
+                <div class="aui-searchbar-btn" tapmode>取消</div>
+            </div>
+        </div>
+        <div class="aui-pull-right aui-btn back-span-green" onclick="searchRepository()">
+            <span>搜索</span>
+        </div>
+    </header>
+
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        var headerPos = $api.offset($api.dom('header'));
+        api.openFrame({
+            name: 'repository_search_frm',
+            url: 'repository_search_frm.html',
+            rect: {
+                x: 0,
+                y: headerPos.h,
+                w: 'auto',
+                h: 'auto'
+            },
+            bounces: false,
+            bgColor: 'rgba(239,242,247,1)',
+            vScrollBarEnabled: false,
+            hScrollBarEnabled: false
+        });
+    };
+
+    /** 搜素内容*/
+    function searchRepository() {
+        var searchWords = $api.trimAll($api.val($api.byId('search-input')));
+        console.log(searchWords);
+        api.execScript({
+            frameName: 'repository_search_frm',
+            script: 'searchClick(' + JSON.stringify(searchWords) + ');'
+        });
+    }
+</script>
+
+</html>

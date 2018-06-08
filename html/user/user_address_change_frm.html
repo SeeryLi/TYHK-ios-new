@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user.css" />
+  </head>
+  <body>
+    <div class="border-se"></div>
+    <div class="aui-content aui-margin-b-15">
+    <ul class="aui-list aui-form-list">
+        <li class="aui-list-item aui-btn-block">
+            <div class="aui-list-item-inner address-border-b">
+                <div class="aui-list-item-label address-item">
+                    收货人
+                </div>
+                <div class="aui-list-item-input address-inner">
+                    <input id="username" type="text" placeholder="输入姓名">
+                </div>
+            </div>
+        </li>
+        <li class="aui-list-item aui-btn-block">
+            <div class="aui-list-item-inner address-border-b">
+                <div  class="aui-list-item-label address-item">
+                    联系电话
+                </div>
+                <div class="aui-list-item-input address-inner">
+                    <input id="userphone" type="number" oninput="if(value.length>11)value=value.slice(0,11)" placeholder="输入电话号码">
+                </div>
+            </div>
+        </li>
+        <li class="aui-list-item aui-btn-block textarea-height">
+            <div class="aui-list-item-inner">
+                <div class="aui-list-item-label address-item">
+                    <span>
+                        详细地址
+                    </span>
+                </div>
+                <div class="aui-list-item-input address-inner">
+                    <textarea  id="useraddress" type="text" placeholder="输入收货详细地址"></textarea>
+                </div>
+            </div>
+        </li>
+    </ul>
+    </div>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+  <script type="text/javascript" src="../../script/commit/utils.js"></script>
+  <script type="text/javascript" src="../../script/commit/encryption.js"></script>
+  <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+  <script type="text/javascript">
+  apiready = function() {
+    getUserAddress();
+    setTimeout(
+        function(){
+            api.closeWin({
+                name: 'shopping_list_win'
+            });
+        },500
+    )
+  };
+
+  /** 获取地址*/
+  function getUserAddress() {
+      var userId = getStorage("userId");
+      if (userId) {
+          api.ajax({
+              url: getAddress,
+              method: 'post',
+              data: {
+                  values: {
+                      "userId": userId,
+                      "deviceId": api.deviceId,
+                      "time": new Date().getTime(),
+                      "sign": ""
+                  },
+              }
+          }, function(ret, err) {
+              console.log("get info-->" + JSON.stringify(ret));
+              if (ret) {
+                if(ret.success){
+                  var useraddress = ret.data.address;
+                  var username = ret.data.addressee;
+                  var userphone = ret.data.contactPhone;
+                  if (useraddress) {
+                      $api.byId("useraddress").innerHTML = useraddress;
+                  }
+                  if (username) {
+                      $api.byId("username").value = username;
+                  }
+                  if (userphone) {
+                      $api.byId("userphone").value = userphone;
+                  }
+                }
+              } else {
+              }
+          });
+      } else {
+          pageJump('login', '../login.html', 'user_info');
+      }
+  }
+
+  /** 地址修改*/
+  function changeAddress() {
+      var userId = getStorage("userId");
+      var myAddress = $api.trimAll($api.val($api.byId("useraddress")));
+      var myname = $api.trimAll($api.val($api.byId("username")));
+      var myphone = $api.trimAll($api.val($api.byId("userphone")));
+      if (myname == "") {
+          defaultToast("请输入收货人姓名!");
+          return;
+      }
+      if(myphone == ""){
+          defaultToast("请输入收货人电话号码!");
+          return;
+      }
+      if(myAddress == ""){
+          defaultToast("请输入收货地址!");
+          return;
+      }
+      if (userId) {
+          api.ajax({
+              url: updateAddress,
+              method: 'post',
+              data: {
+                  values: {
+                      "userId": userId,
+                      "deviceId": api.deviceId,
+                      "time": new Date().getTime(),
+                      "address": myAddress,
+                      "addressee": myname,
+                      "contactPhone": myphone,
+                      "sign": ""
+                  },
+              }
+          }, function(ret, err) {
+              console.log("userChange-->" + JSON.stringify(ret));
+              if (ret) {
+                  if (ret.success) {
+                    api.execScript({
+                        name: 'user_info',
+                        frameName: 'user_info_frm',
+                        script: 'setAddress('+ JSON.stringify(myAddress) +');'
+                    });
+                    api.closeWin();
+                  }
+                  defaultToast(ret.message);
+              } else {
+                  defaultToast(err.message);
+              }
+          });
+
+      } else {
+          pageJump('login', '../login.html', 'user_address_change');
+      }
+
+  }
+  </script>
+</html>

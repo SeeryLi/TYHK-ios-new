@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>我的阳光币</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user_points_frm.css" />
+</head>
+    <div class="warp_div">
+
+        <div class="remaining">
+            <div class="main_info_div">
+                <div class="num_left">
+                  <p><span>10</span>/<span>90</span></p>
+                  <span style="font-size:0.75rem;position:relative;top:-.4rem; ">今日获取</span>
+                </div>
+
+                <div class="num_right">
+                  <p>200</p>
+                  <span style="font-size:0.75rem;position:relative;top:-.4rem; ">总阳光币</span>
+                </div>
+                <!-- <div class="aui-content-padded bth-log1">
+                  <div class="aui-btn aui-btn-block bth-bor">返回首页</div>
+                </div> -->
+                <div class="bth_div" onclick="pageJump('money_recharge_win','money_recharge_win.html','money_recharge_win')">
+                    <span>阳光币充值</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="title_div">
+            <span>可做任务</span>
+        </div>
+        <div class="ever_task">
+            <img class="ico_img" src="../../image/my_mon_mrdl.png" alt="">
+            <div class="tase_info">
+                <p class="tase_info_p">每日登录</p>
+                <p>
+                  <img src="../../image/my_list_mon.png" alt="">
+                  +10
+                </p>
+            </div>
+            <div class="base_bth bth_bg">
+                完成
+            </div>
+        </div>
+
+        <div class="ever_task">
+            <img class="ico_img" src="../../image/my_mon_zczh.png" alt="">
+            <div class="tase_info">
+                <p class="tase_info_p">注册账号</p>
+                <p>
+                  <img src="../../image/my_list_mon.png" alt="">
+                  +10
+                </p>
+            </div>
+            <div class="base_bth bth_bg">
+                完成
+            </div>
+        </div>
+
+        <div class="ever_task">
+            <img class="ico_img" src="../../image/my_mon_ygbcz.png" alt="">
+            <div class="tase_info">
+                <p class="tase_info_p">阳光币充值</p>
+                <p>
+                  <img src="../../image/my_list_mon.png" alt="">
+                  +10
+                </p>
+            </div>
+            <!-- 完成状态添加class名称: bth_bg-->
+            <div class="base_bth">
+                去完成
+            </div>
+        </div>
+
+        <div class="ever_task">
+            <img class="ico_img" src="../../image/my_mon_yszx.png" alt="">
+            <div class="tase_info">
+                <p class="tase_info_p">医生咨询评价</p>
+                <p>
+                  <img src="../../image/my_list_mon.png" alt="">
+                  +10
+                </p>
+            </div>
+            <!-- 完成状态添加class名称: bth_bg-->
+            <div class="base_bth">
+                去完成
+            </div>
+        </div>
+
+        <div class="ever_task">
+            <img class="ico_img" src="../../image/my_mon_fxyq.png" alt="">
+            <div class="tase_info">
+                <p class="tase_info_p">分享邀请码注册</p>
+                <p>
+                  <img src="../../image/my_list_mon.png" alt="">
+                  +10
+                </p>
+            </div>
+            <!-- 完成状态添加class名称: bth_bg-->
+            <div class="base_bth">
+                去完成
+            </div>
+        </div>
+
+    </div>
+<body>
+
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/encryption.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        //绑定touchstart
+	    	document.body.addEventListener('touchstart', function () { });
+    };
+
+    /**获取任务列表*/
+    function getTaskList() {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: getUserTaskSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "time": new Date().getTime(),
+                        "deviceId": api.deviceId,
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                console.log("getTaskList-->" + JSON.stringify(ret));
+                if (ret) {
+                    alert(JSON.stringify(ret));
+                } else {
+                    alert(JSON.stringify(err));
+                }
+            });
+        } else {
+            defaultToast("获取失败，将重新登录");
+            pageJump('login', '../login.html', homePage);
+        }
+    }
+
+    /**获取用户剩余金币*/
+    function getUserMongey(){
+      /** 获取用户剩余的币*/
+      function getUserCurrency(homePage) {
+          var userId = getStorage("userId");
+          if (userId) {
+              api.ajax({
+                  url: getMyCurrencySer,
+                  method: 'post',
+                  data: {
+                      values: {
+                          "userId": userId,
+                          "time": new Date().getTime(),
+                          "deviceId": api.deviceId,
+                          "sign": ""
+                      },
+                  }
+              }, function(ret, err) {
+                  console.log("getMyCurrencySer-->" + JSON.stringify(ret));
+                  if (ret) {
+                  } else {
+                  }
+              });
+          } else {
+              defaultToast("获取失败，将重新登录");
+              pageJump('login', '../../html/login.html', homePage);
+          }
+      }
+
+    }
+
+</script>
+
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>量表自测--列表</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/test_main_frm.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+</head>
+
+<body>
+
+    <script id="testListScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){ }}
+         <li class="box-li" onclick="jumpToTest('{{=it[i].price}}','{{=it[i].id}}','{{=it[i].testName}}','{{=it[i].chinicalType}}')">
+            <div class="main-box">
+                <div class="main-left">
+                    <p>{{=it[i].testName}}</p>
+                    <p>{{=it[i].testDiscription}}</p>
+                </div>
+                <img class="bg_img" src="{{= imagePath + it[i].picture}}" alt="" />
+            </div>
+            </li>
+      {{ }}}
+    </script>
+
+    <div class="aui-content aui-margin-b-15">
+        <ul id="testList" class="aui-list aui-media-list">
+        </ul>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/commit/image-cache.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        getTestCatalogue();
+    };
+
+    /** 获取抑郁症题目列表*/
+    function getTestCatalogue() {
+        api.ajax({
+            url: getTestQuestionsSer,
+            method: 'post',
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.success) {
+                    var testListData = ret.data;
+                    $api.append($api.byId("testList"), doT.template($api.html($api.byId("testListScript")))(testListData));
+                    api.parseTapmode();
+                } else {
+                    defaultToast('请求失败，请稍后重试');
+                }
+                console.log("getTestCatalogue ret-->" + JSON.stringify(ret));
+            } else {
+                defaultToast('请求失败，请稍后重试');
+                console.log("getTestCatalogue err-->" + JSON.stringify(err));
+            }
+        });
+
+    }
+
+    /** 获取用户剩余的币*/
+    function getUserCurrency(price, id,header) {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: getMyCurrencySer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "time": new Date().getTime(),
+                        "deviceId": api.deviceId,
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                console.log("getMyCurrencySer-->" + JSON.stringify(ret));
+                if (ret) {
+                    showDialog(price, ret.data.sunGold, id,header);
+                } else {
+
+                }
+            });
+        } else {
+            pageJump('login', '../login.html', 'test_main_frm');
+        }
+    }
+
+    /** 扣费*/
+    function consume(id,header) {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: testConsume,
+                method: 'post',
+                data: {
+                    values: {
+                      'directoryId': id,
+                      'userId': userId,
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    console.log("consume-->" + JSON.stringify(ret));
+                    if (ret.success) {
+                        api.openWin({
+                            name: 'user_test_win',
+                            url: './user_test_win.html',
+                            pageParam: {
+                                questionId: id,
+                                header:header
+                            },
+                            reload:true
+                        });
+                        api.sendEvent({
+              						name: 'getUserInfo',
+                          extra: {
+                            userId: getStorage('userId'),
+                          }
+              					});
+                    } else {
+                        defaultToast('请求失败，请稍后重试');
+                    }
+                } else {
+                    defaultToast('请求失败，请稍后重试');
+                    console.log("consume-->" + JSON.stringify(err));
+                }
+            });
+        } else {
+            pageJump('login', '../login.html', 'test_main_frm');
+        }
+    }
+
+    /** 跳转到自测页面*/
+    function jumpToTest(price, id,header,chinicalType) {
+      var userId = getStorage("userId");
+      if (userId) {
+        if (price == '0') { //免费
+          if (chinicalType == '睡眠质量') {
+            api.openWin({
+                name: 'test_sleep_win',
+                url: './test_sleep_win.html',
+                pageParam: {
+                    questionId: id,
+                    header:header
+                },
+                reload:true,
+            });
+          }else{
+            api.openWin({
+                name: 'user_test_win',
+                url: './user_test_win.html',
+                pageParam: {
+                    questionId: id,
+                    header:header
+                },
+                reload:true,
+            });
+          }
+        } else { //付费
+            getUserCurrency(price,id,header);
+        }
+      }else{
+          pageJump('login', '../login.html', 'test_main_frm');
+        }
+    }
+
+    /** 支付弹出框*/
+    function showDialog(number, allnumber, id,header) {
+        var dialog = new auiDialog();
+        dialog.alert({
+            title: "支付阳光币",
+            msg: '<h2 style="color:#ECB368;">-' + (number || 0) + '</h2><p style="color:#999999;font-size:0.75rem;margin-top:0.75rem;">当前阳光币' + (allnumber || 0) + '</p>',
+            buttons: ['<img src="../../image/home_form_pop_close.png"/>', '确定']
+        }, function(ret) {
+            console.log(ret);
+            if (ret.buttonIndex == 2) { //点击确定
+                consume(id,header);
+            } else if (ret.buttonIndex == 3) {
+                dialog.hide();
+            }
+        })
+    }
+</script>
+
+</html>

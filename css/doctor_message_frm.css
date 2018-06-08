@@ -1,0 +1,73 @@
+body {
+    background-color: RGBA(239, 242, 247, 1);
+}
+
+.photo {
+    width: 2.725rem;
+    height: 2.5rem;
+    border-radius: 1.25rem;
+    margin: 0.5rem 0.125rem 0.5rem 0;
+}
+
+.messageMain {
+    width: 100%;
+}
+
+.messageMain-title, .aui-pull-right {
+    height: 1rem;
+    line-height: 1rem;
+}
+
+.messageMain-content {
+    height: 1rem;
+    font-size: 0.6rem;
+    line-height: 1rem;
+    margin-top: 0.2rem;
+}
+
+.aui-pull-right {
+    text-align: right;
+}
+
+.messageMain-title {
+    font-weight: Bold;
+    color: RGBA(34, 34, 34, 1);
+}
+
+.messageMain-t .aui-pull-right {
+    color: RGBA(96, 96, 96, 1);
+    font-weight: Medium;
+}
+
+.messageMain-content {
+    font-weight: Medium;
+    color: RGBA(85, 85, 85, 1);
+}
+
+.aui-list .aui-list-item {
+    background-image: none !important;
+}
+
+.base_hint{
+  padding-left: 0.75rem;
+  height: 1.5rem;
+  line-height: 1.5rem;
+  font-size: 0.65rem;
+  color: #999;
+  background-color: #EFF2F7;
+}
+
+.base_title{
+  font-size: 0.75rem;
+  color: #222;
+}
+
+#doctor-consult-cost{
+  font-size: 0.75rem;
+  color: #555;
+}
+
+.aui-switch:checked{
+  background-color: #3FC190;
+  border-color: #3FC190;
+}

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>反馈</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/encryption.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+    <style media="screen">
+      body{
+        background-color: #EFF2F7;
+      }
+    </style>
+</head>
+
+<body>
+
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+      <div></div>
+        <div>
+            <div class="aui-pull-left aui-btn">
+                <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+            </div>
+            <div class="aui-title head-title"><b>意见反馈<b></div>
+        </div>
+    </header>
+
+    <div class="aui-content aui-margin-b-15">
+
+        <ul class="aui-list aui-form-list">
+          <li>
+              <div class="border-se"></div>
+              <div class="box-div-title">
+                  <span>反馈内容</span>
+              </div>
+              <div class="textarea-div">
+                <textarea class="bd-ys3" id="feedbackContent"  oninput="if(value.length>200)value=value.slice(0,200)" placeholder="请描述您需要反馈的内容吧~"></textarea>
+              </div>
+            </li>
+
+        </ul>
+        <div class="aui-content-padded bth-log1" onclick="commitFeekback()">
+            <div class="aui-btn aui-btn-success aui-btn-block ">
+                提交
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script type="text/javascript">
+    apiready = function() {
+      var header = document.querySelector('#header');
+      $api.fixStatusBar(header);
+    };
+
+    /**反馈*/
+    function commitFeekback() {
+        var feedbackStr = $api.trimAll($api.val($api.byId("feedbackContent")));
+        var userId = getStorage('userId');
+
+        if (userId == "") {
+            pageJump("login", "../login.html", "feed_back")
+            return;
+        }
+
+        if (feedbackStr == "") {
+            defaultToast("请输入反馈内容");
+            return;
+        }
+
+        showToast("");
+        api.ajax({
+            url: feedbackSer,
+            method: 'post',
+            data: {
+                values: {
+                    'userId': userId,
+                    'time': new Date().getTime(),
+                    'content': feedbackStr,
+                    'sign': '',
+                    'deviceId': api.deviceId
+                },
+            }
+        }, function(ret, err) {
+            toast.hide();
+            if (ret) {
+                defaultToast("反馈成功");
+            } else {
+                console.log('feedback-->' + JSON.stringify(err));
+                defaultToast("反馈失败，请稍后再试");
+            }
+        });
+        setTimeout(function(){
+            api.closeWin();
+        },500)
+    }
+</script>
+
+</html>

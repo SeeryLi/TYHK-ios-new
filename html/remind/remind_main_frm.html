@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>服药提醒--药单确认页</title>
+      <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+      <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+      <link rel="stylesheet" type="text/css" href="../../css/style.css" />
+      <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/remind.css">
+
+      <script type="text/javascript" src="../../script/api.js"></script>
+      <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+      <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+      <script type="text/javascript" src="../../script/commit/utils.js"></script>
+      <script type="text/javascript" src="../../script/doT.min.js"></script>
+      <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+  </head>
+  <body >
+
+    <div class="med-note-main">
+        <div class="note">
+            提醒：服药提醒开启前用户需确认当前服药的药品信息的正确性。
+        </div>
+        <ul class="medicinalList" id='remind-main-list'>
+        </ul>
+    </div>
+    <div id="noDate" class="noDate" style="display: none;"></div>
+    <script id="remindMainScript" type="text/template">
+      {{for(var i = 0;i< it.length;i++){ }}
+      <li>
+          <div class="main-title">
+            {{if(i == 0){}}
+            <div class="title-left">
+              <img class='consult-record-img' src='../../image/remind/pill_blue.png' />
+              <span class="name-box">第一次服药</span>
+            </div>
+            {{ }else if(i == 1){ }}
+            <div class="title-left">
+              <img class='consult-record-img' src='../../image/remind/pill_green.png' />
+              <span class="name-box">第二次服药</span>
+            </div>
+            {{ }else if(i == 2){ }}
+            <div class="title-left">
+              <img class='consult-record-img' src='../../image/remind/pill_yellow.png' />
+              <span class="name-box">第三次服药</span>
+            </div>
+            {{ }else if(i == 3){ }}
+            <div class="title-left">
+              <img class='consult-record-img' src='../../image/remind/rem_list_d.png' />
+              <span class="name-box">第四次服药</span>
+            </div>
+            {{}}}
+            <div class="title-right">
+                <span>{{=it[i].time}}</span>
+            </div>
+          </div>
+          {{var drugNews = '{{=it[i].drugNews}}' + '';}}
+          {{var drugNewsList = drugNews.split(',');}}
+          <ul>
+          {{for(var n = 0 ;n < drugNewsList.length; n++){ }}
+              <li class="box_li">
+                  <div class="each-med-left">{{=drugNewsList[n]}}</div>
+                   <div class="each-med-right">{{=drugNewsList[++n]}}</div>
+              </li>
+          {{ }}}
+        </ul>
+      </li>
+      {{}}}
+    </script>
+  </body>
+
+  <script type="text/javascript">
+      var takeDrugId;
+      apiready = function(){
+        getPatientPaper();
+      };
+
+      /**获取患者的服药单*/
+      function getPatientPaper(){
+        var userId = getStorage('userId');
+        var takeDrugId = getStorage('takeDrugId');
+        if (userId) {
+          showToast("loadingFy");
+          api.ajax({
+              url: getConfirmTakeDrugSer,
+              method: 'post',
+              data: {
+                  values: {
+                    "userId": userId,
+                    "takeDrugId":takeDrugId,
+                    "deviceId": api.deviceId,
+                    "time": new Date().getTime(),
+                    "sign": ""
+                  },
+              }
+          },function(ret, err){
+              toast.hide();
+              if (ret) {
+                if (ret.success) {
+                  var takeDrugNews = ret.data.takeDrugNewsList;
+                  takeDrugId = ret.data.takeDrugId;
+                  $api.html($api.byId('remind-main-list'), '');
+                  $api.append($api.byId('remind-main-list'), doT.template($api.html($api.byId("remindMainScript")))(takeDrugNews));
+                }
+              }
+              if(err){
+                if(err.status == -1){
+                  defaultToast('服药单正在修改,请稍后重试！');
+                }else{
+                  defaultToast('确认失败，请稍后重试');
+                }
+              }
+          });
+
+        }
+      }
+
+      /** 确认服药单 有误：0 无误：1*/
+      function medicinalPaperSure(isOk){
+        var userId = getStorage('userId');
+        var takeDrugId = getStorage('takeDrugId');
+        if (userId && typeof(takeDrugId) != 'undefined' && takeDrugId) {
+          showToast("loading");
+          api.ajax({
+              url: confirmTakeDrugSer,
+              method: 'post',
+              data: {
+                  values: {
+                    'userId': userId,
+                    'time':new Date().getTime(),
+                    'deviceId':api.deviceId,
+                    'takeDrugId':takeDrugId + '',
+                    'isOk':isOk + '',
+                    'sign':'',
+                  },
+              }
+          },function(ret, err){
+             toast.hide();
+              if (ret) {
+                if (ret.success) {
+                  api.execScript({
+                    name:'root',
+                    frameName:'',
+              			script: 'setPortCheck()'
+                  });
+                  if (isOk == '0') {
+                    setStorage('isConfirm','2');
+                    pageJump('remind_result_wrong','./remind_result_wrong.html','remind_main_frm');
+                  }else {
+                    setStorage('isConfirm','1');
+                    pageJump('remind_result_right_win','./remind_result_right_win.html','remind_main_frm');
+                  }
+                  api.closeWin();
+                }else{
+                  defaultToast('修改失败，请稍后重试');
+                }
+              } else {
+                  defaultToast('修改失败，请稍后重试');
+                  console.log('medicinalPaperSure-->' + JSON.stringify(err));
+              }
+          });
+        }
+      }
+
+  </script>
+  </html>

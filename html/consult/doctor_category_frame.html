@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>医生类型选择</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/doctor_category_frame.css" />
+    <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="../../script/fastclick.js"></script>
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-range.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+    <script type="text/javascript" src="../../script/db/dbSyncUtils.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+    <script type="text/javascript" src="../../script/modules/consult/consultFileUtils.js"></script>
+    <script type="text/javascript" src="../../script/doT.min.js"></script>
+  </head>
+
+  <body>
+    <div class="aui-content">
+      <div class="aui-row">
+          <ul id = "doctorLevelList" class="aui-list aui-list-in">
+            <li class="aui-list-header">
+                <span>*根据选择医师等级不同所需花币数会不同</span>
+            </li>
+        </ul>
+      </div>
+    </div>
+
+    <script id = "doctorLevelData" type="text/template">
+      {{for (var i = 0; i < it.length; i++) {}}
+      <li  class="aui-list-item">
+          <div class="aui-list-item-inner">
+              <div id = "{{=i}}" class="aui-list-item-title"><span> {{=it[i].name}}(</span><span>{{=it[i].rankCost}}阳光币)</span></div>
+          </div>
+      </li>
+      {{}}}
+    </script>
+  </body>
+
+  <script type="text/javascript">
+      var doctorLevelArr = new Array();
+      var clickDoctor;
+      apiready = function(){
+        getDoctorLevel();
+        textColor();
+      }
+      $(function(){
+         FastClick.attach(document.body);
+      });
+
+      // 点击高亮
+      function textColor(){
+        $(".aui-list-item-inner").each(function(){
+          var divs = $(this).children();
+          var jsfun = 'getDoctorObj(' + JSON.stringify(doctorLevelArr[divs.attr("id")]) + ');';
+          $(this).click(function(){
+              $(".aui-list-item-title").removeClass("text-color");
+              divs.addClass("text-color");
+              if(divs.hasClass("text-color")){
+                    api.execScript({
+                        name: 'doctor_category',
+                        script: jsfun
+                    });
+              };
+          });
+        });
+      }
+
+      /** 返回点击的医生等级*/
+      function getDoctorLevelId(){
+        if (clickDoctor == '') {
+          defaultToast('请选择医生等级');
+          return;
+        }
+        return clickDoctor;
+      }
+
+      /** 获取不同等级医生的费用*/
+      function getDoctorLevel(){
+        var userId = getStorage('userId');
+        if (userId) {
+            api.ajax({
+                url: getDoctorRankMoney,
+                method: 'post',
+                data: {
+                    values: {
+                        'userId': userId,
+                        'deviceId':api.deviceId,
+                        'time':new Date().getTime(),
+                        'sign':''
+                    },
+                }
+            },function(ret, err){
+              //console.log('getDoctorLevel-->' + JSON.stringify(ret));
+                if (ret) {
+                  doctorLevelArr = ret.data.doctorRankList;
+                  $api.append($api.byId("doctorLevelList"), doT.template($api.html($api.byId("doctorLevelData")))(doctorLevelArr));
+                  api.parseTapmode();
+                  textColor();
+                } else {
+                    console.log(JSON.stringify(err));
+                }
+            });
+        }else{
+
+        }
+    }
+  </script>
+</html>

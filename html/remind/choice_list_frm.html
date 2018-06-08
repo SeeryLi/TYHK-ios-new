@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>选择药品</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/choice_list.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/mescroll.min.css">
+</head>
+
+<body>
+  <!-- ——————搜索————— -->
+
+  <div class="aui-searchbar" id="search">
+      <div class="aui-searchbar-input aui-border-radius">
+          <i class="aui-iconfont aui-icon-search"></i>
+          <input type="search" placeholder="请输入搜索内容" id="search-input">
+          <div class="aui-searchbar-clear-btn">
+              <i class="aui-iconfont aui-icon-close"></i>
+          </div>
+      </div>
+      <div id="search_txt" class="search_right"  onclick="searchTxt()">搜索</div>
+  </div>
+
+    <!-- ——————list————— -->
+    <div id="par-ul-list-mescroll" class="container-div mescroll">
+        <ul id="par_ul_list" class="par_ul">
+        </ul>
+    </div>
+
+    <script id="medicinesListScript" type="text/template">
+      {{for(var i = 0;i< it.length;i++){ }}
+      {{medicinesArr.push(it[i]);}}
+      <li class="child_list" onclick="highLight(this,{{=i}})">
+          <div class="child_list_div">
+              <span>{{=it[i].goodName}}</span>
+          </div>
+          <img class="xz_ico" src="../../image/remind/list_chose.png" alt="">
+      </li>
+      {{}}}
+    </script>
+
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/fastclick.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/mescroll.min.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript">
+    var mescroll;
+    var searchName = '';
+    var medicinesArr = new Array();
+    var index = -1;
+    apiready = function() {
+        var frameH = api.frameHeight;
+        $("#par-ul-list-mescroll").height(frameH);
+        //清除300MS点击延迟
+        FastClick.attach(document.body);
+        // highLight();
+        //创建MeScroll对象,内部已默认开启下拉刷新,自动执行up.callback,重置列表数据;
+        mescroll = new MeScroll("par-ul-list-mescroll", {
+            up: {
+                auto: false, //是否在初始化时以上拉加载的方式自动加载第一页数据; 默认false
+                clearEmptyId: "par_ul_list",
+                isBounce: false, //此处禁止ios回弹
+                callback: upCallback, //上拉回调,此处可简写; 相当于 callback: function (page) { upCallback(page); }
+                toTop: { //配置回到顶部按钮伤害反弹伤害反弹
+                    src: "../../image/mescroll-totop.png", //默认滚动到1000px显示,可配置offset修改
+                },
+                page:{
+                  size:20
+                }
+            }
+        });
+        searchShow();
+        searchTxt();
+    };
+
+    /** 药品项点击事件*/
+    function highLight(el,i) {
+      index = i;
+      $(".xz_ico").removeClass("show");
+      $(el).find(".xz_ico").eq(0).addClass("show");
+      if (index < 0) {
+        return;
+      }
+      var clickMedicines = medicinesArr[index];
+      api.execScript({
+          name: 'add_med_win',
+          script: 'addMedicines('+ JSON.stringify(clickMedicines) +');'
+      });
+      api.closeWin();
+    }
+
+    /** 搜素过渡动画*/
+    function searchShow() {
+      var searchText = $("#search_txt");
+      $("#search-input").focus(function(){
+        searchText.css('margin-right','0');
+      });
+    }
+
+    /** 搜索*/
+    function searchTxt(){
+      var searchText = $("#search_txt");
+      searchText.css('margin-right','-2.4rem');
+      searchName = $api.trimAll($api.val($api.byId('search-input')));
+      if (typeof(searchName) == 'undefined') {
+        //defaultToast('请输入搜索关键字');
+        return;
+      }
+      medicinesArr.splice(0,medicinesArr.length);
+      index = -1;
+      mescroll.resetUpScroll( true );
+    }
+
+    /*上拉加载的回调 page = {num:1, size:10}; num:当前页 从1开始, size:每页数据条数 */
+    function upCallback(page) {
+
+        getMedicinalList(searchName,page.num, page.size, function(curPageData) {
+            //mescroll会根据传的参数,自动判断列表如果无任何数据,则提示空;列表无下一页数据,则提示无更多数据;
+            if (curPageData.length < page.num) {
+              mescroll.endSuccess(curPageData.length, false);
+            }else{
+              mescroll.endSuccess(curPageData.length, true);
+            }
+            $api.append($api.byId("par_ul_list"), doT.template($api.html($api.byId("medicinesListScript")))(curPageData));
+        }, function() {
+            //联网失败的回调,隐藏下拉刷新和上拉加载的状态;
+            defaultToast('数据加载失败，请稍后重试');
+            mescroll.endErr();
+        });
+    }
+
+    /**获取药品列表数据*/
+    function getMedicinalList(searchName,pageNum, pageSize, successCallback, errorCallback) {
+        var userId = getStorage('userId');
+        api.ajax({
+            url: getMedicinesSer,
+            method: 'post',
+            data: {
+                values: {
+                    'userId': userId,
+                    'searchName': searchName,
+                    'queryStartNumber': (pageNum - 1) * pageSize + '',
+                    'queryLimit': pageSize + '',
+                    'time': new Date().getTime(),
+                    'deviceId': api.deviceId,
+                    'sign': ''
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.success) {
+                    var medicinesList = ret.data.records;
+                    successCallback && successCallback(medicinesList);
+                } else {
+                    errorCallback && errorCallback();
+                }
+            } else {
+                console.log('getMedicinalList-->' + JSON.stringify(err));
+                errorCallback && errorCallback();
+            }
+        });
+    }
+
+</script>
+
+</html>

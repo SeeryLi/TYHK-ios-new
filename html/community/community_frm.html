@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>社区-圈子</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <style media="screen">
+      .warp_box_div{
+        background-color: #EFF2F7;
+      }
+      .warp_box_div>img{
+        position: relative;
+        top: 6.02rem;
+        left: calc(50% - 4.25rem);
+        max-width: 8.5rem;
+        max-height: 8.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="warp_box_div">
+      <img src="../../image/build.png" alt="">
+    </div>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-popup.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-range.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+  <script type="text/javascript" src="../../script/commit/utils.js"></script>
+  <script type="text/javascript">
+    apiready = function(){
+      var frameH = api.frameHeight;
+      $(".warp_box_div").height(frameH);
+    }
+  </script>
+</html>

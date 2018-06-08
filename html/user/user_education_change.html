@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>学历修改</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/encryption.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+    <script type="text/javascript" src="../../script/fastclick.js"></script>
+</head>
+
+<body>
+
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+      <div></div>
+        <div class="bottom-br">
+            <div class="aui-pull-left aui-btn">
+                <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+            </div>
+            <div class="aui-title head-title"><b>学历<b></div>
+              <div class="aui-pull-right aui-btn title-right-text" onclick="userEducationChange()">
+                  <span>确定</span>
+              </div>
+        </div>
+    </header>
+
+    <div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-select-list">
+
+            <div class="border-se"></div>
+            <li>
+                <div class="aui-list-item-inner par_box">
+                    <label>小学以下<input class="aui-radio radio_input" type="radio" name="radio" id="educationPrimaryBelow"> </label>
+                      <div class="border_solid posi"></div>
+                </div>
+            </li>
+
+            <li>
+                <div class="aui-list-item-inner par_box">
+                    <label>小学<input class="aui-radio radio_input" type="radio" name="radio" id="educationPrimary"> </label>
+                      <div class="border_solid posi"></div>
+                </div>
+            </li>
+
+            <li>
+                <div class="aui-list-item-inner par_box">
+                    <label>初中<input class="aui-radio radio_input" type="radio" name="radio" id="educationMiddle"> </label>
+                    <div class="border_solid posi"></div>
+                </div>
+            </li>
+
+            <li>
+                <div class="aui-list-item-inner par_box">
+                    <label>高中<input class="aui-radio radio_input" type="radio" name="radio" id="educationHigh"> </label>
+                    <div class="border_solid posi"></div>
+                </div>
+            </li>
+
+            <li>
+                <div class="aui-list-item-inner par_box">
+                    <label>大学及以上<input class="aui-radio radio_input" type="radio" name="radio" id="educationCollege"> </label>
+                </div>
+            </li>
+        </ul>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+      var header = document.querySelector('#header');
+      $api.fixStatusBar(header);
+      initEdu();
+      // 清除300s延迟
+      FastClick.attach(document.body);
+    };
+
+    function initEdu(){
+      var education = getStorage("userEducation");
+      if (education) {
+        if (education == '1') {
+          $("#educationPrimaryBelow").prop("checked",true)
+        }else if(education == '2'){
+          $("#educationPrimary").prop("checked",true)
+        }else if (education == '3') {
+          $("#educationMiddle").prop("checked",true)
+        }else if (education == '4') {
+          $("#educationHigh").prop("checked",true)
+        }else if (education == '5') {
+          $("#educationCollege").prop("checked",true)
+        }
+      }
+    }
+    /** 学历修改*/
+    function userEducationChange() {
+
+        var userId = getStorage("userId");
+        var edcationPrimaryBelow = $api.byId("educationPrimaryBelow").checked;
+        var edcationPrimary = $api.byId("educationPrimary").checked;
+        var edcationMiddle = $api.byId("educationMiddle").checked;
+        var edcationHigh = $api.byId("educationHigh").checked;
+        var edcationCollege = $api.byId("educationCollege").checked;
+        var educationLevel = 1;
+        var educationStr = '';
+
+        if (edcationPrimaryBelow) {
+            educationLevel = 1;
+            educationStr = '小学以下';
+        } else if (edcationPrimary) {
+            educationLevel = 2;
+            educationStr = '小学';
+        } else if (edcationMiddle) {
+            educationLevel = 3;
+            educationStr = '初中';
+        } else if (edcationHigh) {
+            educationLevel = 4;
+            educationStr = '高中';
+        } else if (edcationCollege) {
+            educationLevel = 5;
+            educationStr = '大学及以上';
+        }
+        setStorage("userEducation", educationLevel);
+        if (userId) {
+            api.ajax({
+                url: changeUserInfoSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "flag": "4",
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "userInfo": educationLevel + "",
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                console.log("userChange-->" + JSON.stringify(ret));
+                if (ret) {
+                  if (ret.success) {
+                    api.execScript({
+                        name: 'user_info',
+                        frameName: 'user_info_frm',
+                        script: 'setEducation('+ JSON.stringify(educationStr) +');'
+                    });
+                    api.closeWin();
+                  }
+                  defaultToast(ret.message);
+                } else {
+                }
+            });
+
+        } else {
+            pageJump('login', '../login.html', 'user_name_change');
+        }
+
+    }
+</script>
+
+</html>

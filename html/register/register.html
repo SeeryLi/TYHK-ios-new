@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>快速注册</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/login.css" />
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+</head>
+
+<body>
+
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+        <div class="aui-pull-left aui-btn">
+            <span class="aui-iconfont aui-icon-left back-span" onclick="goBack()"></span>
+        </div>
+        <div class="aui-title"><b>快速注册<b></div>
+    </header>
+
+</body>
+<script type="text/javascript">
+    apiready = function() {
+      var headerT = document.querySelector('#header');
+      $api.fixStatusBar(headerT);
+      var header = $api.byId('header');
+      var headerH = $api.offset(header).h;
+      api.openFrame({
+          name: 'register_frame',
+          url: 'register_frame.html',
+          rect: {
+              x: 0,
+              y: headerH,
+              w: "auto",
+              h: "auto"
+          },
+          pageParam: {
+              name: 'test'
+          },
+          bounces: false,
+          bgColor: 'rgba(0,0,0,0)',
+          vScrollBarEnabled: true,
+          hScrollBarEnabled: false
+      });
+
+    };
+</script>
+</html>

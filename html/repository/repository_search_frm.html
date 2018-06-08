@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/repository_search_frm.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/home_page_win.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/mescroll.min.css">
+    <link rel="stylesheet" type="text/css" href="../../css/indentification_dialog.css" />
+
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+    <script type="text/javascript" src="../../script/doT.min.js"></script>
+    <script type="text/javascript" src="../../script/mescroll.min.js"></script>
+    <script type="text/javascript" src="../../script/modules/repository/repositoryUtils.js"></script>
+
+</head>
+
+<body>
+    <div id="repository-search-mescroll" class="container-div mescroll">
+        <ul id="search-repository-list">
+        </ul>
+        <!-- wu -->
+        <div id="search-repository-empty" class="base_hint dis">
+            <p>无搜索结果</p>
+        </div>
+    </div>
+    <script id="searchRepositoryListScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){ }}
+         <li class="aui-list-item bg_color_li" onclick="jumpRepositoryInfo('{{=it[i].paperId}}','{{=it[i].price}}')">
+            <div class="aui-list-item-inner">
+                <div class="aui-row">
+                    <div class="main-divs">
+                        <div class="main-left">
+                            <p><b>{{=it[i].title}}</b></p>
+                            <p>
+                                <!-- {{if(it[i].price == '0'){ }}
+                                <span class="price">免费</span> {{ }else{ }}
+                                <span class="price-color">{{=it[i].price}}阳光币</span> {{}}} -->
+                                <span class="amount">{{=it[i].hits}}阅读</span></p>
+                        </div>
+                        <div class="main-right">
+                            <img src="{{=it[i].fileUrl}}" alt="">
+                        </div>
+                    </div>
+                </div>
+            </li>
+        {{}}}
+    </script>
+
+</body>
+
+<script type="text/javascript">
+    var mescroll;
+    var searchWords = '';
+    apiready = function() {
+      //创建MeScroll对象,内部已默认开启下拉刷新,自动执行up.callback,重置列表数据;
+      mescroll = new MeScroll("repository-search-mescroll", {
+        up: {
+            auto: false, //是否在初始化时以上拉加载的方式自动加载第一页数据; 默认false
+            clearEmptyId: "search-repository-list",
+            isBounce: false, //此处禁止ios回弹
+            callback: upCallback, //上拉回调,此处可简写; 相当于 callback: function (page) { upCallback(page); }
+            toTop: {
+                src: "../../image/mescroll-totop.png",
+            },
+        }
+      });
+    };
+
+    /*上拉加载的回调 page = {num:1, size:10}; num:当前页 从1开始, size:每页数据条数 */
+    function upCallback(page) {
+      getSearchList(searchWords,page.num, page.size, function(curPageData) {
+          //mescroll会根据传的参数,自动判断列表如果无任何数据,则提示空;列表无下一页数据,则提示无更多数据;
+          //console.log("page.num=" + page.num + ", page.size=" + page.size + ", curPageData.length=" + curPageData.length);
+          if (curPageData.length < page.num) {
+            mescroll.endSuccess(curPageData.length, false);
+          }else{
+            mescroll.endSuccess(curPageData.length, true);
+          }
+          $api.append($api.byId("search-repository-list"), doT.template($api.html($api.byId("searchRepositoryListScript")))(curPageData));
+      }, function() {
+          //联网失败的回调,隐藏下拉刷新和上拉加载的状态;
+          mescroll.endErr();
+      });
+    }
+
+    /**搜索*/
+    function getSearchList(searchWords,pageNum, pageSize, successCallback, errorCallback){
+      var userId = getStorage('userId');
+      if (typeof(userId) == 'undefined') {
+        userId = '';
+      }
+      if (typeof(searchWords) == 'undefined' || searchWords == '') {
+        errorCallback && errorCallback();
+        return;
+      }
+      api.ajax({
+          url: getRepositorySer,
+          method: 'post',
+          data: {
+              values: {
+                  'userId': userId,
+                  'uploaderId': '',
+                  'flags': '',
+                  'searchWords': searchWords,
+                  'sortType': '',
+                  'queryStartDate': '',
+                  'queryEndDate': '',
+                  'queryStartNumber': (pageNum - 1)*pageSize + '',
+                  'queryLimit': pageSize + '',
+                  'queryType': '',
+                  'time': new Date().getTime(),
+                  'deviceId': api.deviceId,
+                  'sign': ''
+              },
+          }
+      }, function(ret, err) {
+        console.log("getRepositoryList ret-->" + JSON.stringify(ret));
+        if (ret) {
+          if (ret.success) {
+            var repositoryList = ret.data.repositories;
+            successCallback && successCallback(repositoryList);
+          }else{
+            defaultToast(ret.message);
+            errorCallback && errorCallback();
+          }
+        }else{
+          defaultToast(err.message);
+          errorCallback && errorCallback();
+          console.log("getRepositoryList err-->" + JSON.stringify(err));
+        }
+
+      });
+    }
+
+    /**点击搜索按钮*/
+    function searchClick(words){
+      console.log(words);
+      searchWords = words;
+      if (typeof(searchWords) == 'undefined' || searchWords == '') {
+        defaultToast('请输入搜索关键字');
+        return;
+      }
+      mescroll.resetUpScroll( true );
+    }
+
+    /** 设置列表数据*/
+    function setListData(repositoryJson) {
+        var repositoryList = repositoryJson.repositories;
+        if (typeof(repositoryList) != "undefined" && repositoryList.length > 0) {
+            $('#search-repository-empty').removeClass("show");
+            $('#search-repository-empty').addClass("dis");
+        } else {
+            $('#search-repository-empty').removeClass("dis");
+            $('#search-repository-empty').addClass("show");
+            defaultToast('没有搜索到内容喔');
+        }
+        $api.html($api.byId("search-repository-list"), "");
+        $api.append($api.byId("search-repository-list"), doT.template($api.html($api.byId("searchRepositoryListScript")))(repositoryList));
+        api.parseTapmode();
+    }
+
+    /** 跳转知识库详情*/
+    function jumpRepositoryInfo(repositoryId,price) {
+      if (price > 0) {
+        if (getStorage('userId')) {
+            var userType = getStorage('userType');
+            var userAppType = getStorage('userAppType');
+            if (userAppType == '1') {
+              if (userType == '1' || userType == '2' || userType == '4') {
+                showDialog(userType,'../user/user_indentification_win.html');
+                return;
+              }
+            }
+            api.openWin({
+                name: 'repository_detail_win',
+                url: './repository_detail_win.html',
+                pageParam: {
+                    repositoryId: repositoryId,
+                    price: price
+                }
+            });
+        } else {
+            pageJump('login', '../login.html', 'repository_list_frm');
+        }
+      }else{
+        api.openWin({
+            name: 'repository_detail_win',
+            url: './repository_detail_win.html',
+            pageParam: {
+                repositoryId: repositoryId,
+                price:price
+            }
+        });
+      }
+    }
+
+</script>
+
+</html>

@@ -1,0 +1,17 @@
+
+.box_div>img{
+  position: fixed;
+  top: 4.5rem;
+  left: calc(50% - 3rem);
+  max-width: 9rem !important;
+  max-height: 9rem !important;
+}
+
+.version_number{
+  position: fixed;;
+  bottom: 2rem;
+  width: 100%;
+  text-align: center;
+  color: #999;
+  font-size: 0.65rem;
+}

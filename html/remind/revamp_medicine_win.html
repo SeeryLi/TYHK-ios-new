@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <title>修改服药单</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+  </head>
+  <body>
+
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+      <div></div>
+        <div>
+            <div class="aui-pull-left aui-btn">
+                <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+            </div>
+            <div class="aui-title head-title"><b>修改服药单<b></div>
+              <div class="aui-pull-right aui-btn title-right-text back-span-green" onclick="okClick()">
+                  <span>确定</span>
+              </div>
+        </div>
+    </header>
+
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+  <script type="text/javascript" src="../../script/commit/utils.js"></script>
+  <script type="text/javascript">
+    apiready = function(){
+      var header = document.querySelector('#header');
+      $api.fixStatusBar(header);
+      var headerPos = $api.offset($api.dom('header'));
+      api.openFrame({
+          name: 'revamp_medicine_frm',
+          url: './revamp_medicine_frm.html',
+          rect: {
+              x: 0,
+              y: headerPos.h,
+              w: 'auto',
+              h: 'auto'
+          },
+          pageParam: {
+            takeDrugId: api.pageParam.takeDrugId,
+            patientId:api.pageParam.patientId,
+            consultId:api.pageParam.consultId
+          },
+          bounces: false,
+          bgColor: 'rgba(0,0,0,0)',
+          vScrollBarEnabled: true,
+          hScrollBarEnabled: false
+      });
+    }
+
+    /** 点击确定*/
+    function okClick(){
+      api.execScript({
+          frameName: 'revamp_medicine_frm',
+          script: 'updatePaper();'
+      });
+
+    }
+  </script>
+</html>

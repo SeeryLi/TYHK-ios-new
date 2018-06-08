@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>用户信息</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/user.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/header_title.css" />
+    <script type="text/javascript" src="../../../script/api.js"></script>
+    <script type="text/javascript" src="../../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../../script/commit/servicePath.js"></script>
+    <script type="text/javascript" src="../../../script/jquery-2.1.1.js"></script>
+
+</head>
+
+<body>
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+        <div></div>
+        <div class="bottom-br">
+            <div class="aui-pull-left aui-btn">
+                <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+            </div>
+            <div class="aui-title"><b>个人中心<b></div>
+    </div>
+  </header>
+      <div class="border-se"></div>
+        <ul class="aui-list aui-list-in">
+
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title">我的头像</div>
+                    <div class="aui-list-item-right">
+                        <img id="doctor-info-header" style="height:40px;width:40px;margin:4px;" src="../../../image/user/user_defult.png"></img>
+                    </div>
+                </div>
+            </li>
+
+            <li class="aui-list-item" onclick="">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title">医院</div>
+                    <div class="aui-list-item-right">
+                        <span id="doctor-info-hospital"> 未填写 </span>
+                    </div>
+                </div>
+            </li>
+
+            <li class="aui-list-item" onclick="">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title">科室</div>
+                    <div class="aui-list-item-right">
+                        <span id="doctor-info-administrative"> 未填写 </span>
+                    </div>
+                </div>
+            </li>
+
+            <li class="aui-list-item" onclick="">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title"> 职称 </div>
+                    <div class="aui-list-item-right">
+                        <span id="doctor-info-professional-title"> 未填写 </span>
+                    </div>
+                </div>
+            </li>
+
+            <div class="border-se"></div>
+            <li class="aui-list-item none_border" onclick="pageJump('user_QRcode_win','../../user/user_QRcode_win.html','doctor_user_info')">
+                <div id="userInfoLiQRCode" class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title">我的二维码</div>
+                </div>
+            </li>
+
+        </ul>
+        <div class="aui-content-padded">
+            <p>
+                <div class="aui-btn aui-btn-success aui-btn-block" style="background-color:#E63D4A;border-radius:45px;" onclick="loginOut()">退出账号</div>
+            </p>
+        </div>
+</body>
+
+<script type="text/javascript">
+    apiready = function() {
+      var header = document.querySelector('#header');
+      $api.fixStatusBar(header);
+      getDoctorInfo();
+    };
+
+    /** 获取医生信息*/
+    function getDoctorInfo() {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: getDoctorInfoSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "doctorId": userId,
+                        "time": new Date().getTime(),
+                        "deviceId": api.deviceId,
+                        "queryStartNumber":0,
+                        "queryLimit" :3,
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                console.log("getDoctorInfo-->" + JSON.stringify(ret));
+                if (ret) {
+                  if (ret.success) {
+                    $('#doctor-info-hospital').text(ret.data.hospitalName);
+                    $('#doctor-info-professional-title').text(ret.data.doctorRank);
+                    $('#doctor-info-administrative').text(ret.data.clinicalDepartment);
+                    if (ret.data.doctorPortrait) {
+                      $api.attr($api.byId('doctor-info-header'), 'src', ret.data.doctorPortrait);
+                    }else{
+                      $api.attr($api.byId('doctor-info-header'), 'src', '../../image/user/user_defult.png');
+                    }
+                  }else{
+                    defaultToast(ret.message);
+                  }
+                } else {
+                    defaultToast("获取用户详情失败");
+                }
+            });
+        }
+    }
+
+    /** 退出账号*/
+    function loginOut() {
+
+        api.ajax({
+            url: loginOutSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": getStorage("userId"),
+                    "time": new Date().getTime(),
+                    "deviceId": api.deviceId,
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            //console.log("loginout-->" + JSON.stringify(ret));
+            if (ret) {
+              if (ret.success) {
+                setStorage("userId", "");
+                pageJump("login", "../../login.html", "doctor_user_info");
+                api.sendEvent({
+                    name: 'clearUserInfo'
+                });
+                api.sendEvent({
+                    name: 'clearData',
+                });
+                setTimeout(function(){
+                    api.closeWin()
+                },800);
+                api.closeWin();
+              }else{
+                defaultToast(ret.message);
+              }
+            } else {
+                defaultToast("请求失败，请稍后再试");
+            }
+        });
+    }
+</script>
+
+</html>

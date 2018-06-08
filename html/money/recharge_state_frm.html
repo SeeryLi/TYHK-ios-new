@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>付款状态</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <style media="screen">
+      span{
+        position: relative;
+        left: 0.35rem;
+        color: #222;
+        font-size: 0.85rem;
+      }
+      .cg_ico{
+        position: relative;
+        top: 1.3rem;
+        left: calc(50% - 2.25rem);
+        width: 4.5rem;
+        height: 7rem;
+      }
+      .cg_ico>img{
+        margin: auto;
+        margin-bottom: 0.75rem;
+        max-width: 3.02rem;
+        max-height: 3.02rem;
+      }
+      .aui-content-padded{
+        margin: 2.8rem 2.75rem 0;
+      }
+
+      .aui-btn-block{height:2.25rem;line-height:2.25rem;}
+
+      .aui-btn{border-radius: 1.125rem;background-color: #3FC190;margin-top: 1.85rem;}
+
+      .aui-btn-success:active{background-color: #00897b !important;}
+
+      .bth-bor{border-radius: 1.125rem;background-color: #fff !important;border: 1px solid #CBCACF;margin-top: 0 !important;}
+
+      .mar_t{margin-top: 0.75rem !important;}
+    </style>
+  </head>
+  <body>
+      <!-- 充值成功 -->
+      <div class="warp_box_1">
+        <div class="cg_ico">
+          <img src="../../image/home_list_right.png" alt="">
+          <span>付款成功！</span>
+        </div>
+        <div class="aui-content-padded bth-log1" onclick="finish()">
+        	<div class="aui-btn aui-btn-success aui-btn-block ">
+        	  完成
+        	</div>
+        </div>
+      </div>
+
+      <!-- 充值失败 -->
+      <div class="warp_box_2" style="display:none;">
+        <div class="cg_ico">
+          <img src="../../image/my_mon_no.png" alt="">
+          <span> 付款失败！</span>
+        </div>
+        <div class="aui-content-padded bth-log1">
+        	<div class="aui-btn aui-btn-success aui-btn-block ">
+          	重新支付！
+        	</div>
+        </div>
+
+        <div class="aui-content-padded bth-log1 mar_t" onclick="baseBack()">
+          <div class="aui-btn aui-btn-block bth-bor">返回</div>
+        </div>
+
+      </div>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+  <script type="text/javascript" src="../../script/commit/utils.js"></script>
+  <script type="text/javascript" src="../../script/commit/encryption.js"></script>
+  <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+  <script type="text/javascript">
+    apiready = function(){
+
+    };
+
+    function finish() {
+      api.openWin({
+          name: 'consult_profession_chat_win',
+          url: '../consult/consult_profession_chat_win.html',
+          pageParam: {
+              name: 'test'
+          }
+      });
+    };
+
+    function baseBack() {
+      api.closeWin();
+    }
+  </script>
+</html>

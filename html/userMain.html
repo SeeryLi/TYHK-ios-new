@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>我的</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../css/userMain.css" />
+    <link rel="stylesheet" type="text/css" href="../css/indentification_dialog.css" />
+    <script type="text/javascript" src="../script/api.js"></script>
+    <script type="text/javascript" src="../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../script/jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="../script/commit/servicePath.js"></script>
+</head>
+
+<body>
+
+    <div class="aui-content aui-margin-b-15">
+        <!-- 顶部 pageJumpCheckLogin('user_info','./user/user_info.html','./login.html','userMain')-->
+        <section class="aui-content" onclick="pageJumpCheckLogin('user_info','./user/user_info.html','./login.html','userMain')">
+            <div class="aui-list aui-media-list aui-list-noborder aui-bg-info par_div">
+                <div class="aui-list-item aui-list-item-middle">
+                    <div class="aui-media-list-item-inner ">
+                        <div class="aui-list-item-media" style="width:4rem;">
+                            <img id="userMainHeader" src="../image/my_list_default.png" class="aui-img-round">
+                        </div>
+                        <div class="aui-list-item-inner aui-list-item-arrow">
+                            <div id='userMainName' class="aui-list-item-text text-white aui-font-size-18 top-head">登录/注册</div>
+                            <div class="aui-list-item-text text-white">
+                                <div id="aui_num" class="aui-w-h-img" style="display:none;"><img src="../image/my_list_mon.png" alt=""><span class="mar_span" id="userMainMoney">0</span></div>
+                            </div>
+
+                            <!-- ——————————审核状态———————————— -->
+                            <div id="examine_info" style="display:none;" class="examine_div" data-flag="1">
+                                正在审核中
+                            </div>
+
+                        </div>
+                    </div>
+                    <img class="qr_code" src="../image/my_list_code.png" onclick="goMyQrCode()" />
+                </div>
+            </div>
+        </section>
+        <ul class="aui-list aui-list-in">
+            <!--             <div class="border-se"></div>
+            <li class="aui-list-item none_border" onclick="pageJumpCheckLogin('user_points_win','./money/user_points_win.html','./login.html','userMain')">
+                <div class="aui-list-item-label-icon">
+                    <image class='user-main-list-icon' src='../image/user/icon_user_money.png' />
+                </div>
+                <div class="aui-list-item-inner">
+                    我的阳光币
+                </div>
+            </li> -->
+            <div class="border-se"></div>
+            <li class="aui-list-item" onclick="jumpCheck('user_consult_record_win','./consult/user_consult_record_win.html')">
+                <div class="aui-list-item-label-icon">
+                    <image class='user-main-list-icon' src='../image/user/icon_user_consult.png' />
+                </div>
+                <div class="aui-list-item-inner">
+                    我的咨询
+                </div>
+            </li>
+
+            <li class="aui-list-item" onclick="jumpCheck('remind_main_win','./remind/remind_main_win.html')">
+                <div class="aui-list-item-label-icon">
+                    <image class='user-main-list-icon' src='../image/user/icon_user_remind.png' />
+                </div>
+                <div class="aui-list-item-inner">
+                    服药提醒
+                </div>
+            </li>
+
+            <li class="aui-list-item none_border" onclick="pageJumpCheckLogin('test_records_win','./test/test_records_win.html','./login.html','userMain')">
+                <div class="aui-list-item-label-icon">
+                    <image class='user-main-list-icon' src='../image/user/icon_user_test.png' />
+                </div>
+                <div class="aui-list-item-inner">
+                    测试结果
+                </div>
+            </li>
+
+            <!--<li class="aui-list-item" onclick="pageJumpCheckLogin('user_identification','./user/user_identification.html','./login.html','userMain')">
+                <div class="aui-list-item-label-icon">
+                    <image style="height:30px;width=30px;" src='../image/user/icon_user_money.png'/>
+                </div>
+                <div class="aui-list-item-inner">
+                    身份认证
+                </div>
+            </li> -->
+            <div class="border-se"></div>
+            <li class="aui-list-item" onclick="pageJump('aboutUs_win','./user/aboutUs_win.html','aboutUs_win')">
+                <div class="aui-list-item-label-icon">
+                    <image class='user-main-list-icon' src='../image/user/icon_user_recommend.png' />
+                </div>
+                <div class="aui-list-item-inner">
+                    关于我们
+                </div>
+            </li>
+            <li class="aui-list-item" onclick="pageJumpCheckLogin('feed_back','./user/feed_back.html','./login.html','usrMain')" style="background-image:none;">
+                <div class="aui-list-item-label-icon">
+                    <image class='user-main-list-icon' src='../image/user/icon_user_feedback.png' />
+                </div>
+                <div class="aui-list-item-inner">
+                    意见反馈
+                </div>
+            </li>
+        </ul>
+    </div>
+
+</body>
+
+<script type="text/javascript">
+    var userId = getStorage("userId");
+    apiready = function() {
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        getUserInfo(getStorage("userId"));
+        initEvents();
+    };
+
+    function initEvents() {
+        api.addEventListener({
+            name: 'getUserInfo'
+        }, function(ret, err) {
+            if (ret) {
+                getUserInfo(ret.value.userId);
+            }
+        });
+        api.addEventListener({
+            name: 'clearUserInfo'
+        }, function(ret, err) {
+            if (ret) {
+                clearUserInfo();
+            }
+        });
+        api.addEventListener({
+            name: 'refershUserInfo'
+        }, function(ret, err) {
+                getUserInfo(getStorage("userId"));
+                ifJumpToRemind();
+        });
+    }
+
+    //点击进入我的二维码页面
+    function goMyQrCode(){
+      if (getStorage('userId') == '' || typeof(getStorage('userId')) == 'undefined') {
+        return;
+      }
+        pageJump('user_QRcode_win','./user/user_QRcode_win.html','user_Main')
+        cancelBubble();
+    }
+
+    function ifJumpToRemind() {
+        var isConfirm = getStorage('isConfirm');
+        var takeDrugId = getStorage('takeDrugId');
+        var userId = getStorage('userId');
+        if(userId && userId!=''){
+            if (typeof(takeDrugId) != 'undefined' && takeDrugId) {
+                if (isConfirm == 0) {
+                    api.openWin({
+                        name: 'remind_main_win',
+                        url: './remind/remind_main_win.html',
+                        bounces: false,
+                        bgColor: 'rgba(239,242,247,1)',
+                        vScrollBarEnabled: false,
+                        hScrollBarEnabled: false
+                    });
+                }
+            }
+            api.ajax({
+                url: getNotEatTakeDrugNewsSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId + '',
+                        "patientId": userId + '',
+                        "queryStartNumber": 0,
+                        "queryLimit": "100",
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if(ret.data.takeDrugNewsList.length != 0){
+                        api.openWin({
+                            name: 'remind_taken_win',
+                            url: './remind/remind_taken_win.html',
+                            pageParam: {
+                                checkData: ret
+                            }
+                        });
+                    }
+                } else {
+                    console.log('checkIfDrugNotTaken-->' + JSON.stringify(err));
+                }
+            });
+        }
+    }
+    // 取消点击冒泡事件
+    function cancelBubble(e) {
+      var evt = e ? e : window.event;
+         if (evt.stopPropagation) {
+            evt.stopPropagation();
+         }else {
+            evt.cancelBubble = true;
+         }
+     }
+
+    /** 获取用户信息*/
+    function getUserInfo(id) {
+        //alert($("body").height());
+        if (id) {
+            api.ajax({
+                url: getUserInfoSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": id,
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if (ret.success) {
+                        /**userType:审核状态  1：未审核 2：审核中 3：审核成功 4：审核失败*/
+                        setStorage('userType', ret.data.userType);
+                        /**userType:审核状态  1：游客 2：患者 3：护士 4：医生*/
+                        setStorage('userAppType', ret.data.userAppType);
+                        setStorage('takeDrugId', ret.data.takeDrugId);
+                        /** 0：未确认 1：确认 2：有误*/
+                        setStorage('isConfirm', ret.data.isConfirm);
+                        var userName = ret.data.userName;
+                        var photo = ret.data.photo;
+                        if (photo) {
+                            $api.attr($api.byId('userMainHeader'), 'src', photo);
+                        } else {
+                            $api.attr($api.byId('userMainHeader'), 'src', '../image/user/user_defult.png');
+                        }
+                        if (ret.data.userType == '1') {
+                            $api.css($api.byId('examine_info'), 'display:block;');
+                            $api.text($api.byId('examine_info'), '账号未审核');
+                        } else if (ret.data.userType == '2') {
+                            $api.css($api.byId('examine_info'), 'display:block;');
+                            $api.text($api.byId('examine_info'), '正在审核中');
+                        } else if (ret.data.userType == '4') {
+                            $api.css($api.byId('examine_info'), 'display:block;');
+                            $api.text($api.byId('examine_info'), '审核未通过');
+                        } else {
+                            $api.css($api.byId('examine_info'), 'display:none;');
+                        }
+                        setStorage('userHeader', photo);
+                        setStorage('userName', userName);
+                        $('#userMainName').text(userName);
+                    }
+                }
+            });
+        }
+    }
+
+    /** 跳转到服药提醒*/
+    function jumpToRemind() {
+        var isConfirm = getStorage('isConfirm');
+        var takeDrugId = getStorage('takeDrugId');
+        if (typeof(takeDrugId) != 'undefined' && takeDrugId) {
+            if (isConfirm == 0) {
+                api.openWin({
+                    name: 'remind_main_win',
+                    url: './remind/remind_main_win.html',
+                    pageParam: {
+                        name: 'userMain',
+                    },
+                    bounces: false,
+                    bgColor: 'rgba(239,242,247,1)',
+                    vScrollBarEnabled: false,
+                    hScrollBarEnabled: false
+                });
+            } else if (isConfirm == 1) {
+                api.openWin({
+                    name: 'remind_result_right_win',
+                    url: './remind/remind_result_right_win.html',
+                    pageParam: {
+                        name: 'userMain',
+                    },
+                    bounces: false,
+                    bgColor: 'rgba(239,242,247,1)',
+                    vScrollBarEnabled: false,
+                    hScrollBarEnabled: false
+                });
+            } else if (isConfirm == 2) {
+                pageJumpCheckLogin('remind_result_wrong', './remind/remind_result_wrong.html', './login.html', 'userMain');
+            }
+        }else{
+            defaultToast('用户目前没有主治医生！');
+        }
+    }
+
+    /** 清空当前页数据*/
+    function clearUserInfo() {
+        $api.attr($api.byId('userMainHeader'), 'src', '../image/my_list_default.png');
+        $('#userMainName').text('登录/注册');
+        $('#aui_num').css("display", "none");
+        $("#examine_info").css("display", "none");
+    }
+
+    /** 当前页面跳转验证*/
+    function jumpCheck(name, url) {
+        var userId = getStorage("userId");
+        var userType = getStorage('userType');
+        var userAppType = getStorage('userAppType');
+        if (userId) {
+            //console.log('userAppType-->' + JSON.stringify(userAppType));
+            //console.log('userType-->' + JSON.stringify(userType));
+            if (userAppType == '1' && (userType == '1' || userType == '2' || userType == '4')) {
+                showDialog(userType);
+                return;
+            }
+            if (name == 'remind_main_win') {
+                jumpToRemind();
+            } else {
+                api.openWin({
+                    name: name,
+                    url: url,
+                    pageParam: {
+                        name: 'userMain'
+                    },
+                    bounces: false,
+                    bgColor: 'rgba(239,242,247,1)',
+                    vScrollBarEnabled: false,
+                    hScrollBarEnabled: false
+                });
+            }
+        } else {
+            api.openWin({
+                name: 'login',
+                url: 'login.html',
+                pageParam: {
+                    name: 'userMain'
+                },
+                bounces: false,
+                bgColor: 'rgba(239,242,247,1)',
+                vScrollBarEnabled: false,
+                hScrollBarEnabled: false
+            });
+        }
+    }
+
+    // 审核弹窗
+    function showDialog(userType) {
+        var dialog = new auiDialog();
+        if (userType == "4") {
+            dialog.alert({
+                title: "<img src='../image/user/dialog_a.png'>",
+                msg: '<p style="color:#222;font-weight:bold;font-size:0.85rem;">审核未通过</p><p style="color:#999;font-size:0.75rem;">当等待运营人员完成审核后使用该功能</p>',
+                buttons: ['', '重新认证']
+            }, function(ret) {
+                if (ret) {
+                    api.openWin({
+                        name: 'user_indentification_win',
+                        url: './user/user_indentification_win.html',
+                        pageParam: {
+                            name: 'user_indentification_win'
+                        }
+                    });
+                }
+            })
+        } else if (userType == "2") {
+            dialog.alert({
+                title: "<img src='../image/user/dialog_a.png'>",
+                msg: '<p style="color:#222;font-weight:bold;font-size:0.85rem;">正在审核中</p><p style="color:#999;font-size:0.75rem;">当等待运营人员完成审核后使用该功能</p>',
+                buttons: ['', '确认']
+            }, function(ret) {
+                console.log(ret);
+            })
+        } else if (userType == "1") {
+            dialog.alert({
+                title: "<img src='../image/user/dialog_a.png'>",
+                msg: '<p style="color:#222;font-weight:bold;font-size:0.85rem;">未审核</p><p style="color:#999;font-size:0.75rem;">当等待运营人员完成审核后使用该功能</p>',
+                buttons: ['', '进行审核']
+            }, function(ret) {
+                if (ret) {
+                    api.openWin({
+                        name: 'user_indentification_win',
+                        url: './user/user_indentification_win.html',
+                        pageParam: {
+                            name: 'user_indentification_win'
+                        }
+                    });
+                }
+            });
+        }
+    }
+</script>
+
+</html>

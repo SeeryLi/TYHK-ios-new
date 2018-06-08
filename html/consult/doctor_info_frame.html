@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>医生主页信息</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/doctor_main.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/starRating.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/indentification_dialog.css" />
+
+</head>
+
+<body>
+    <div class="container-div">
+        <div class="warp-boxDiv">
+            <!-- img -->
+            <div class="photo-img">
+                <img id="doctorHeader" src="../../image/user/user_defult.png" />
+            </div>
+            <!-- doctor-info -->
+            <div class="warp-right">
+                <div class="baseBox1">
+                    <span id="doctorName"><b></b></span>
+                </div>
+                <div class="baseBox2">
+                    <span id="doctorFile"></span>
+                    <p class="bor-p"></p>
+                    <span class="baseBox2_span2" id="doctorLevel"></span>
+                </div>
+            </div>
+        </div>
+        <div class="baseInfo-1" id="doctorPermission">
+            <div class="info-1">
+                <h2 id="doctorRat"></h2>
+                <p>评价星级(星)</p>
+                <div class="solid-div"></div>
+            </div>
+            <div class="info-1">
+                <h2 id="doctorConsultCount"></h2>
+                <p>咨询数(次)</p>
+                <div class="solid-div"></div>
+            </div>
+            <div class="info-1">
+                <h2 id="doctorWorkYear"></h2>
+                <p>从业年限(年)</p>
+            </div>
+        </div>
+        <div class="baseInfo-2">
+            <div class="info-2" id="doctorPermission">
+                <img src="../../image/con_doc_yes.png" />
+                <span>医师认证</span>
+            </div>
+            <div class="info-2" id="doctorConsultOpen">
+                <img src="../../image/con_doc_yes.png" />
+                <span>专业咨询</span>
+            </div>
+            <div class="info-2" id="doctorAnswerQic">
+                <img src="../../image/con_doc_yes.png" />
+                <span>快速回复</span>
+            </div>
+            <div class="info-2">
+            </div>
+        </div>
+        <!-- style-border -->
+        <div class="border-se"></div>
+        <div class="hospitalName">
+            <div><b>执业医院</b></div>
+            <div>
+                <img src="../../image/con_doc_hos.png" alt="">
+                <span id="doctorHospital"></span>
+            </div>
+        </div>
+        <!-- style-border -->
+        <div class="border-se"></div>
+        <div class="baseInfo-3">
+            <div class="info-3">
+                <b>擅长介绍</b>
+            </div>
+            <div id="doctorSkill">
+            </div>
+        </div>
+        <!-- style-border -->
+        <div class="border-se"></div>
+        <div class="info-3" onclick="jumpToComments()">
+            <b>患者评价</b>
+            <span id="number-span"></span>
+            <div class="more-div">
+                更多
+                <img src="../../image/home_more.png" alt="">
+            </div>
+        </div>
+        <div class="content_div">
+            <!-- 无评论状态 -->
+            <img id="nothing" src="../../image/con_chat_no@3x.png" alt="" style="display:none;">
+            <ul id="doctor-comment">
+                <!-- 评论列表 -->
+
+            </ul>
+        </div>
+    </div>
+    <!-- style-border -->
+    <div class="border-se"></div>
+    </div>
+
+    <script id="doctorPermissionScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){}}
+         <div class="info-2" id="doctorPermission">
+            <img src="../../image/con_doc_yes.png" />
+            <span>{{=it[i]}}}</span>
+         </div>
+        {{}}}
+    </script>
+
+    <script id="doctorCommentScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){ }}
+         <li>
+            <div class="info-2">
+                <div class="main-div">
+                    <div class="title_box">
+                        {{ if({{=it[i].patientPortrait}}){ }}
+                        <img id="ph-img" src="{{=it[i].patientPortrait}}" alt="">
+                         {{ }else{ }}
+                        <img id="ph-img" src="../../image/user/user_defult.png" alt="">
+                         {{ }}}
+                          <span class='doctor-comment-name'>{{=it[i].patientName}}</span>
+                          <span class='doctor-comment-data'>{{=it[i].commentDate}}</span>
+                        <!-- 评价等级 -->
+                        <div class="star_level">
+                            {{ if(it[i].rating >= 1){ }}
+                              <img src="../../image/con_chat_eva.png" alt="">
+                            {{ }if(it[i].rating >= 2){ }}
+                              <img src="../../image/con_chat_eva.png" alt="">
+                            {{ }if(it[i].rating >= 3){ }}
+                              <img src="../../image/con_chat_eva.png" alt="">
+                            {{ }if(it[i].rating >= 4){ }}
+                              <img src="../../image/con_chat_eva.png" alt="">
+                            {{ }if(it[i].rating >= 5){ }}
+                              <img src="../../image/con_chat_eva.png" alt="">
+                            {{ }}}
+                        </div>
+                    </div>
+                    <div class="cont_text">
+                        <p>{{=it[i].comment}}</p>
+                    </div>
+                </div>
+            </div>
+          </li>
+        {{ }}}
+    </script>
+
+</body>
+
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/encryption.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/modules/money/moneyUtil.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+
+<script type="text/javascript">
+    var doctorId = '';
+    var indentificationUrl = '../user/user_indentification_win.html';
+    apiready = function() {
+        getDoctorInfo();
+    };
+
+    /** 获取医生信息*/
+    function getDoctorInfo() {
+        var userId = getStorage("userId");
+        if (typeof(userId) == 'undefined') {
+          userId = '';
+        }
+        api.ajax({
+            url: getDoctorInfoSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": userId,
+                    "doctorId": api.pageParam.doctorId,
+                    "time": new Date().getTime(),
+                    "deviceId": api.deviceId,
+                    "sign": "",
+                    "queryLimit": 0,
+                    "queryStartNumber":0,
+                },
+            }
+        }, function(ret, err) {
+            console.log("getDoctorInfo-->" + JSON.stringify(ret));
+            if (ret) {
+                if (ret.success) {
+                    doctorId = ret.data.doctroId;
+                    $api.byId("doctorName").innerText = ret.data.doctorName;
+                    $api.byId("doctorFile").innerText = ret.data.clinicalDepartment;
+                    $api.byId("doctorLevel").innerText = ret.data.doctorRank;
+                    $api.byId("doctorRat").innerText = ret.data.rating;
+                    $api.byId("doctorConsultCount").innerText = ret.data.answerTotal;
+                    $api.byId("doctorWorkYear").innerText = ret.data.workSeniority;
+                    $api.byId("doctorHospital").innerText = ret.data.hospitalName;
+                    $api.byId("doctorSkill").innerText = ret.data.skilledTypes;
+                    if (ret.data.doctorPortrait) {
+                        $api.attr($api.byId('doctorHeader'), 'src', ret.data.doctorPortrait);
+                    } else {
+                        $api.attr($api.byId('doctorHeader'), 'src', '../../image/user/user_defult.png');
+                    }
+                    if (ret.data.consultEnable == 0) {
+                      $api.addCls($api.byId('doctorConsultOpen'), 'dis');
+                    }
+                    var commentList = ret.data.comment;
+                    if (typeof(commentList) != 'undefined' && commentList.length > 0) {
+                        $api.css($api.byId("nothing"),"display:none;");
+                        $api.html($api.byId("doctor-comment"), "");
+                        $api.append($api.byId("doctor-comment"), doT.template($api.html($api.byId("doctorCommentScript")))(commentList));
+                        api.parseTapmode();
+                    }else{
+                       $api.css($api.byId("nothing"),"display:block;");
+                    }
+
+                    api.execScript({
+                        name: 'doctor_main_win',
+                        script: 'getDocInfo(' + JSON.stringify(ret.data) + ');'
+                    });
+                } else {
+                    defaultToast(ret.message);
+                }
+                //$api.append($api.byId("doctorPermission"), doT.template($api.html($api.byId("doctorPermissionScript")))(doctorList));
+            } else {
+                console.log(JSON.stringify(err));
+            }
+        });
+    }
+
+    /** 跳转到医生评论界面*/
+    function jumpToComments() {
+        api.openWin({
+            name: 'doctor_comments_win',
+            url: './doctor_comments_win.html',
+            pageParam: {
+                doctorId: doctorId
+            }
+        });
+    }
+</script>
+
+</html>

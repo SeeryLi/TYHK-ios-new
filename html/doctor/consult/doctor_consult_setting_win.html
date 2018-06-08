@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>咨询设置</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/header_title.css" />
+    <script type="text/javascript" src="../../../script/api.js"></script>
+    <script type="text/javascript" src="../../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../../script/commit/encryption.js"></script>
+    <script type="text/javascript" src="../../../script/commit/servicePath.js"></script>
+
+</head>
+
+<body>
+    <header id="doctor-consult-seting-header" class="aui-bar aui-bar-nav title-a">
+        <div></div>
+        <div>
+            <div class="aui-pull-left aui-btn">
+                <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+            </div>
+            <div></div>
+            <div class="aui-title"><b>咨询设置<b></div>
+            <div class="aui-pull-right aui-btn" onclick="sure()">
+                <span>确定</span>
+            </div>
+        </div>
+    </header>
+  </body>
+  <script type="text/javascript">
+      apiready = function(){
+	      var header = document.querySelector('#doctor-consult-seting-header');
+	      $api.fixStatusBar(header);
+	      var header = $api.byId('doctor-consult-seting-header');
+    	  var headerH = $api.offset(header).h;
+	      api.openFrame({
+	      name: 'doctor_consult_setting_frm',
+	      url: 'doctor_consult_setting_frm.html',
+	      rect: {
+		      x:0,
+		      y:headerH,
+		      w:"auto",
+		      h:"auto"
+	      },
+          pageParam: {
+              name: 'test'
+          },
+          bounces: false,
+          bgColor: 'RGBA(239, 242, 247, 1)',
+          vScrollBarEnabled: false,
+          hScrollBarEnabled: false
+      });
+
+      };
+
+      /** 点击确定*/
+      function sure(){
+        api.execScript({
+            frameName: 'doctor_consult_setting_frm',
+            script: 'clickOk();'
+        });
+      }
+
+      /**设置咨询金币*/
+      function setCost(cost){
+        api.execScript({
+            frameName: 'doctor_consult_setting_frm',
+            script: 'setCost('+ JSON.stringify(cost) +');'
+        });
+
+      }
+
+  </script>
+  </html>

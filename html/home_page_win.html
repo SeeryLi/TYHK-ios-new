@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>首页</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../css/home_page_win.css" />
+    <link rel="stylesheet" type="text/css" href="../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../css/indentification_dialog.css" />
+</head>
+
+<body>
+
+    <div class="aui-content">
+        <span id="homeSpan" style="height:170px;overflow:hidden;"></span>
+
+        <ul class="aui-list aui-form-list">
+            <li class="aui-list-item passerby_li">
+                <div class="aui-list-item-inner">
+                    <div class="aui-row flex-div">
+                        <div class="aui-col-xs-4" onclick="goMyDoc()">
+                            <img src="../image/home_icon_doc.png" alt="">
+                            <p class="info-name">我的医生</p>
+                        </div>
+                        <div class="aui-col-xs-4" onclick="pageJump('test_main_win','./test/test_main_win.html')">
+                            <img src="../image/home_icon_test.png" alt="">
+                            <p class="info-name">健康测评</p>
+                        </div>
+                        <div class="aui-col-xs-4" onclick="goMyReport()">
+                            <img src="../image/home_icon_fzbg.png" alt="">
+                            <p class="info-name">复诊报告</p>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <div id = "MyRequestList"></div>
+
+            <!-- <ul id="home-repository-list">
+
+            </ul> -->
+            <li class="ech_box_li" style="overflow-x:auto;">
+                <!-- <div class="head_title">
+                    <b>服药次数统计</b>
+                </div> -->
+                <!-- 线形图 -->
+                <div id="linellae_main" class="base_box_linellae">
+
+                </div>
+            </li>
+
+            <!-- <ul id="home-doctor-list">
+
+            </ul> -->
+        </ul>
+    </div>
+
+    <script id="MyRequestScript" type="text/template">
+        <li class="aui-list-item" style="height:9.125rem;background-color:#EFF2F7;padding:0.75rem;" onclick="goMyRequest()">
+              <div class="box_base_div">
+                  <div class="head_title border_bottom">
+                      <img class="ico_2" src="../image/home_wdzx.png" alt="">
+                      <b>我的咨询</b>
+                      <div class="more-div">
+                          <img src="../image/home_more.png" alt="">
+                      </div>
+                  </div>
+                  <!-- img -->
+                    {{ if(it.type == 1 || it.type == 2 || it.type == 8){ }}
+                  <div id="img_content" class="box_content_div border_bottom">
+                    <div class="">
+                      <img src="../image/home_wdzx_js.png" alt="">
+                      <span>{{=it.docName}}医生消息:</span><span>{{=it.inner}}</span>
+                    </div>
+                  </div>
+                  <!-- 无咨询 -->
+                    {{ }if(it.type == 3){ }}
+                  <div id="none_content" class="box_content_div border_bottom">
+                    <div class="" style="overflow:hidden;">
+                      <span style="float:left">{{=it.docName}}医生消息:</span><span style="max-width:60%;white-space: nowrap;text-overflow: ellipsis;overflow:hidden;">{{=it.inner}}</span>
+                    </div>
+                  </div>
+                    {{ }if(it.type == 4){ }}
+                  <div id="voice_content" class="box_content_div border_bottom">
+                    <div class="">
+                      <img src="../image/home_wdzx_pic.png" alt="">
+                      <span>{{=it.docName}}医生消息:</span><span>{{=it.inner}}</span>
+                    </div>
+                  </div>
+                    {{ }if(it.type == 5){ }}
+                  <div id="none_content" class="box_content_div border_bottom">
+                    <div class="">
+                      <img src="../image/home_wdzx_yy.png" alt="">
+                      <span>{{=it.docName}}医生消息:</span><span>{{=it.inner}}</span>
+                    </div>
+                  </div>
+                    {{ }if(it.type == 6){ }}<!-- 修改药品信息 -->
+                  <div id="none_content" class="box_content_div border_bottom">
+                    <div class="">
+                      <img src="../image/home_wdzx_xgtj.png" alt="">
+                      <span>{{=it.docName}}医生消息:</span><span>{{=it.inner}}</span>
+                    </div>
+                  </div>
+                    {{ }if(it.type == 7){ }}<!-- 新增药品信息 -->
+                    <div id="none_content" class="box_content_div border_bottom">
+                      <div class="">
+                        <img src="../image/remind/con_chat_xtyd.png" alt="">
+                        <span>{{=it.docName}}医生消息:</span><span>{{=it.inner}}</span>
+                      </div>
+                    </div>
+                    {{}}}
+                  <div class="box_time_div">
+                    {{=it.date}}
+                  </div>
+              </div>
+        </li>
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../script/echarts.min.js"></script>
+<script type="text/javascript" src="../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../script/commit/utils.js"></script>
+<script type="text/javascript" src="../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../script/doT.min.js"></script>
+<script type="text/javascript" src="../script/commit/image-cache.js"></script>
+<script type="text/javascript">
+    var mescroll;
+    var myConsultId;
+    apiready = function() {
+        api.parseTapmode();
+        fnOpen();
+        getMyRequest();
+        initEvents();
+        setTimeout(function(){
+            myMainData();
+        },500)
+        setTimeout(function(){
+            setMyRequestCheck();
+        },2000)
+    };
+
+
+    // 轮询3秒一次聊天记录
+    function setMyRequestCheck(){
+        checkIfNewMsg = setInterval(function(){
+        getMyRequest();
+      }, 10000);
+    }
+
+    function initEvents() {
+        api.addEventListener({
+            name: 'refreshConsultId'
+        }, function(ret, err) {
+            if(ret){
+              refreshConsultId(ret.value.key1)
+            }
+        });
+        api.addEventListener({
+            name: 'refershUserHomePage'
+        }, function(ret, err) {
+            if (ret) {
+                getMyRequest();
+                myMainData();
+            }
+        });
+        api.addEventListener({
+            name: 'refreshHomeResult'
+        }, function(ret, err) {
+            if (ret) {
+                getMyRequest();
+            }
+        });
+    }
+    //初始化MyChart
+    function initMyChart(time,num){
+      // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('linellae_main'));
+
+        // 指定图表的配置项和数据
+        option = {
+          color:["#FFC57B"],
+          fontSize: 10,
+          title: {
+              text: '服药次数统计',
+              left:15,
+              top:15,
+              textStyle: {
+                  color: '#222',
+                  fontSize: 16,
+                  fontWeight: 'normal'
+              },
+          },
+          tooltip: {},
+          xAxis: {
+              type: 'category',
+              data: time,
+          },
+          dataZoom:[
+                {
+            type: 'inside',
+            xAxisIndex: [0],
+            start: 0,
+            end: 50
+                }
+            ],
+          yAxis: {
+              min:0,
+              max:4,
+          },
+          series: [{
+              name: '服药次数',
+              type: 'bar',
+              data: num,
+               type: 'line'
+          }]
+      };
+          // 使用刚指定的配置项和数据显示图表。
+      myChart.setOption(option);
+    }
+
+
+    /** 获取用户信息*/
+    function getUserInfo() {
+        var id = getStorage('userId');
+        if (id) {
+            api.ajax({
+                url: getUserInfoSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": id,
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if (ret.success) {
+                        setStorage('userType', ret.data.userType);
+                        setStorage('userAppType', ret.data.userAppType);
+                        setStorage('takeDrugId', ret.data.takeDrugId);
+                        setStorage('isConfirm', ret.data.isConfirm);
+                    }
+                }
+            });
+        }
+    }
+
+
+
+    /** 获取推荐的知识库数据*/
+    function getRepository() {
+        var userId = getStorage('userId');
+        if (typeof(userId) == 'undefined') {
+          userId = '';
+        }
+        api.ajax({
+            url: getRepositorySer,
+            method: 'post',
+            data: {
+                values: {
+                    'userId': userId,
+                    'uploaderId': '',
+                    'flags': '',
+                    'searchWords': '',
+                    'sortType': '',
+                    'queryStartDate': '',
+                    'queryEndDate': '',
+                    'queryStartNumber': 0,
+                    'queryLimit': 3,
+                    'queryType': '',
+                    'time': new Date().getTime(),
+                    'deviceId': api.deviceId,
+                    'sign': ''
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.success) {
+                    // $api.html($api.byId("home-repository-list"), "");
+                    // var repositoryList = ret.data.repositories;
+                    // $api.append($api.byId("home-repository-list"), doT.template($api.html($api.byId("homeRepositoryListScript")))(repositoryList));
+                } else {
+                }
+
+            } else {
+                //console.log("getRepositoryList err-->" + JSON.stringify(err));
+            }
+        });
+    }
+
+    /** 跳转知识库详情*/
+    function jumpRepositoryInfo(repositoryId,price) {
+      if (price > 0) {
+        if (getStorage('userId')) {
+            var userType = getStorage('userType');
+            var userAppType = getStorage('userAppType');
+            if (userAppType == '1') {
+              if (userType == '1' || userType == '2' || userType == '4') {
+                showDialog(userType);
+                return;
+              }
+            }
+            api.openWin({
+                name: 'repository_detail_win',
+                url: './repository/repository_detail_win.html',
+                pageParam: {
+                    repositoryId: repositoryId,
+                    price: price
+                }
+            });
+        } else {
+            pageJump('login', 'login.html', 'repository_list_frm');
+        }
+      }else{
+        api.openWin({
+            name: 'repository_detail_win',
+            url: './repository/repository_detail_win.html',
+            pageParam: {
+                repositoryId: repositoryId,
+                price:price
+            }
+        });
+      }
+    }
+
+    /** 获取医生列表*/
+    function getDocList() {
+        var timestamp = new Date().getTime();
+        var userId = getStorage("userId");
+        if (typeof(userId) == 'undefined') {
+          userId = '';
+        }
+        api.ajax({
+            url: consultDocSer,
+            method: 'post',
+            data: {
+                values: {
+                  "userId": userId,
+                  "sortType": "1",
+                  "queryStartNumber": 0,
+                  "queryLimit": 3,
+                  "doctorRank": "1,2,3",
+                  "doctorSkilledTypes": "1",
+                  "hospitalIds": "1",
+                  "listUse": "1",
+                  "time": timestamp,
+                  "deviceId": api.deviceId,
+                  "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+              if (ret.success) {
+                var doctorList = ret.data.doctors;
+                //清空页面
+                // $api.html($api.byId("home-doctor-list"), "");
+                // $api.append($api.byId("home-doctor-list"), doT.template($api.html($api.byId("homeDoctorScript")))(doctorList));
+              }else{
+              }
+            } else {
+              console.log("getDocList err-->" + JSON.stringify(err));
+            }
+        });
+    }
+
+    /** 跳转医生详情*/
+    function jumpDoctorInfo(doctorId) {
+        api.openWin({
+            name: 'doctor_main_win',
+            url: './consult/doctor_main_win.html',
+            pageParam: {
+                name: 'consult',
+                doctorId: doctorId
+            }
+        });
+    }
+
+    /** 轮播图*/
+    function fnOpen() {
+        var UIScrollPicture = api.require('UIScrollPicture');
+        var headerPos = $api.offset($api.dom('header'));
+        UIScrollPicture.open({
+            rect: {
+                x: 0,
+                y: 0,
+                w: api.winWidth,
+                h: 170
+            },
+            data: {
+                paths: ['widget://image/banner01.png', 'widget://image/banner02.png', 'widget://image/banner03.png'],
+                captions: []
+            },
+            styles: {
+                caption: {
+                    height: 35,
+                    color: '#E0FFFF',
+                    size: 13,
+                    bgColor: '#696969',
+                    position: 'bottom'
+                },
+                indicator: {
+                    align: 'center',
+                    color: '#FFFFFF',
+                    activeColor: '#32d086'
+                }
+            },
+            placeholderImg: 'widget://image/banner01.png',
+            contentMode: 'scaleToFill',
+            fixedOn: api.frameName,
+            interval: 3,
+            loop: true,
+            fixed: false
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.eventType == "click") { //点击事件
+                    var index = ret.index;
+                }
+            } else {
+
+            }
+        });
+    };
+
+    /*进入我的医生*/
+    function goMyDoc(){
+        var userId = getStorage("userId");
+        var userType = getStorage('userType');
+        var timestamp = new Date().getTime();
+        getUserInfo();
+        if (userId) {
+            api.ajax({
+                url: enterPhysicianSer,
+                method: 'post',
+                data: {
+                    values: {
+                      "userId": userId,
+                      "time": timestamp,
+                      "deviceId": api.deviceId,
+                      "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                  if (ret.success) {
+                      if(ret.data.isFirst == 0){
+                        api.openWin({
+                            name: 'doctor_list_win',
+                            url: './consult/doctor_list_win.html'
+                        });
+                      }else if(ret.data.isFirst == 1){
+                          jumpDoctorInfo(ret.data.doctorId);
+                      }else{
+                          api.openWin({
+                              name: 'consult_profession_chat_win',
+                              url: './consult/consult_profession_chat_win.html',
+                              pageParam: {
+                                  name: 'doctor_consult',
+                                  consultId: ret.data.consultId,
+                              },
+                          });
+                      }
+                  }else{
+                      defaultToast(ret.message);
+                  }
+                } else {
+                  defaultToast(ret.message);
+                  console.log("getDocList err-->" + JSON.stringify(err));
+                }
+            });
+        } else {
+            api.openWin({
+                name: 'login',
+                url: 'login.html',
+                pageParam: {
+                    name: 'home_page_win'
+                },
+                bounces: false,
+                bgColor: 'rgba(239,242,247,1)',
+                vScrollBarEnabled: false,
+                hScrollBarEnabled: false
+            });
+        }
+    }
+
+    function goMyReport(){
+        var userId = getStorage("userId");
+        getUserInfo();
+        if(userId && userId!=''){
+            if(getStorage('userType') != '3'){
+                defaultToast('用户还未通过审核！');
+                return;
+            } else{
+                api.openWin({
+                    name: 'visit_report_win',
+                    url: './test/visit_report_win.html'
+                });
+            }
+        } else {
+            api.openWin({
+                name: 'login',
+                url: 'login.html',
+                pageParam: {
+                    name: 'home_page_win'
+                },
+                bounces: false,
+                bgColor: 'rgba(239,242,247,1)',
+                vScrollBarEnabled: false,
+                hScrollBarEnabled: false
+            });
+        }
+    }
+
+    // 服药统计图数据请求
+    function myMainData() {
+        var userDifference;
+        var userScore;
+        var userDaysStatistics;
+        var userId = getStorage("userId");
+        if(userId && userId!=''){
+            api.ajax({
+                url: returnReportDisplaySer,
+                method: 'post',
+                data: {
+                    values: {
+                        userId: userId,
+                        "deviceId": api.deviceId,
+                        'sign': ''
+                    }
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    var allDayTime=[];
+                    var allEatNum=[];
+                    if(!ret.data.takeDrugStatistics){
+                      initMyChart([0],[0]);
+                      return;
+                    }
+                    var amount = ret.data.takeDrugStatistics;
+                    for(var i =0 ;i<amount.length;i++){
+                        amount[i].dayTime = amount[i].dayTime.substring(5,10);
+                        allDayTime.push(amount[i].dayTime);
+                        allEatNum.push(amount[i].eatNum);
+                    }
+                    initMyChart(allDayTime,allEatNum);
+                } else {
+                    // alert(JSON.stringify(err));
+                }
+            });
+        }else{
+            initMyChart([0],[0]);
+        }
+    }
+
+
+    //更新consultId
+    function refreshConsultId(newId){
+      myConsultId = newId;
+    }
+
+    /*初始化我的咨询*/
+    function getMyRequest(){
+        var userId = getStorage("userId");
+        var userType = getStorage('userType');
+        var timestamp = new Date().getTime();
+        var MyRequestResult = {};
+        if (userId && userId != '') {
+            api.ajax({
+                url: patientConsultRecordsSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "patientId": userId,
+                        "sortType": "",
+                        "queryLimit":1,
+                        "queryStartTime": '',
+                        "queryEndTime": '',
+                        "queryStartNumber":0,
+                        "listUse": "",
+                        "time": timestamp,
+                        "deviceId": api.deviceId,
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if (ret.success) {
+                        if (ret.data.records.length > 0){
+                            myConsultId = ret.data.records[0].consultId;
+                            api.ajax({
+                                url: consultChatHistoryRecordsSer,
+                                method: 'post',
+                                data: {
+                                    values: {
+                                        "userId": userId,
+                                        "consultId": myConsultId,
+                                        "queryType":'',
+                                        "queryLimit":'',
+                                        "listUse": "",
+                                        "time": timestamp,
+                                        "deviceId": api.deviceId,
+                                        "sign": ""
+                                    },
+                                }
+                            }, function(ret, err) {
+                                if (ret) {
+                                    if (ret.success) {
+                                        MyRequestResult.type = ret.data.type;
+                                        MyRequestResult.inner = ret.data.typeRecord;
+                                        MyRequestResult.date = ret.data.time;
+                                        MyRequestResult.docName = ret.data.doctorName.substring(0,1);
+                                        $api.html($api.byId("MyRequestList"), "");
+                                        $api.append($api.byId("MyRequestList"), doT.template($api.html($api.byId("MyRequestScript")))(MyRequestResult));
+                                    }
+                                }
+                            });
+                        }else{
+                            MyRequestResult.type = 1;//无咨询
+                            MyRequestResult.inner = '无咨询...';
+                            MyRequestResult.date = '';
+                            MyRequestResult.docName = '';
+                            $api.html($api.byId("MyRequestList"), "");
+                            $api.append($api.byId("MyRequestList"), doT.template($api.html($api.byId("MyRequestScript")))(MyRequestResult));
+                        }
+                    } else {
+
+                    }
+                } else {
+                }
+            });
+        } else {
+            MyRequestResult.type = 1;//无咨询
+            MyRequestResult.inner = '无咨询...';
+            MyRequestResult.date = '';
+            MyRequestResult.docName = '';
+            $api.html($api.byId("MyRequestList"), "");
+            $api.append($api.byId("MyRequestList"), doT.template($api.html($api.byId("MyRequestScript")))(MyRequestResult));
+        }
+    }
+
+    /** 我的咨询跳转聊天页*/
+    function goMyRequest(){
+        var userId = getStorage("userId");
+        getUserInfo();
+        if(userId && userId !=''){
+            // getMyRequest();
+            if(getStorage('userType') == 1){
+                defaultToast('用户未审核！');
+                return;
+            }
+            if(getStorage('userType') == 2){
+                defaultToast('用户审核中！');
+                return;
+            }
+            api.ajax({
+                url: enterPhysicianSer,
+                method: 'post',
+                data: {
+                    values: {
+                      "userId": userId,
+                      "time": new Date().getTime(),
+                      "deviceId": api.deviceId,
+                      "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                  if (ret.success) {
+                      if(ret.data.isFirst == 1 || ret.data.isFirst == 0){
+                          defaultToast("当前未开始咨询，请先点击'我的医生'！");
+                      }else{
+                          api.openWin({
+                              name: 'consult_profession_chat_win',
+                              url: './consult/consult_profession_chat_win.html',
+                              pageParam: {
+                                  name: 'doctor_consult',
+                                  consultId: myConsultId,
+                              },
+                          });
+                      }
+                  }else{
+                      defaultToast(ret.message);
+                  }
+                } else {
+                  defaultToast(ret.message);
+                  console.log("getDocList err-->" + JSON.stringify(err));
+                }
+            })
+            }else{
+            api.openWin({
+                name: 'login',
+                url: 'login.html',
+                pageParam: {
+                    name: 'home_page_win'
+                },
+                bounces: false,
+                bgColor: 'rgba(239,242,247,1)',
+                vScrollBarEnabled: false,
+                hScrollBarEnabled: false
+            });
+        }
+    }
+
+    /** 当前页面跳转验证*/
+    function jumpCheck(name,url){
+      var userId = getStorage("userId");
+      var userType = getStorage('userType');
+      var userAppType = getStorage('userAppType');
+      if (userId) {
+          if (userAppType == '1' && (userType == '1' || userType == '2' || userType == '4')) {
+              showDialog(userType);
+              return;
+          }
+            api.openWin({
+                name: name,
+                url: url,
+                pageParam: {
+                    name: 'home_page_win'
+                },
+                bounces: false,
+                bgColor: 'rgba(239,242,247,1)',
+                vScrollBarEnabled: false,
+                hScrollBarEnabled: false
+            });
+      } else {
+          api.openWin({
+              name: 'login',
+              url: 'login.html',
+              pageParam: {
+                  name: 'home_page_win'
+              },
+              bounces: false,
+              bgColor: 'rgba(239,242,247,1)',
+              vScrollBarEnabled: false,
+              hScrollBarEnabled: false
+          });
+      }
+    }
+
+    // 审核弹窗
+    function showDialog(userType) {
+        var dialog = new auiDialog();
+         if ($(window).scrollTop() == 0){
+             $('html,body').animate({scrollTop: '130px'}, 400);
+         }
+        if (userType == "4") {
+            dialog.alert({
+                title: "<img src='../image/user/dialog_a.png'>",
+                msg: '<p style="color:#222;font-weight:bold;font-size:0.85rem;">审核未通过</p><p style="color:#999;font-size:0.75rem;">当等待运营人员完成审核后使用该功能</p>',
+                buttons: ['', '重新认证']
+            }, function(ret) {
+                if (ret) {
+                    api.openWin({
+                        name: 'user_indentification_win',
+                        url: './user/user_indentification_win.html',
+                        pageParam: {
+                            name: 'user_indentification_win'
+                        }
+                    });
+                }
+            })
+        } else if (userType == "2") {
+            dialog.alert({
+                title: "<img src='../image/user/dialog_a.png'>",
+                msg: '<p style="color:#222;font-weight:bold;font-size:0.85rem;">正在审核中</p><p style="color:#999;font-size:0.75rem;">当等待运营人员完成审核后使用该功能</p>',
+                buttons: ['', '确认']
+            }, function(ret) {
+            })
+        }else if (userType == "1"){
+          dialog.alert({
+              title: "<img src='../image/user/dialog_a.png'>",
+              msg: '<p style="color:#222;font-weight:bold;font-size:0.85rem;">未审核</p><p style="color:#999;font-size:0.75rem;">当等待运营人员完成审核后使用该功能</p>',
+              buttons: ['', '进行审核']
+          }, function(ret) {
+              if (ret) {
+                  api.openWin({
+                      name: 'user_indentification_win',
+                      url: './user/user_indentification_win.html',
+                      pageParam: {
+                          name: 'user_indentification_win'
+                      }
+                  });
+              }
+          });
+        }
+    }
+
+    // function building(){
+    //     defaultToast("正在建设中，敬请期待！");
+    // }
+</script>
+
+</html>

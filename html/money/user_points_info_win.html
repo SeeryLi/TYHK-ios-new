@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>阳光币明细--主页</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user_points_info_frm.css" />
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/encryption.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+</head>
+
+<body>
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+      <div></div>
+      <div class="bottom-br">
+        <div class="aui-pull-left aui-btn">
+            <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+        </div>
+        <div class="aui-title"><b>阳光币明细<b></div>
+          <div class="aui-pull-right aui-btn aui-btn-outlined mar-r" onclick="showFun()">
+            <span>筛选</span>
+          </div>
+      </div>
+    </header>
+</body>
+
+<script type="text/javascript">
+    apiready = function() {
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        var headerPos = $api.offset($api.dom('header'));
+        api.openFrame({
+            name: 'user_points_info_frm',
+            url: 'user_points_info_frm.html',
+            rect: {
+                x: 0,
+                y: headerPos.h,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'test'
+            },
+            bounces: false,
+            bgColor: 'rgba(0,0,0,0)',
+            vScrollBarEnabled: false,
+            hScrollBarEnabled: false
+        });
+    };
+
+  // 筛选
+  function showFun(){
+       var jsfun = 'funcGoto();';
+       api.execScript({
+           frameName: 'user_points_info_frm',
+           script: jsfun
+       });
+     }
+
+
+    /** 获取花币明细*/
+    function getMoneyDetail(){
+      var userId = getStorage("userId");
+
+      if (userId) {
+          api.ajax({
+              url: getTestQuestionsSer,
+              method: 'post',
+              data: {
+                  values: {
+                      "userId": userId,
+                      "time": new Date().getTime(),
+                      "deviceId": api.deviceId,
+                      "sign": ""
+                  },
+              }
+          }, function(ret, err) {
+              if (ret) {
+                  alert(JSON.stringify(ret));
+              } else {
+                  alert(JSON.stringify(err));
+              }
+          });
+      } else {
+          defaultToast("获取失败，将重新登录");
+          pageJump('login', '../login.html', 'user_points_info_win');
+      }
+    }
+
+</script>
+
+</html>

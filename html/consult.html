@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>咨询--医生列表</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../css/consult_doctor.css" />
+    <link rel="stylesheet" type="text/css" href="../css/mescroll.min.css">
+</head>
+
+<body>
+    <div id="doctor-list-mescroll" class="container-div mescroll">
+        <ul id="doctorList">
+        </ul>
+    </div>
+    <div id="noDate" class="noDate" style="display: none;"></div>
+
+    <script id="doctorDataScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){}}
+        <li onclick="jumpDoctorInfo('{{=it[i].userId}}')">
+            <div class="warp-boxDiv">
+                <!-- img -->
+                <div class="photo-img">
+                  {{ if(it[i].photo){}}
+                      <img src="{{=it[i].photo}}" />
+                  {{ }else {}}
+                    <img src="../image/user/user_defult.png" />
+                  {{}}}
+
+                </div>
+                <div class="warp-right">
+                    <div class="baseBox1">
+                        <span>{{=it[i].name}}</span>
+                        <span>{{=it[i].doctorRank}}</span>
+                    </div>
+                    <div class="baseBox2">
+                        <span>{{=it[i].hospitalName}}</span>
+                        <p class="bor-p"></p>
+                        <span>{{=it[i].departmentName}}</span>
+                    </div>
+                    <div class="baseBox3">
+                        <span>擅长:</span> {{=it[i].skillType}}
+                    </div>
+                    <div class="baseBox4">
+                        <div><span>{{=it[i].rating}}星</span><span>{{=it[i].answerTotal}}个咨询</span></div>
+                        <div>
+                            {{=it[i].hireGold}}阳光币
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </li>
+          {{}}}
+    </script>
+
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../script/commit/utils.js"></script>
+<script type="text/javascript" src="../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../script/modules/consult/consultChatUtils.js"></script>
+<script type="text/javascript" src="../script/doT.min.js"></script>
+<script type="text/javascript" src="../script/mescroll.min.js"></script>
+<script type="text/javascript">
+    var mescroll;
+    apiready = function() {
+        //getDocList('1');
+        //ios顶部
+        var headerT = document.querySelector('#header');
+        $api.fixStatusBar(headerT);
+        api.addEventListener({
+            name: 'resetIndex'
+        }, function(ret, err) {
+            console.log(JSON.stringify(ret));
+            if (ret) {
+              mescroll.resetUpScroll( true );
+            }
+        });
+        //创建MeScroll对象,内部已默认开启下拉刷新,自动执行up.callback,重置列表数据;
+        mescroll = new MeScroll("doctor-list-mescroll", {
+          up: {
+              auto: false, //是否在初始化时以上拉加载的方式自动加载第一页数据; 默认false
+              clearEmptyId: "doctorList",
+              isBounce: false, //此处禁止ios回弹
+              callback: upCallback, //上拉回调,此处可简写; 相当于 callback: function (page) { upCallback(page); }
+              toTop: {
+                  src: "../image/mescroll-totop.png",
+              },
+          }
+        });
+    };
+
+    /*上拉加载的回调 page = {num:1, size:10}; num:当前页 从1开始, size:每页数据条数 */
+    function upCallback(page) {
+      getDocList(page.num, page.size, function(curPageData) {
+          //mescroll会根据传的参数,自动判断列表如果无任何数据,则提示空;列表无下一页数据,则提示无更多数据;
+          //console.log("page.num=" + page.num + ", page.size=" + page.size + ", curPageData.length=" + curPageData.length);
+          if (curPageData.length < page.num) {
+            mescroll.endSuccess(curPageData.length, false);
+          }else{
+            mescroll.endSuccess(curPageData.length, true);
+          }
+          $api.append($api.byId("doctorList"), doT.template($api.html($api.byId("doctorDataScript")))(curPageData));
+      }, function() {
+          //联网失败的回调,隐藏下拉刷新和上拉加载的状态;
+          mescroll.endErr();
+      });
+    }
+
+    /** 获取医生列表 isClear 1:清空当前列表 0：不清空*/
+    function getDocList(pageNum, pageSize, successCallback, errorCallback) {
+        var userId = getStorage("userId");
+        if (typeof(userId) == 'undefined') {
+          userId = '';
+        }
+        api.ajax({
+            url: consultDocSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": userId,
+                    "sortType": "1",
+                    "queryStartNumber": (pageNum - 1)*pageSize,
+                    "queryLimit": pageSize,
+                    "doctorRank": "1,2,3",
+                    "doctorSkilledTypes": "1",
+                    "hospitalIds": "1",
+                    "listUse": "1",
+                    "time": new Date().getTime(),
+                    "deviceId": api.deviceId,
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            //console.log("getDocList ret-->" + JSON.stringify(ret));
+            if (ret) {
+              if (ret.success) {
+                var doctorList = ret.data.doctors;
+                successCallback && successCallback(doctorList);
+              }else{
+                defaultToast(ret.message);
+                errorCallback && errorCallback();
+              }
+
+            } else {
+              defaultToast(err.message);
+              errorCallback && errorCallback();
+            }
+        });
+    }
+
+    /** 跳转医生详情*/
+    function jumpDoctorInfo(doctorId) {
+        api.openWin({
+            name: 'doctor_main_win',
+            url: './consult/doctor_main_win.html',
+            pageParam: {
+                name: 'consult',
+                doctorId: doctorId
+            }
+        });
+    }
+
+    /** 跳转登录*/
+    function jumpLogin() {
+        api.openWin({
+            name: 'login',
+            url: './login.html',
+            pageParam: {
+                name: 'consult'
+            }
+        });
+    }
+</script>
+
+</html>

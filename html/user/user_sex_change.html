@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>修改性别</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+    <script type="text/javascript" src="../../script/fastclick.js"></script>
+</head>
+
+<body>
+  <header id="header" class="aui-bar aui-bar-nav title-a">
+    <div></div>
+      <div>
+          <div class="aui-pull-left aui-btn">
+              <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+          </div>
+          <div class="aui-title head-title"><b>性别<b></div>
+            <div class="aui-pull-right aui-btn title-right-text" onclick="sexChange()">
+                <span>确定</span>
+            </div>
+      </div>
+  </header>
+
+    <div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-select-list">
+            <div class="border-se"></div>
+            <li class="">
+                <div class="aui-list-item-inner par_box">
+                    <label>男<input class="aui-radio radio_input" type="radio" id="sexMen" name="radio2"> </label>
+                </div>
+            </li>
+            <div class="border_solid"></div>
+            <li class="">
+                <div class="aui-list-item-inner par_box">
+                    <label>女<input class="aui-radio radio_input" type="radio" id="sexWomen" name="radio2"> </label>
+                </div>
+            </li>
+          </ul>
+    </div>
+</body>
+
+<script type="text/javascript">
+    apiready = function() {
+      var header = document.querySelector('#header');
+      $api.fixStatusBar(header);
+      initSex();
+      // 清除300s延迟
+      FastClick.attach(document.body);
+    };
+
+    function initSex(){
+      var sex = getStorage('userSex')
+      console.log(sex);
+      if (sex) {
+          if (sex == "0") {
+              $("#sexWomen").prop("checked",true)
+          } else if (sex == "1") {
+              $("#sexMen").prop("checked",true)
+          }
+      }
+    }
+    /** 姓名修改 1:男 0:女*/
+    function sexChange() {
+        var userId = getStorage("userId");
+        var sexMen = $api.byId("sexMen").checked;
+        var sexWomen = $api.byId("sexWomen").checked;
+        var sex;
+        var sexStr;
+
+        if (sexMen) {
+          sex = 1;
+          sexStr = '男';
+        }else if (sexWomen) {
+          sex = 0;
+          sexStr = '女';
+        }
+        setStorage("userSex", sex);
+        if (userId) {
+            api.ajax({
+                url: changeUserInfoSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "flag": "2",
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "userInfo": sex + "",
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                console.log("userChange-->" + JSON.stringify(ret));
+                if (ret) {
+                  if (ret.success) {
+                    api.execScript({
+                        name: 'user_info',
+                        frameName: 'user_info_frm',
+                        script: 'setSex('+ JSON.stringify(sexStr) +');'
+                    });
+                    api.closeWin();
+                  }
+                  defaultToast(ret.message);
+                } else {
+                  defaultToast(err.message);
+                }
+            });
+
+        } else {
+            pageJump('login', '../login.html', 'user_name_change');
+        }
+
+    }
+</script>
+
+</html>

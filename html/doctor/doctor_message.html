@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <title>消息</title>
+  <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/style.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/baseMessage_frm.css" />
+</head>
+
+<body>
+  <div id="messageTemplate"></div>
+  <script id='meassageScript' type="text/template">
+    <ul class="aui-list aui-media-list">
+      <!-- ————————资讯消息———————— -->
+      {{? it.records2}}
+      <li class="aui-list-item aui-list-item-middle" onclick="pageJump('doctor_message_consult_win','./message/doctor_message_consult_win.html')">
+        <div class="aui-media-list-item-inner">
+          <div class="aui-list-item-media" style="width: 3rem;">
+            <img src="../../image/consult_message.png" class="aui-img-round aui-list-img-sm">
+          </div>
+          <div class="aui-list-item-inner">
+            <div class="time_div">{{=it.records2.createDate || ''}}</div>
+            <div class="aui-list-item-text">
+              <div class="aui-list-item-title aui-font-size-14 base_title_1">咨询消息</div>
+            </div>
+            <div class="aui-list-item-text base_info">
+              {{=it.records2.news || ''}}
+            </div>
+            {{? it.records2.isNewRecord }}
+            <div class="aui-badge">{{=it.num2 || ''}}</div>
+            {{? }}
+          </div>
+        </div>
+      </li>
+      {{? }}
+      <!-- ————————系统消息———————— -->
+      {{? it.records1}}
+      <li class="aui-list-item aui-list-item-middle" onclick="pageJump('doctor_message_sys_win','./message/doctor_message_sys_win.html')">
+        <div class="aui-media-list-item-inner">
+          <div class="aui-list-item-media" style="width: 3rem;">
+            <img src="../../image/sys_message.png" class="aui-img-round aui-list-img-sm">
+          </div>
+          <div class="aui-list-item-inner">
+            <div class="time_div">{{=it.records1.createDate || ''}}</div>
+            <div class="aui-list-item-text">
+              <div class="aui-list-item-title aui-font-size-14 base_title_1">系统消息</div>
+            </div>
+            <div class="aui-list-item-text base_info">
+              {{=it.records1.news || ''}}
+            </div>
+            {{? it.records1.isNewRecord }}
+            <div class="aui-badge">{{=it.num1 || ''}}</div>
+            {{? }}
+          </div>
+        </div>
+      </li>
+      {{? }}
+    </ul>
+  </script>
+</body>
+
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript" src="../../script/commit/fileDownload.js"></script>
+<script type="text/javascript" src="../../script/modules/consult/consultVoicePlay.js"></script>
+<script type="text/javascript">
+  var queryStartTime = '';
+  var queryStartNumber = 0;
+  var queryEndTime = '';
+  apiready = function() {
+    var header = document.querySelector('#header');
+    $api.fixStatusBar(header);
+    getAllNotices();
+    initEvents();
+  };
+
+  /** 设置监听*/
+  function initEvents() {
+    api.addEventListener({
+        name: 'refershDocMessage'
+    }, function(ret, err) {
+        if (ret) {
+          getAllNotices();
+        }
+    });
+    api.addEventListener({
+        name: 'clearData'
+    }, function(ret, err){
+        if( ret ){
+          $api.html($api.byId("messageTemplate"), "");
+          $api.css($api.byId("record-first"),"display: block;");
+        }
+    });
+  }
+  /** 查询咨询记录*/
+  function getAllNotices() {
+    var timestamp = new Date().getTime();
+    var userId = getStorage("userId");
+    if (userId == "") {
+      pageJump("login", "../login.html", "consult")
+      return;
+    }
+    api.ajax({
+      url: getDoctorNotices,
+      method: 'post',
+      data: {
+        values: {
+          "userId": userId,
+          "queryStartNumber": queryStartNumber,
+          "queryLimit": "10",
+          "queryType": "",
+          "queryStartTime": queryStartTime,
+          "queryEndTime": queryEndTime,
+          "deviceId": api.deviceId,
+          "time": timestamp,
+          "sign": ""
+        },
+      }
+    }, function(ret, err) {
+      toast.hide();
+      if (ret) {
+        if (ret.success) {
+          var meassageRecords = ret.data;
+          if (ret.data.records1.createDate) {
+            ret.data.records1.createDate = ret.data.records1.createDate.substring(11, 16);
+          }
+          if (ret.data.records2.createDate) {
+            ret.data.records2.createDate = ret.data.records2.createDate.substring(11, 16);
+          }
+          $api.html($api.byId("messageTemplate"), "");
+          $api.append($api.byId("messageTemplate"), doT.template($api.html($api.byId("meassageScript")))(meassageRecords));
+          api.parseTapmode();
+        } else {
+          defaultToast(ret.message);
+        }
+      } else {
+        defaultToast(err.message)
+        // alert(JSON.stringify(err));
+      }
+    });
+  }
+</script>
+
+</html>

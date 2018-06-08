@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>添加新的药品</title>
+      <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+      <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+      <link rel="stylesheet" type="text/css" href="../../css/style.css" />
+      <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/remind.css">
+      <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/list_swipe.css">
+      <link rel="stylesheet" type="text/css" href="../../css/common/color.css">
+  </head>
+  <body style="background:rgb(239,242,247);">
+    <p class="no_drug" style="display:none;">还未添加药品</p>
+
+    <div class="aui-content aui-margin-b-15">
+        <ul id='add-new-medinices-list' class="aui-list">
+        </ul>
+        <p id='add-new-medinices-money' class="new-med-total">合计：¥0</p>
+    </div>
+
+    <div id="noDate" class="noDate" style="display: none;"></div>
+
+    <script id="medicinalDataScript" type="text/template">
+      {{for(var i = 0;i < it.length; i++){ }}
+      <div class="border-se"></div>
+      <li class="aui-list-item each-drug">
+          <div class="aui-list-item-inner aui-swipe-handle" style="overflow:hidden;">
+              <div class="left-block">
+                  <img src='../../image/remind/pill_blue.png'alt="">
+                  <div class="right-main">
+                      <p class="top"> {{=it[i].goodName}}</p>
+                      <p class="mid">
+                          <span>每日{{=it[i].eatNumber}}次</span>
+                          <span>每次{{=it[i].eatCount}}{{=it[i].smallUnit}}</span>
+                          <span>共{{=it[i].takedays}}天</span>
+                      </p>
+                      <p class="down">{{=it[i].dosage}}{{=it[i].bigUnit}}</p>
+                  </div>
+              </div>
+              <div class="price">
+                ￥{{=it[i].money}}
+              </div>
+          </div>
+          <div class="aui-swipe-btn">
+              <div class="aui-btn aui-btn-danger">删除</div>
+          </div>
+      </li>
+
+      {{ }}}
+    </script>
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+  <script type="text/javascript" src="../../script/commit/utils.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-list-swipe.js"></script>
+  <script type="text/javascript" src="../../script/doT.min.js"></script>
+  <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+  <script type="text/javascript">
+      var takeDrugId;
+      var medicineList = new Array();
+      var medicineInfoList = new Array();
+      apiready = function(){
+          var swipe = new auiListSwipe(function(ret){
+              // console.log(ret)
+          });
+      };
+
+      /** 点击删除*/
+      function deleteMedicine(index){
+        medicineList.splice(index,1);
+        medicineInfoList.splice(index,1);
+        allMoneyCount();
+        $api.html($api.byId("add-new-medinices-list"), '');
+        $api.append($api.byId("add-new-medinices-lis"), doT.template($api.html($api.byId("medicinalDataScript")))(medicineInfoList));
+      }
+
+      /**添加药品*/
+      function addMedicines(medicines,medicinesInfo){
+        console.log(JSON.stringify(medicines));
+        medicineList.push(medicines);
+        medicineInfoList.push(medicinesInfo);
+        allMoneyCount();
+        $api.html($api.byId("add-new-medinices-list"), '');
+        $api.append($api.byId("add-new-medinices-list"), doT.template($api.html($api.byId("medicinalDataScript")))(medicineInfoList));
+      }
+
+      /**确定添加药品*/
+      function addMedicinesSure(){
+        takeDrugId = api.pageParam.takeDrugId;
+        for (var i = 0; i < medicineList.length; i++) {
+          medicineList[i].takeDrugId = takeDrugId;
+        }
+        if(medicineList.length == 0){
+          defaultToast('请先选择药品');
+          return;
+        }
+        var medicineListStr = JSON.stringify(medicineList);
+        console.log('medicineList-->' + medicineListStr);
+        var userId = getStorage('userId');
+        showToast('');
+        api.ajax({
+            url: addNewDrugSer,
+            method: 'post',
+            data: {
+                values: {
+                  "userId": userId,
+                  'patientId':api.pageParam.patientId,
+                  "doctorId":userId,
+                  "takeDrugId":takeDrugId,
+                  "TakeDrugRecord":medicineListStr + '',
+                  "consultId":api.pageParam.consultId,
+                  "deviceId": api.deviceId,
+                  "time": new Date().getTime(),
+                  "sign": ""
+                },
+
+            }
+        },function(ret, err){
+          toast.hide();
+            if (ret) {
+                if(ret.success){
+                  // api.closeWin();
+                  api.sendEvent({
+                      name: 'closeRemindWin',
+                  });
+                  api.sendEvent({
+                      name: 'updateRemind',
+                  });
+                  // api.openWin({
+                  //     name: 'consult_profession_chat_win',
+                  //     url: '../consult/consult_profession_chat_win.html',
+                  //     pageParam: {
+                  //         name:'add_new_med',
+                  //         consultId:ret.data.consultId,
+                  //         consultType:1
+                  //     }
+                  // });
+                  api.closeToWin({
+                      name: 'consult_profession_chat_win'
+                  });
+
+                }
+            } else {
+                console.log('addMedicinesSure-->' + JSON.stringify(err));
+            }
+        });
+
+      }
+
+      /** 计算合计*/
+      function allMoneyCount(){
+        var totleMoney = 0;
+        for (var i = 0; i < medicineInfoList.length; i++) {
+          totleMoney += parseFloat(medicineInfoList[i].money);
+        }
+        console.log(JSON.stringify(totleMoney));
+        totleMoney = totleMoney.toFixed(2);//取小数点后两位
+        $api.text($api.byId('add-new-medinices-money'), '合计:￥' + totleMoney);
+      }
+
+  </script>
+  </html>

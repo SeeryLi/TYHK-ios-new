@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user.css" />
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+  </head>
+  <body>
+    <div class="border-se"></div>
+      <ul class="aui-list aui-list-in">
+
+          <li id="userHeaderLiImg" class="aui-list-item head_photo">
+              <div class="aui-list-item-inner aui-list-item-arrow">
+                  <div class="aui-list-item-title info-title">我的头像</div>
+                  <div class="aui-list-item-right">
+                      <img id="userHeaderImg" src="../../image/my_list_default.png"></img>
+                  </div>
+              </div>
+          </li>
+
+          <li id="userInfoLiName" class="aui-list-item" onclick="pageJump('user_name_change','user_name_change.html','user_info')">
+              <div class="aui-list-item-inner aui-list-item-arrow">
+                  <div class="aui-list-item-title info-title">姓名</div>
+                  <div class="aui-list-item-right">
+                      <span id="userInfoName" class="info-text"> 未填写 </span>
+                  </div>
+              </div>
+          </li>
+
+          <li id="userInfoLiSex" class="aui-list-item" onclick="pageJump('user_sex_change','user_sex_change.html','user_info')">
+              <div class="aui-list-item-inner aui-list-item-arrow">
+                  <div class="aui-list-item-title info-title">性别</div>
+                  <div class="aui-list-item-right">
+
+                      <span id="userInfoSex" class="info-text"> 未填写 </span>
+                  </div>
+              </div>
+          </li>
+
+          <li id="userInfoLiAge" class="aui-list-item" onclick="pageJump('user_age_change','user_age_change.html','user_info')">
+              <div class="aui-list-item-inner aui-list-item-arrow">
+                  <div class="aui-list-item-title info-title">年龄</div>
+                  <div class="aui-list-item-right">
+                      <span id="userInfoAge" class="info-text"> 未填写 </span>
+                  </div>
+              </div>
+          </li>
+
+          <li id="userInfoLiEducate" class="aui-list-item" onclick="pageJump('user_education_change','user_education_change.html','user_info')" style="background-image:none;">
+              <div class="aui-list-item-inner aui-list-item-arrow">
+                  <div class="aui-list-item-title info-title">学历</div>
+                  <div class="aui-list-item-right">
+                      <span id="userInfoEducate" class="info-text"> 未填写 </span>
+                  </div>
+              </div>
+          </li>
+
+          <div class="border-se"></div>
+          <li id="base_main_info" class="aui-list-item" onclick="pageJump('clinical_data_win','clinical_data_win.html','clinical_data_win')" style="background-image:none;">
+              <div class="aui-list-item-inner aui-list-item-arrow">
+                  <div class="aui-list-item-title info-title">病例资料</div>
+                  <div class="aui-list-item-right">
+                      <span id="userInfoDescription" class="info-text"></span>
+                  </div>
+              </div>
+          </li>
+
+          <div class="border-se"></div>
+          <li class="aui-list-item .aui-list" onclick="pageJump('user_QRcode_win','./user_QRcode_win.html','user_info')">
+              <div id="userInfoLiQRCode" class="aui-list-item-inner aui-list-item-arrow">
+                  <div class="aui-list-item-title info-title">我的二维码</div>
+              </div>
+          </li>
+          <li class="aui-list-item .aui-list" onclick="pageJump('user_address_change','./user_address_change.html','user_info')" style="background-image:none;">
+              <div id="userAddress" class="aui-list-item-inner aui-list-item-arrow">
+                  <div class="aui-list-item-title info-title">我的收货地址</div>
+                  <div class="aui-list-item-right">
+                      <span id="myAdress" class="info-text my-address"> 未填写 </span>
+                  </div>
+              </div>
+          </li>
+
+      </ul>
+      <div class="aui-content-padded">
+          <p>
+              <div class="aui-btn aui-btn-success aui-btn-block" style="background-color:#E63D4A;border-radius:45px;" tapmode onclick="loginOut()">退出账号</div>
+          </p>
+      </div>
+  </body>
+  <script type="text/javascript">
+    apiready = function(){
+      getUserInfo();
+      getUserAddress();
+    }
+
+    /** 获取用户信息*/
+    function getUserInfo() {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: getUserInfoSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                console.log("get info-->" + JSON.stringify(ret));
+                if (ret) {
+                  if(ret.success){
+
+                    var sex = ret.data.sex;
+                    var userId = ret.data.userId;
+                    var age = ret.data.age;
+                    var userName = ret.data.userName;
+                    var education = ret.data.education;
+                    var photo = ret.data.photo;
+                    var userType = ret.data.userType;
+                    // var individualConfirm = ret.data.individualConfirm;
+                    // setClinical(individualConfirm);
+                    setStorage("userSex", sex);
+                    setStorage("userAge", age);
+                    setStorage("userEducation", education);
+                    if (sex) {
+                        if (sex == "0") {
+                            $api.byId("userInfoSex").innerHTML = '女';
+                        } else if (sex == "1") {
+                            $api.byId("userInfoSex").innerHTML = '男';
+                        }
+                    }
+                    if (userName) {
+                        $api.byId("userInfoName").innerHTML = userName;
+                    }
+                    if (age) {
+                        $api.byId("userInfoAge").innerHTML = age;
+                    }
+                    if(photo){
+                      $api.attr($api.byId('userHeaderImg'), 'src', photo);
+                    }else{
+                      $api.attr($api.byId('userHeaderImg'), 'src', '../../image/user/user_defult.png');
+                    }
+                    if (education) {
+                      if (education == '1') {
+                        $api.byId('userInfoEducate').innerHTML = '小学以下';
+                      }else if(education == '2'){
+                        $api.byId('userInfoEducate').innerHTML = '小学';
+                      }else if (education == '3') {
+                        $api.byId('userInfoEducate').innerHTML = '初中';
+                      }else if (education == '4') {
+                        $api.byId('userInfoEducate').innerHTML = '高中';
+                      }else if (education == '5') {
+                        $api.byId('userInfoEducate').innerHTML = '大学及以上';
+                      }
+                    }
+                  }
+                } else {
+                }
+            });
+        } else {
+            pageJump('login', '../login.html', 'user_info');
+        }
+    }
+
+    function getUserAddress() {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: getAddress,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                console.log("get info-->" + JSON.stringify(ret));
+                if (ret) {
+                  if(ret.success){
+                    var address = ret.data.address;
+                    if (address) {
+                        $api.byId("myAdress").innerHTML = address;
+                    }
+                  }
+                } else {
+                }
+            });
+        } else {
+            pageJump('login', '../login.html', 'user_info');
+        }
+    }
+
+
+    /** 退出账号*/
+    function loginOut() {
+
+        api.ajax({
+            url: loginOutSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": getStorage("userId"),
+                    "time": new Date().getTime(),
+                    "deviceId": api.deviceId,
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+              if (ret.success) {
+                api.sendEvent({
+                    name: 'clearUserInfo'
+                });
+                setStorage("userId", "");
+                setStorage("userAppType", 1);
+                setStorage("takeDrugId", "");
+                setStorage("isConfirm", "");
+                setTimeout(function(){
+                    api.closeWin();
+                },800);
+                pageJump("login", "../login.html", "user_info");
+              }else{
+                defaultToast(ret.message);
+              }
+            } else {
+                defaultToast("请求失败，请稍后再试");
+            }
+        });
+
+        setClinical();
+    }
+    /** 设置头像*/
+  function setHeader(){
+
+  }
+
+  /** 设置姓名*/
+  function setName(name){
+    $api.byId("userInfoName").innerHTML = name;
+  }
+
+  /** 设置性别*/
+  function setSex(sex){
+    $api.byId("userInfoSex").innerHTML = sex;
+  }
+
+  /** 设置年龄*/
+  function setAge(age){
+    $api.byId("userInfoAge").innerHTML = age;
+  }
+
+  /** 设置学历*/
+  function setEducation(education){
+    $api.byId('userInfoEducate').innerHTML = education;
+  }
+
+  /** 设置收货地址*/
+  function setAddress(address){
+    $api.byId('myAdress').innerHTML = address;
+  }
+
+   // 退出帐号清除缓存
+  function setClinical(){
+      setStorage("clinicalData", null);
+  }
+  </script>
+</html>

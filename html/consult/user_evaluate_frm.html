@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>咨询评价</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/starRating.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/doctor_main.css" />
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/fastclick.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+    <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+</head>
+
+<body>
+    <!-- style-border -->
+    <div class="border-se"></div>
+    <div class="starRatRoot">
+        <span class="starRateTitle"><b>星级评价</b></span>
+        <div id="starRateCon" class="dis">
+            <div class="star">
+            </div>
+            <div class="star">
+            </div>
+            <div class="star">
+            </div>
+            <div class="star">
+            </div>
+            <div class="star">
+            </div>
+        </div>
+        <!-- 评价等级 -->
+          <div id="evaluate-reting" class='dis' >
+
+        </div>
+    </div>
+
+    <div class="aui-list-item-inner aui-content-padded starRatRoot">
+        <span class="starRateTitle"><b>评价内容</b></span>
+        <div class="textarea-div dis" id='evaluate-input'>
+            <textarea class="bd-ys3" id="consultContent" oninput="wordsDeal(this)" name="mechanism.researchObjectives" placeholder="说说您对医师的评价吧"></textarea>
+            <p><span id="textCount">0</span>/200</p>
+        </div>
+    </div>
+    <div class="aui-content-padded dis" id="evaluate-content" ></div>
+    <div class="aui-content-padded">
+        <p>
+            <div id='evaluate-comment-btn' class="aui-btn aui-btn-success aui-btn-block dis" onclick="uploadEvaluate()">提交</div>
+        </p>
+    </div>
+</body>
+
+<script type="text/javascript">
+    var ratStar = 0;
+    var evaluateStatus = 0;
+    apiready = function() {
+      FastClick.attach(document.body);
+      evaluateStatus = api.pageParam.evaluateStatus;
+      if (evaluateStatus == 1) {//已经评价
+        $api.removeCls($api.byId('evaluate-reting'), 'dis');
+        $api.addCls($api.byId('evaluate-reting'), 'show');
+        $api.removeCls($api.byId('evaluate-content'), 'dis');
+        $api.addCls($api.byId('evaluate-content'), 'show');
+        getCommentInfo();
+      }else{
+        $api.removeCls($api.byId('evaluate-comment-btn'), 'dis');
+        $api.addCls($api.byId('evaluate-comment-btn'), 'show');
+        $api.removeCls($api.byId('starRateCon'), 'dis');
+        $api.addCls($api.byId('starRateCon'), 'show');
+          $(".star").css({
+            'background': 'url("../../image/con_chat_eva.png") no-repeat center',
+            'background-size': '1.5rem 1.5rem'
+          })
+        $api.removeCls($api.byId('evaluate-input'), 'dis');
+        $api.addCls($api.byId('evaluate-input'), 'show');
+        if($("star").eq(4).prevAll().attr("url","../../image/con_chat_eva.png")){
+          ratStar = $(".star").eq(4).prevAll().length + 1;
+        };
+        (function() {
+            $('#starRateCon').on('click', '.star', function(index, item) {
+                clickStar(this);
+            })
+        })()
+      }
+    };
+
+    /** 文字限制*/
+    function wordsDeal(this_) {
+        var count = $(this_).val().length;
+        if(count>200){
+          $(this_).val( $(this_).val().slice(0,200) );
+        }
+        $('#textCount').text($(this_).val().length);
+    }
+
+    /**
+     * 点击star
+     */
+    function clickStar(this_) {
+        $(this_).css({
+                'background': 'url("../../image/con_chat_eva.png") no-repeat center',
+                'background-size': '1.5rem 1.5rem'
+            })
+            .prevAll().each(function(index, item) {
+                $(this).css({
+                    'background': 'url("../../image/con_chat_eva.png") no-repeat center',
+                    'background-size': '1.5rem 1.5rem'
+                });
+            })
+        $(this_).nextAll().each(function(index, item) {
+            $(this).css({
+                'background': 'url("../../image/con_chat_eva_no.png") no-repeat center',
+                'background-size': '1.5rem 1.5rem'
+            });
+        })
+        ratStar = $(this_).prevAll().length + 1;
+    }
+
+    /** 获取某咨询的评价内容*/
+    function getCommentInfo(){
+      var userId = getStorage("userId");
+      if (userId) {
+          api.ajax({
+              url: getConsultCommentAndRatingSer,
+              method: 'post',
+              data: {
+                  values: {
+                      "userId": userId,
+                      'consultId': api.pageParam.consultId,
+                      "time": new Date().getTime(),
+                      "deviceId": api.deviceId,
+                      "sign": ""
+                  },
+              }
+          }, function(ret, err) {
+              // console.log("getCommentInfo-->" + JSON.stringify(ret));
+              if (ret) {
+                  if (ret.success) {
+                    $api.text($api.byId('evaluate-content'), ret.data.consultComment);
+                    if (ret.data.rating) {
+                      if (ret.data.rating >= 1) {
+                        $api.html($api.byId('evaluate-reting'),'<img class="star" src="../../image/con_chat_eva.png" alt="">');
+                      }
+                      if (ret.data.rating >= 2) {
+                        $api.html($api.byId('evaluate-reting'),'<img class="star" src="../../image/con_chat_eva.png" alt=""><img class="star" src="../../image/con_chat_eva.png" alt="">');
+                      }
+                      if (ret.data.rating >= 3) {
+                        $api.html($api.byId('evaluate-reting'),'<img class="star" src="../../image/con_chat_eva.png" alt=""><img class="star" src="../../image/con_chat_eva.png" alt=""><img class="star" src="../../image/con_chat_eva.png" alt="">');
+                      }
+                      if (ret.data.rating >= 4) {
+                        $api.html($api.byId('evaluate-reting'),'<img class="star" src="../../image/con_chat_eva.png" alt=""><img class="star" src="../../image/con_chat_eva.png" alt=""><img class="star" src="../../image/con_chat_eva.png" alt=""><img class="star" src="../../image/con_chat_eva.png" alt="">');
+                      }
+                      if (ret.data.rating >= 5) {
+                        $api.html($api.byId('evaluate-reting'),'<img class="star" src="../../image/con_chat_eva.png" alt=""><img class="star" src="../../image/con_chat_eva.png" alt=""><img class="star" src="../../image/con_chat_eva.png" alt=""><img class="star" src="../../image/con_chat_eva.png" alt=""><img class="star" src="../../image/con_chat_eva.png" alt="">');
+                      }
+                    }
+                  }
+              } else {
+                  defaultToast(err.message);
+              }
+          });
+      } else {
+          defaultToast('提交失败，即将重新登录');
+          pageJump("login", "../login.html", "user_evaluate");
+      }
+    }
+
+    /** 提交评价*/
+    function uploadEvaluate() {
+        var userId = getStorage("userId");
+        var evaluateText = $api.trimAll($api.val($api.byId("consultContent")));
+        if (evaluateText == '') {
+          evaluateText = '患者未填写评价内容！';
+        }
+        if (ratStar == 0) {
+          defaultToast('请对该次咨询进行打分');
+          return;
+        }
+        if (userId) {
+            api.ajax({
+                url: consultRatingSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        'consultId': api.pageParam.consultId,
+                        'comment': evaluateText + '',
+                        "rating": ratStar + "",
+                        "time": new Date().getTime(),
+                        "deviceId": api.deviceId,
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                //console.log("uploadEvaluate-->" + JSON.stringify(ret));
+                if (ret) {
+                    defaultToast(ret.message);
+                    if (ret.success) {
+                        api.closeWin();
+                        api.execScript({
+                            name: 'consult_profession_chat_win',
+                            script: 'endConsult()'
+                        });
+                    }
+                } else {
+                    defaultToast(err.message);
+                    console.log('uploadEvaluate err-->' + JSON.stringify(err));
+                }
+            });
+        } else {
+            defaultToast('提交失败，即将重新登录');
+            pageJump("login", "../login.html", "user_evaluate");
+        }
+    }
+</script>
+
+</html>

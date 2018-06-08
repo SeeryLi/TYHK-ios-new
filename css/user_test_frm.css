@@ -1,0 +1,84 @@
+div{
+  box-sizing: border-box;
+}
+
+.title_info{
+  width: 100%;
+  height: 1.5rem;
+  line-height: 1.5rem;
+  padding-left:0.75rem;
+  color: #999999;
+  font-size: 0.65rem;
+  background-color: #EFF2F7;
+}
+
+.main_num{
+  width: 100%;
+  height: auto;
+  padding-top: 1.5rem;
+}
+
+.pagination{
+  color: #999999;
+  text-align: center;
+}
+
+.pagination_span{
+  color: #3FC190;
+  font-size: 1.2rem;
+}
+
+.main_content{
+  color: #222;
+  line-height: 1.2rem;
+  padding: 1rem 1.5rem 0;
+}
+
+.main_p{
+  font-size: 0.85rem;
+  text-align: center;
+  color: #222;
+}
+
+.box-content{
+  width: 100%;
+  padding: 2rem 0.75rem 0;
+}
+
+.box-text{
+  padding: 0 1rem;
+  position: relative;
+  margin-top: 0.5rem;
+  width: 100%;
+  height: 2.5rem;
+  line-height: 2.5rem;
+  border-radius: 1.3rem;
+  border: 1px solid #E1E1E1;
+  color: #555555;
+}
+
+.box-text>span:nth-child(2){
+  margin-left: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.pick_on{
+  display: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  position: absolute;
+  right: 2.5rem;
+  top: calc(50% - 0.75rem);
+}
+
+.show{
+  display: block !important;
+}
+
+.aui-btn-block{height:2.25rem !important;line-height:2.25rem !important;}
+
+.aui-btn{border-radius: 1.125rem !important;background-color: #3FC190 !important;margin-top: 1.85rem !important;}
+
+.aui-btn-success:active{background-color: #00897b !important;}
+
+.aui-content-padded{margin: 0.75rem !important;}

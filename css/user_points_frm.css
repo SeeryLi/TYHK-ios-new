@@ -1,0 +1,121 @@
+.remaining {
+    width: 100%;
+    height: 8.5rem;
+    padding: 1rem 1.5rem;
+    background-color: #53505F;
+}
+
+.main_info_div {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: .75rem 1.5rem 0;
+    background-image: url("../image/my_mon.png");
+    background-size: 100% 100%;
+}
+
+.num_left {
+    float: left;
+    color: #fff;
+    text-align: center;
+}
+
+.num_left>p, .num_right>p {
+    color: #fff;
+    font-size: 1.5rem;
+}
+
+.num_right {
+    float: right;
+    color: #fff;
+    text-align: center;
+}
+
+.bth_div {
+    position: absolute;
+    bottom: .5rem;
+    left: calc(50% - 3rem);
+    width: 6rem;
+    height: 2rem;
+    line-height: 2rem;
+    font-size: 0.75rem;
+    color: #ECB368;
+    background-color: #FFFFFF;
+    border-radius: 1.4rem;
+    text-align: center;
+}
+
+.bth_div:active {
+    background-color: #bdbdbd;
+}
+
+.title_div {
+    width: 100%;
+    height: 2rem;
+    line-height: 2rem;
+    padding-left: 1rem;
+    font-size: 0.65rem;
+    color: #555;
+    background-color: #EFF2F7;
+}
+
+.ever_task {
+    position: relative;
+    width: 100%;
+    height: 4rem;
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid #EFF2F7;
+}
+
+.ico_img {
+    display: inline-block;
+    max-width: 2rem;
+    max-height: 2rem;
+    border-radius: 2rem;
+}
+
+.tase_info {
+    display: inline-block;
+}
+
+.tase_info_p {
+    position: relative;
+    top: -.25rem;
+    font-size: 0.75rem;
+    color: #222;
+}
+
+.tase_info>p:nth-child(2) {
+    position: relative;
+    top: -.2rem;
+    color: #999;
+    font-size: 0.65rem;
+}
+
+.tase_info img {
+    display: inline-block;
+    max-width: 0.5rem !important;
+    max-height: 0.5rem !important;
+}
+
+.base_bth {
+    position: absolute;
+    right: 0.75rem;
+    top: calc(50% - 0.75rem);
+    width: 3rem;
+    height: 1.5rem;
+    line-height: 1.5rem;
+    border-radius: 0.7rem;
+    font-size: 0.65rem;
+    background-color: #ECB368;
+    color: #fff;
+    text-align: center;
+}
+
+.base_bth:active {
+    background-color: #c69658;
+}
+
+.bth_bg {
+    background-color: #C3C3C3 !important;
+}

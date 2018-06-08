@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>用户的消息记录</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/baseMessage_frm.css" />
+</head>
+
+<body>
+    <div id="chatListMescroll" class="container-div mescroll">
+        <div class="aui-content">
+            <ul id="chatList"></ul>
+            <div id="chatTemplate"></div>
+        </div>
+    </div>
+
+    <script id="chatScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){ }}
+            <section class="aui-chat">
+                <div class="aui-chat-header">{{=it[i].createDate}}</div>
+                    <div class="aui-chat-item aui-chat-left" style="float:none;">
+                    <div class="aui-chat-media">
+                        {{ if(it[i].type == 2){ }}
+                        <img src="../../image/consult_message.png" />
+                        {{ } }}
+                        {{ if(it[i].type == 1){ }}
+                        <img src="../../image/sys_message.png" />
+                        {{ } }}
+                    </div>
+                    <div class="aui-chat-inner">
+                        {{ if(it[i].type == 2){ }}
+                        <div class="aui-chat-name">资讯消息</div>
+                        <div class="aui-chat-content" onclick="jumpToChat('{{=it[i].typeId}}','{{=it[i].type}}')">
+                            <span>{{=it[i].news}}</span>
+                            <br><br><a href="javascript:void(0)">点击查看详情</a>
+                        </div>
+                        {{ } }}
+                        {{ if(it[i].type == 1){ }}
+                        <div class="aui-chat-name">系统消息</div>
+                        <div class="aui-chat-content">
+                            <span>{{=it[i].news}}</span>
+                        </div>
+                        {{ }}}
+                    </div>
+                </div>
+            </section>
+        {{ } }}
+    </script>
+
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/encryption.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    var queryStartNumber = 0;
+    var queryLimit = 20;
+
+    apiready = function() {
+        getNotice();
+    };
+
+    /** 获取消息记录*/
+    function getNotice() {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: getMyNoticesSer,
+                method: 'post',
+                data: {
+                    values: {
+                        'userId': userId,
+                        'queryStartDate': '',
+                        'queryEndDate': '',
+                        'queryStartNumber': queryStartNumber,
+                        'queryLimit': queryLimit,
+                        'queryType': '1,2',
+                        'time': new Date().getTime(),
+                        'deviceId': api.deviceId,
+                        'sign': ''
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if(ret.success){
+                        var requests = ret.data.records.reverse();
+                        $api.html($api.byId("chatTemplate"), "");
+                        $api.append($api.byId("chatTemplate"), doT.template($api.html($api.byId("chatScript")))(requests));
+                        api.parseTapmode();
+                    }
+                    console.log('getNotice-->' + JSON.stringify(ret));
+                } else {
+                    console.log('getNotice-->' + JSON.stringify(err));
+                }
+            });
+
+        } else {
+            defaultToast("获取失败，请重新登录");
+            pageJump('login', '../login.html', 'user_notices');
+        }
+    }
+
+    //跳转到聊天
+    function jumpToChat(consultId,typeId){
+        api.openWin({
+            name: 'consult_profession_chat_win',
+            url: '../consult/consult_profession_chat_win.html',
+            reload:true,
+            pageParam: {
+                consultId: consultId,
+                consultType:typeId,
+            }
+        });
+    }
+</script>
+
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>知识库</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+</head>
+
+<body>
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+        <li class="border-b">
+            <header class="aui-bar aui-bar-nav aui-bar-light title-a">
+                <div class="aui-pull-left aui-btn aui-btn-outlined" onclick="showDialog()">
+                    <img src="../../image/nav_scr.png" width="25px" height="25px" />
+                </div>
+                <div class="aui-title"><b>知识库</b></div>
+                <div class="aui-pull-right aui-btn aui-btn-outlined" onclick="pageJump('repository_search_win','../../html/repository/repository_search_win.html','repository_list_win')">
+                    <img src="../../image/repository/icon_search.png" width="25px" height="25px" />
+                </div>
+            </header>
+        </li>
+    </header>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../fastclick.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/fastclick.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        $api.fixStatusBar($api.dom('header'));
+        api.parseTapmode();
+
+        var headerPos = $api.offset($api.dom('header'));
+        api.openFrame({
+            name: 'repository_list_frm',
+            url: 'repository_list_frm.html',
+            rect: {
+                x: 0,
+                y: headerPos.h,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'test'
+            },
+            bounces: false,
+            bgColor: 'rgba(239,242,247,1)',
+            vScrollBarEnabled: false,
+            hScrollBarEnabled: false
+        });
+    };
+
+    /** 筛选弹出框*/
+    function showDialog() {
+      FastClick.attach(document.body);
+      var jsfun = 'dialogOpen();';
+      api.execScript({
+          frameName: 'repository_list_frm',
+          script: jsfun
+      });
+    }
+</script>
+
+</html>

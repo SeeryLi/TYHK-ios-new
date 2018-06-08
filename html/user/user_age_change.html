@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>年龄修改</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/encryption.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+
+</head>
+
+<body>
+
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+      <div></div>
+        <div>
+            <div class="aui-pull-left aui-btn">
+                <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+            </div>
+            <div class="aui-title head-title"><b>年龄<b></div>
+              <div class="aui-pull-right aui-btn title-right-text" onclick="userAgeChange()">
+                  <span>确定</span>
+              </div>
+        </div>
+    </header>
+    <div class="border-se"></div>
+    <!-- <li class="aui-list-item">
+        <div class="aui-list-item-inner">
+            <div class="aui-list-item-input user-input">
+                <input id="userAgeChange" type="number" placeholder="请输入年龄">
+            </div>
+        </div>
+    </li> -->
+    <div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-form-list">
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-input user-setting-list-left">
+                        <!-- 新增字符验证 -->
+                        <input id="userAgeChange" type='number' placeholder="请输入年龄" onkeyup="(this.v=function(){this.value=this.value.replace(/[^0-9-]+/,'');}).call(this)" onblur="this.v();" />
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+</body>
+
+<script type="text/javascript">
+    apiready = function() {
+      var header = document.querySelector('#header');
+      $api.fixStatusBar(header);
+      initAge();
+    };
+
+    function initAge(){
+      var age = getStorage('userAge');
+      $("#userAgeChange").val(age);
+    }
+    /** 年龄修改*/
+    function userAgeChange() {
+        var age = $api.trimAll($api.val($api.byId('userAgeChange')));
+        var userId = getStorage("userId");
+
+        if (age == "") {
+            defaultToast("请输入年龄");
+            return;
+        }
+        if (age > 99 || age < 0) {
+          defaultToast("您输入的年龄超出限制了");
+          return;
+        }
+
+        if (userId) {
+            api.ajax({
+                url: changeUserInfoSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "flag": "3",
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "userInfo": age + "",
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                console.log("userChange-->" + JSON.stringify(ret));
+                if (ret) {
+                  if (ret.success) {
+                    setStorage("userAge",age)
+                    api.execScript({
+                        name: 'user_info',
+                        frameName: 'user_info_frm',
+                        script: 'setAge('+ JSON.stringify(age) +');'
+                    });
+                  }
+                  defaultToast(ret.message);
+                  api.closeWin();
+                } else {
+                  defaultToast(err.message);
+                }
+            });
+
+        } else {
+            pageJump('login', '../login.html', 'user_name_change');
+        }
+
+
+    }
+</script>
+
+</html>

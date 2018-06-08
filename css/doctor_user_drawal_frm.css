@@ -1,0 +1,45 @@
+ body{
+	      	background-color: RGBA(239, 242, 247, 1);
+	      }
+      	.aui-list .aui-list-header{
+      		/* width:18rem; */
+      		height:2rem;
+      		font-size:0.75rem;
+      		background-color:RGBA(239, 242, 247, 1) !important;
+      	}
+      	
+      	.aui-list .aui-list-item {
+      		/* width:18rem; */
+      		height:2.5rem;
+      		border-bottom:0;
+      	}
+      	
+      	#subBtn{
+      		padding:2.5rem 0 0 0;
+      		background:RGBA(239, 242, 247, 1);
+      	}
+      	.aui-btn{
+      		line-height:2.5rem;
+      		width:15rem;
+      		height:2.5rem;
+      		margin: 0 1.5rem;
+      		background:RGBA(63, 193, 144, 1);
+      		font-size:1rem;
+      		color:RGBA(255, 255, 255, 1);
+      		border-radius:2.5rem;
+      	}
+      	
+      	#note{
+      		padding:0 1rem;
+      		font-size:0.6rem;
+      		color:RGBA(153, 153, 153, 1);
+      		background:RGBA(239, 242, 247, 1);
+      	}
+      	
+      	#goldNotice{
+      		color:RGBA(236, 179, 104, 1);
+      		font-size:0.7rem;
+      		position:fixed;
+      		left:0.7rem;
+      		top:9rem;
+      	}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>医生主页</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+</head>
+
+<body>
+    <header id="header" class="aui-bar aui-bar-nav aui-bar-light title-a">
+        <div class="aui-pull-left aui-btn" onclick="goBack()">
+            <span class="aui-iconfont aui-icon-left span-left2"></span>
+        </div>
+        <div class="aui-title"><b>医生主页</b></div>
+    </header>
+</body>
+
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+
+
+<script type="text/javascript">
+    var mDoctorId;
+    var mDoctorName;
+    var hireGold;
+    var requestId;
+    apiready = function() {
+
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        var header = $api.byId('header');
+        var headerH = $api.offset(header).h;
+        requestId = getUUID();
+        api.openFrame({
+            name: 'doctor_main_frame',
+            url: 'doctor_main_frame.html',
+            rect: {
+                x: 0,
+                y: headerH,
+                w: "auto",
+                h: api.winHeight - headerH
+            },
+            pageParam: {
+                name: 'doctor_main',
+                doctorId: api.pageParam.doctorId
+            },
+            bounces: false,
+            bgColor: 'rgba(0,0,0,0)',
+            vScrollBarEnabled: false,
+            hScrollBarEnabled: false
+        });
+
+    };
+
+    /** 获取医生的基本信息*/
+    function getDocInfo(doctorInfo) {
+        hireGold = doctorInfo.hireGold;
+        mDoctorId = doctorInfo.doctroId;
+        mDoctorName = doctorInfo.doctorName;
+        if (doctorInfo.consultEnable == 1) {
+            $api.byId('consultMoney').innerText = doctorInfo.hireGold;
+        } else {
+            $api.text($api.byId('consult-status'), '咨询已暂停');
+        }
+    }
+
+</script>
+
+</html>

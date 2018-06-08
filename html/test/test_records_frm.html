@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>测试结果</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+</head>
+
+<body>
+    <div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-list-in" id='test-result-list'>
+        </ul>
+    </div>
+
+    <script id='testResultScript' type="text/template">
+        {{for(var i = 0;i< it.length;i++){ }}
+         <li class="aui-list-item" onclick="testResultJump('{{=it[i].id}}','{{=it[i].price}}','{{=it[i].isTested}}','{{=it[i].resultId}}','{{=it[i].testName}}')">
+            <div class="aui-list-item-inner aui-list-item-arrow">
+                <div class="aui-list-item-title">{{=it[i].testName}}</div>
+                  {{if('{{=it[i].isTested}}' == 1){ }}
+                    <div class="aui-list-item-right">已测试</div>
+                  {{ }else{ }}
+                    <div class="aui-list-item-right">未测试</div>
+                  {{ }}}
+            </div>
+          </li>
+        {{ }}}
+    </script>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript">
+    var dialog = new auiDialog();
+    apiready = function() {
+        getTestCatalogue();
+        api.addEventListener({
+            name: 'refreshTestRecord'
+        }, function(ret, err){
+            if( ret ){
+              getTestCatalogue();
+            }
+        });
+
+    };
+
+    /** 获取测试记录*/
+    function getTestCatalogue() {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: userTestResult,
+                method: 'post',
+                data: {
+                  values: {
+                      "userId": userId
+                  },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if (ret.success) {
+                        var testListData = ret.data;
+                        $api.html($api.byId("test-result-list"), "");
+                        $api.append($api.byId("test-result-list"), doT.template($api.html($api.byId("testResultScript")))(testListData));
+                        api.parseTapmode();
+                    } else {
+                        defaultToast(ret.message);
+                    }
+                    //console.log("getTestCatalogue ret-->" + JSON.stringify(ret));
+                } else {
+                    defaultToast(err.message);
+                    //console.log("getTestCatalogue err-->" + JSON.stringify(err));
+                }
+            });
+        } else {
+            defaultToast("获取失败，将重新登录");
+            pageJump('login', '../login.html', "tset_main_frm");
+        }
+    }
+
+    /** 获取用户剩余的币*/
+    function getUserCurrency(price, id,header) {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: getMyCurrencySer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "time": new Date().getTime(),
+                        "deviceId": api.deviceId,
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                //console.log("getMyCurrencySer-->" + JSON.stringify(ret));
+                if (ret) {
+                    showDialog(price,ret.data.sunGold,id,header);
+                } else {
+
+                }
+            });
+        } else {
+            pageJump('login', './login.html', 'test_main_frm');
+        }
+    }
+
+    /** 扣费*/
+    function consume(id,header) {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: testConsume,
+                method: 'post',
+                data: {
+                    values: {
+                        'userId': userId,
+                        'directoryId': id
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    //console.log("consume-->" + JSON.stringify(ret));
+                    if (ret.success) {
+                      api.openWin({
+                          name: 'user_test_win',
+                          url: './user_test_win.html',
+                          pageParam: {
+                              questionId: id,
+                              header:header
+                          }
+                      });
+                      api.sendEvent({
+            						name: 'getUserInfo',
+                        extra: {
+                          userId: getStorage('userId'),
+                        }
+            					});
+                    }else {
+                      defaultToast(ret.message);
+                      dialog.hide();
+                    }
+                } else {
+                  defaultToast(err.message);
+                  dialog.hide();
+                  console.log("consume-->" + JSON.stringify(err));
+                }
+            });
+        } else {
+            pageJump('login', './login.html', 'test_main_frm');
+        }
+    }
+
+    /** 点击跳转界面*/
+    function testResultJump(id,price,isTested,resultId,header){
+      console.log(JSON.stringify(isTested));
+      if(isTested == 1){
+        api.openWin({
+            name: 'test_record_detail',
+            url: './test_record_detail.html',
+            pageParam: {
+              resultId: resultId
+            }
+        });
+      }else{
+          defaultToast('请先进行测试！');
+          return;
+      }
+    }
+
+    /** 支付弹出框*/
+    function showDialog(number,allnumber,id,header){
+
+      dialog.alert({
+          title:"支付阳光币",
+          msg:'<h2 style="color:#ECB368;">-'+ (number || 0) +'</h2><p style="color:#999999;font-size:0.75rem;margin-top:0.75rem;">当前阳光币' +( allnumber || 0) +'</p>',
+          buttons:['<img src="../../image/home_form_pop_close.png"/>','确定']
+      },function(ret){
+          console.log(ret);
+          if (ret.buttonIndex == 2) {//点击确定
+            consume(id,header);
+          }
+      })
+    }
+</script>
+
+</html>

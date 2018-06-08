@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="format-detection" content="telephone=no">
+    <title>睡眠质量测试</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main_style.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user_test_frm.css" />
+  </head>
+  <body>
+      <div class="tsf_warp_div">
+          <div class="tsf_title">
+            提醒：请根据您过去2周状况，选出符合您的选项卡。
+          </div>
+          <div class="tsf_content_box">
+              <p class="tsf_chaild_p"><span id="quesion-id" class="tsf_child_span1"></span>/<span id="question-count" class="tsf_child_span2"></span></p>
+              <p id='question-title' class="tsf_info_title"></p>
+              <ul id="question-options" class="box-content" style="display:none;">
+              </ul>
+              <ul id='test-time-ul' class="tsf_main_box">
+              </ul>
+      </div>
+    </div>
+
+    <script id='testTimeScript' type="text/template">
+        {{for(var i = 0;i < it.length; i++){ }}
+        <li class="tsf_time_div" onclick="basePickon(this,'{{=it[i]}}')">
+            {{=it[i]}}
+        </li>
+        {{ }}}
+    </script>
+
+    <script id='questionOptionScript' type="text/template">
+      {{for(var i = 0;i< it.length;i++){ }}
+       <li>
+          <div class="box-text" onclick="basePickon(this,{{=it[i].optionScore}})">
+                   <span>{{=it[i].optionFlag}}</span>
+                  <span>{{=it[i].optionContent}}</span>
+                  <img class="pick_on" src="../../image/home_list_right.png" alt="">
+          </div>
+      </li>
+      {{}}}
+    </script>
+
+  </body>
+  <script type="text/javascript" src="../../script/api.js"></script>
+  <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+  <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+  <script type="text/javascript" src="../../script/commit/utils.js"></script>
+  <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+  <script type="text/javascript" src="../../script/commit/image-cache.js"></script>
+  <script type="text/javascript" src="../../script/doT.min.js"></script>
+  <script type="text/javascript">
+    timeArr = new Array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23);
+    var isChoice = false;
+    var testLength ;
+    var questionList;
+    var answerId = 0;
+
+    apiready = function(){
+      api.parseTapmode();
+      timeBg();
+      getQuestionList();
+      answerId = 0;
+      questionList = new Array();
+      $api.html($api.byId('question-options'), '');
+      $api.html($api.byId("test-time-ul"), '');
+      $('#quesion-id').text(1 + '');
+    }
+
+    // 点击着色
+    function timeBg(){
+      $(".tsf_time_div").each(function(){
+          $(this).click(function(){
+            $(".tsf_time_div").removeClass("tsf_color");
+            $(this).addClass("tsf_color");
+          });
+      });
+    }
+
+    /**选中*/
+    function basePickon(el, optionScore) {
+        $(".box-text").attr("onclick", "null");//设置只能选择一次
+        $(".tsf_time_div").attr('onclick','null');
+
+        $(".pick_on").removeClass("show");
+        $(el).children(".pick_on").addClass("show");
+
+        $(el).removeClass("tsf_color");
+        $(el).addClass("tsf_color");
+        questionList[answerId - 1].score = optionScore;
+        isChoice = true;
+        setTimeout(
+            function(){
+                if($('#quesion-id').text() < questionList){
+                    nextQuestion();
+                }else{
+                    commitResult();
+                }
+            },500);
+    }
+
+    /** 获取测试题目列表*/
+    function getQuestionList() {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: getTestCatalogueSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "directoryId": api.pageParam.questionId,
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    //console.log('getQuestionList ret-- >' + JSON.stringify(ret));
+                    if (ret.success) {
+                        questionList = ret.data;
+                        testLength = ret.data.length;
+                        if (questionList && questionList.length > 0) {
+                            $('#question-count').text(questionList.length + '');
+                            nextQuestion();
+                        }
+                    } else {
+                        defaultToast(ret.message);
+                    }
+                } else {
+                    defaultToast(err.message);
+                }
+            });
+        } else {
+            defaultToast("获取失败，将重新登录");
+            pageJump('login', '../login.html', 'user_test');
+        }
+    }
+
+    /** 结算结果*/
+    function getResult(){
+      var sleepB = questionList[2].score + questionList[4].score;//入睡时间
+      var mathNum;
+      if (sleepB = 0) {
+        sleepB = 0;
+      }else if(sleepB >= 0 && sleepB <= 2){
+        sleepB = 1;
+      }else if (sleepB >= 3 && sleepB <= 4) {
+        sleepB = 2;
+      }else if (sleepB >= 5 && sleepB <= 6) {
+        sleepB = 3;
+      }
+      if(questionList[1].score > questionList[0].score){
+        mathNum = questionList[1].score - questionList[0].score;
+      }else{
+        mathNum = questionList[1].score - questionList[0].score + 24;
+      }
+      var sleepD;//睡眠效率
+      if (mathNum == 0) {
+        sleepD = 0;
+      }else{
+        sleepD = questionList[3].score/Math.abs(mathNum);
+        if (sleepD > 0.85 ) {
+          sleepD = 0;
+        }else if (sleepD >= 0.75 && sleepD <= 0.84) {
+          sleepD = 1;
+        }else if (sleepD >= 0.65 && sleepD <= 0.74) {
+          sleepD = 2;
+        }else if (sleepD <= 0.64) {
+          sleepD = 3;
+        }
+      }
+      var sleepE = questionList[5].score + questionList[6].score + questionList[7].score + questionList[8].score
+      + questionList[9].score + questionList[10].score + questionList[11].score + questionList[12].score + questionList[13].score;//睡眠障碍
+      if (sleepE = 0 ) {
+        sleepE = 0;
+      }else if (sleepE >= 1 && sleepE <= 9) {
+        sleepE = 1;
+      }else if (sleepE >= 10 && sleepE <= 18) {
+        sleepE = 2;
+      }else if (sleepE >= 19 && sleepE <= 27) {
+        sleepE = 3;
+      }
+      var sleepG = questionList[16].score + questionList[17].score;
+      if (sleepG = 0) {
+        sleepG = 0;
+      }else if(sleepG >= 0 && sleepG <= 2){
+        sleepG = 1;
+      }else if (sleepG >= 3 && sleepG <= 4) {
+        sleepG = 2;
+      }else if (sleepG >= 5 && sleepG <= 6) {
+        sleepG = 3;
+      }
+      var scoreStr = questionList[14].score + questionList[3].score + questionList[15].score + sleepB + sleepD + sleepE + sleepG;
+      return scoreStr;
+    }
+
+    /**提交测试结果*/
+    function commitResult() {
+        var userId = getStorage("userId");
+        var scoreStr = getResult();
+        showToast("");
+        if (userId) {
+            api.ajax({
+                url: commitTestResult,
+                method: 'post',
+                data: {
+                    values: {
+                        "directoryId": api.pageParam.questionId,
+                        "sorce": scoreStr + '',
+                        "userId": userId
+                    },
+
+                }
+            }, function(ret, err) {
+                toast.hide();
+                if (ret) {
+                    if (ret.success) {
+                        ret.data.pageName = 'user_test';
+                        api.openWin({
+                            name: 'test_record_detail',
+                            url: './test_record_detail.html',
+                            pageParam: {
+                                result: ret.data,
+                            }
+                        });
+                        api.sendEvent({
+                            name: 'refreshTestRecord',
+                        });
+
+                    } else {
+                        defaultToast(ret.message);
+                    }
+                } else {
+                    defaultToast(err.message);
+                }
+            });
+        } else {
+            defaultToast("提交失败，将重新登录");
+            pageJump('login', '../login.html', 'user_test');
+        }
+    }
+
+    // 下一题
+    function nextQuestion() {
+
+        if (questionList && questionList.length > 0) {
+            var questionJson = questionList[answerId];
+            if (answerId == questionList.length) {
+                commitResult();
+                return;
+            }
+            $('#question-title').text(questionJson.questionContent);
+            $('#quesion-id').text(answerId + 1 + '');
+            var questionOptions = questionJson.optionList;
+            $api.html($api.byId("question-options"), "");
+            if (questionOptions.length == 0) {
+              $api.html($api.byId("test-time-ul"), '');
+              $api.append($api.byId("test-time-ul"), doT.template($api.html($api.byId("testTimeScript")))(timeArr));
+              $api.css($api.byId("test-time-ul"), 'display:block;');
+              $api.css($api.byId("question-options"), 'display:none;');
+            } else{
+              $api.html($api.byId("question-options"), '');
+              $api.append($api.byId("question-options"), doT.template($api.html($api.byId("questionOptionScript")))(questionOptions));
+              $api.css($api.byId("test-time-ul"), 'display:none;');
+              $api.css($api.byId("question-options"), 'display:block;');
+            }
+
+            answerId++;
+            if (answerId == questionList.length) {
+                $('#question-btn').text('提交');
+            }
+            isChoice = false;
+        }
+    }
+  </script>
+</html>

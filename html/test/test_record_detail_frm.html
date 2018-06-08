@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>自测结果展示</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/test_record_detail_frm.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+</head>
+
+<body>
+    <div class="aui-content">
+        <ul class="aui-list aui-form-list">
+            <li>
+                <div class="title_info">
+                    提醒：测试结果仅供参考,请以医生指导治疗为准。
+                </div>
+            </li>
+            <li>
+                <p class="title-p">结果分析</p>
+                <img id="test-result-level-exp" class="base_img" src="../../image/home_list_exp_a.png" alt="">
+                <div class="box_text">
+                    <p class="title-p">测试建议</p>
+                    <p id="test-advice"></p>
+                </div>
+            </li>
+        </ul>
+        <!-- 按钮 -->
+        <div id="test-record-detail-counsult" class="aui-content-padded bth-log1 dis">
+            <div class="aui-btn aui-btn-success aui-btn-block " onclick="backHome()" >
+                返回首页
+            </div>
+        </div>
+        <div id="test-record-detail-back" class="aui-content-padded bth-log1 dis" onclick="testAgain()">
+            <div class="aui-btn aui-btn-block bth-bor">继续测评</div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    var testResult;
+    apiready = function() {
+        testResult = api.pageParam.result;
+        if (typeof(testResult) != "undefined" && testResult) {
+            console.log('testresylt-->' + JSON.stringify(testResult));
+            $('#test-advice').text(testResult.advice);
+            var pageName = testResult.pageName;
+            var resultLevel = testResult.level;
+            if (pageName == 'user_test') {
+                $('#test-record-detail-counsult').removeClass("dis");
+                $('#test-record-detail-back').removeClass("dis");
+                $('#test-record-detail-counsult').addClass('show');
+                $('#test-record-detail-back').addClass('show');
+            }
+            if (resultLevel == 1) {
+                $api.attr($api.byId('test-result-level-exp'), 'src', '../../image/home_list_exp_e.png');
+            } else if (resultLevel == 2) {
+                $api.attr($api.byId('test-result-level-exp'), 'src', '../../image/home_list_exp_d.png');
+            } else if (resultLevel == 3) {
+                $api.attr($api.byId('test-result-level-exp'), 'src', '../../image/home_list_exp_c.png');
+            } else if (resultLevel == 4) {
+                $api.attr($api.byId('test-result-level-exp'), 'src', '../../image/home_list_exp_b.png');
+            } else {
+                $api.attr($api.byId('test-result-level-exp'), 'src', '../../image/home_list_exp_a.png');
+            }
+        } else {
+          $('#test-record-detail-counsult').removeClass("show");
+          $('#test-record-detail-back').removeClass("show");
+          $('#test-record-detail-counsult').addClass('dis');
+          $('#test-record-detail-back').addClass('dis');
+            getTestReult();
+        }
+    };
+
+    /** 获取测试结果*/
+    function getTestReult() {
+        api.ajax({
+            url: getUserTestResult,
+            method: 'post',
+            data: {
+                values: {
+                    'resultId': api.pageParam.resultId
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.success) {
+                    $('#test-advice').text(ret.data.advice);
+                    var resultLevel = ret.data.level;
+                    if (resultLevel == 1) {
+                        $api.attr($api.byId('test-result-level-exp'), 'src', '../../image/home_list_exp_e.png');
+                    } else if (resultLevel == 2) {
+                        $api.attr($api.byId('test-result-level-exp'), 'src', '../../image/home_list_exp_d.png');
+                    } else if (resultLevel == 3) {
+                        $api.attr($api.byId('test-result-level-exp'), 'src', '../../image/home_list_exp_c.png');
+                    } else if (resultLevel == 4) {
+                        $api.attr($api.byId('test-result-level-exp'), 'src', '../../image/home_list_exp_b.png');
+                    } else {
+                        $api.attr($api.byId('test-result-level-exp'), 'src', '../../image/home_list_exp_a.png');
+                    }
+                }
+                console.log('getTestReult ret-->' + JSON.stringify(ret));
+            } else {
+                console.log('getTestReult err-->' + JSON.stringify(err));
+            }
+        });
+
+    }
+
+    /** 返回首页*/
+    function backHome() {
+        api.openWin({
+            name: 'index',
+            url: '../../index.html',
+        });
+    }
+
+    /** 继续测评*/
+    function testAgain() {
+        api.closeToWin({
+            name: 'test_main_win',
+            url: '../test/test_main_win.html',
+        });
+    }
+
+</script>
+
+</html>

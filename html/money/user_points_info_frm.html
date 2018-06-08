@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>阳光币明细--列表</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user_points_info_frm.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/consult/consult_record.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/mescroll.min.css">
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/fastclick.js"></script>
+    <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../script/commit/encryption.js"></script>
+    <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+    <script type="text/javascript" src="../../script/doT.min.js"></script>
+    <script type="text/javascript" src="../../script/doT.min.js"></script>
+    <script type="text/javascript" src="../../script/mescroll.min.js"></script>
+</head>
+
+<body>
+<!--"success":true,"message":"操作成功","data":{"queryStartDate":"","queryType":"","record":[{"id":"1","type":"1","time":1519628170000,"content":"充值"}
+,{"id":"2","type":"0","time":1519628187000,"content":"充值"}],"queryLimit":"","userId":"2277b5997e014c46ba8f3e5fdf4ba15b","queryStartNumber":"","queryEndDate":"","size":2}}
+  1表示增加积分，0表示减积分-->
+    <script id="dataListScript" type="text/template">
+      {{for(var i = 0;i< it.length;i++){}}
+      <li>
+          <div class="aui-media-list-item-inner">
+                <div class="box-divs">
+                    <p>{{=it[i].content}}</p>
+                    <p>{{=it[i].time}}</p>
+                    {{if(it[i].type == '0'){ }}
+                        <p>-{{=it[i].money}}</p>
+                    {{ }else{ }}
+                        <p>+{{=it[i].money}}</p>
+                    {{ }}}
+            </div>
+      </li>
+      {{}}}
+    </script>
+
+    <div id="points-info-mescroll" class="aui-content aui-margin-b-15 mescroll" style="height:100%;">
+        <ul id="pointsInfoList" class="aui-list aui-media-list">
+        </ul>
+        <div id="points-info-empty" class="record-div" style="display: none;">
+          <img src="../../image/doctor/my_deta_no.png" alt="">
+        </div>
+    </div>
+
+    <!--  弹窗-->
+    <div id="dialog-box-div" class="dialog-box-div">
+        <div class="main-divs">
+          <ul class="aui-list aui-media-list">
+            <li onclick="getQueryType(0)">
+              <div class="aui-media-list-item-inner">
+                <div class="main-div-p">
+                  全部
+                </div>
+                </div>
+            </li>
+            <li onclick="getQueryType(1)">
+              <div class="aui-media-list-item-inner">
+                <div class="main-div-p">
+                  获得明细
+                </div>
+                </div>
+            </li>
+            <li onclick="getQueryType(2)">
+              <div class="aui-media-list-item-inner">
+                <div class="main-div-p">
+                  消费明细
+                </div>
+                </div>
+            </li>
+          </ul>
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+    var userType;
+    var queryType = 0;
+    var serPath;
+    var mescroll;
+    apiready = function() {
+      userType = getStorage('userAppType');
+      if (userType == '4') {
+          serPath = getDoctorTransactionDetailSer;
+      }else{
+         serPath = getUserMoneyInfoSer;
+      }
+      // click清除300S延迟
+      FastClick.attach(document.body);
+      //创建MeScroll对象,内部已默认开启下拉刷新,自动执行up.callback,重置列表数据;
+      mescroll = new MeScroll("points-info-mescroll", {
+        up: {
+            auto: false, //是否在初始化时以上拉加载的方式自动加载第一页数据; 默认false
+            clearEmptyId: "pointsInfoList",
+            isBounce: false, //此处禁止ios回弹
+            callback: upCallback, //上拉回调,此处可简写; 相当于 callback: function (page) { upCallback(page); }
+            toTop: {
+                src: "../../image/mescroll-totop.png",
+            },
+            page: {
+              size:50
+            }
+        }
+      });
+    };
+
+    /*上拉加载的回调 page = {num:1, size:10}; num:当前页 从1开始, size:每页数据条数 */
+    function upCallback(page) {
+      getUserMoneyInfo(queryType,page.num, page.size, function(curPageData) {
+          //mescroll会根据传的参数,自动判断列表如果无任何数据,则提示空;列表无下一页数据,则提示无更多数据;
+          console.log("page.num=" + page.num + ", page.size=" + page.size + ", curPageData.length=" + curPageData.length);
+          if (curPageData.length < page.num) {
+            mescroll.endSuccess(curPageData.length, false);
+          }else{
+            mescroll.endSuccess(curPageData.length, true);
+          }
+          $api.append($api.byId("pointsInfoList"), doT.template($api.html($api.byId("dataListScript")))(curPageData));
+      }, function() {
+          //联网失败的回调,隐藏下拉刷新和上拉加载的状态;
+          mescroll.endErr();
+      });
+    }
+
+    /** 获取交易明细 筛选 0：全部 1：获得金币明细 2：花费金币明细*/
+    function getUserMoneyInfo(queryType,pageNum, pageSize, successCallback, errorCallback) {
+        var userId = getStorage("userId");
+        if (userId) {
+            //console.log("pageNum=" + pageNum + ", pageSize=" + pageSize);
+            api.ajax({
+                url: serPath,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "queryStartDate": '',
+                        "queryEndDate": '',
+                        "queryStartNumber": (pageNum - 1)*pageSize +　'',
+                        "queryLimit": pageSize,
+                        "queryType":queryType + '',
+                        "time": new Date().getTime(),
+                        "deviceId": api.deviceId,
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                //console.log("getgetUserMoneyInfo ret-->" + JSON.stringify(ret));
+                //console.log("getgetUserMoneyInfo err-->" + JSON.stringify(err));
+                if (ret) {
+                  if (ret.success) {
+                    var pointsArr = ret.data.record;
+                    successCallback && successCallback(pointsArr);
+                  }else{
+                    defaultToast(ret.message);
+                    errorCallback && errorCallback();
+                  }
+                } else {
+                    defaultToast(err.message);
+                    errorCallback && errorCallback();
+                }
+            });
+        } else {
+            defaultToast("获取失败，将重新登录");
+            pageJump('login', '../login.html', 'user_points_info_frm');
+        }
+    }
+
+    /**获取筛选信息*/
+    function getQueryType(type){
+      if ($(".dialog-box-div").hasClass("show")) {
+        $(".main-divs").animate({top:"-=7rem"},300);
+         setTimeout(function(){
+          $(".dialog-box-div").removeClass("show");
+        },200);
+      }
+      queryType = type;
+      mescroll.resetUpScroll( true );
+    }
+
+    // 筛选
+    function funcGoto(){
+      var pardiv = $(".dialog-box-div");
+      // 取消touchmove
+        pardiv.bind('touchmove', function(event) {
+        return false;
+      });
+        if(!(pardiv.hasClass("show"))){
+        var frameH = api.frameHeight;
+        pardiv.height(frameH);
+        $(".main-divs").animate({top:"0"},300);
+        pardiv.addClass("show");
+        }else {
+        $(".main-divs").animate({top:"-7rem"},300);
+         setTimeout(function(){
+        pardiv.removeClass("show");
+        },200);
+        }
+        $(".main-div-p").each(function(){
+        $(this).click(function(){
+          $(".main-div-p").removeClass("show-color");
+          $(this).addClass("show-color");
+        });
+      });
+    }
+</script>
+
+</html>

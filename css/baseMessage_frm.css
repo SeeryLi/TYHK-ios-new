@@ -1,0 +1,60 @@
+body{
+  background-color: #EFF2F7;
+}
+.aui-chat-content {
+    max-width: 96% !important;
+    background-color: #fff !important;
+    font-size: 0.65rem !important;
+    color: #222 !important;
+}
+
+.aui-chat-media,
+.aui-chat-media img {
+    width: 2rem;
+    height: 2rem;
+}
+
+a {
+    font-size: 0.75rem;
+    color: #3FC190;
+}
+
+.aui-list-item-text{
+  width: calc(100% - 3rem) !important;
+}
+
+.base_title_1{
+  color: #222 !important;
+  font-weight: bold;
+  font-size: 0.75rem !important;
+}
+
+.base_info{
+  display: inline-block !important;
+  width: calc(100% - 5rem) !important;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #555 !important;
+  font-size: 0.6rem !important;
+}
+
+
+.time_div{
+  position: absolute;
+  right: 0.75rem;
+  color: #606060;
+  font-size: 0.6rem;
+}
+
+.aui-badge{
+  right: 0.75rem;
+}
+
+.aui-list-item-inner{
+  width: calc(100% - 3rem) !important;
+}
+
+.aui-list-item{
+  overflow: hidden;
+}

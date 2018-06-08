@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>提醒列表页</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/remind.css" />
+</head>
+
+<body>
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+        <div></div>
+        <div class="bottom-br">
+        <div class="aui-pull-left aui-btn">
+            <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+        </div>
+        <div class="aui-title"><b>服药提醒<b></div>
+        <div class="aui-pull-right aui-btn aui-btn-outlined mar-l" onclick="pageJump('medicines_record_win','./medicines_record_win.html','edit_remind_result_right_win')">
+            <img src="../../image/remind/sign.png" width="25px" height="25px" style="margin-right:0.75rem;"/>
+        </div>
+        <div class="aui-pull-right aui-btn aui-btn-outlined mar-r">
+            <img src="../../image/remind/change.png" width="25px" height="25px" onclick="pageJump('edit_remind_result_right_win','./edit_remind_result_right_win.html','edit_remind_result_right_win')" />
+        </div>
+    </div>
+  </header>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-popup.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-range.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+      var header = document.querySelector('#header');
+      $api.fixStatusBar(header);
+      var headerPos = $api.offset($api.dom('header'));
+      api.openFrame({
+          name: 'remind_result_right_frm',
+          url: 'remind_result_right_frm.html',
+          rect: {
+              x: 0,
+              y: headerPos.h,
+              w: 'auto',
+              h: 'auto'
+          },
+      });
+    };
+
+
+</script>
+
+</html>

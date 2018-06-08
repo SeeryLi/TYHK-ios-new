@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>用户提现</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+</head>
+
+<body>
+    <header class="aui-bar aui-bar-nav aui-bar-light">
+        <div class="aui-pull-left aui-btn" onclick="goBack()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </div>
+        <div class="aui-title">提现</div>
+    </header>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/encryption.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+
+    };
+
+    /** 提现*/
+    function withdrawDeposit(){
+      var userId = getStorage("userId");
+      if (userId) {
+          api.ajax({
+              url: withdrawDepositSer,
+              method: 'post',
+              data: {
+                  values: {
+                      "userId": userId,
+                      "currency":"",
+                      "time": new Date().getTime(),
+                      "deviceId": api.deviceId,
+                      "sign": ""
+                  },
+              }
+          }, function(ret, err) {
+              console.log("withdrawDeposit-->" + JSON.stringify(ret));
+              if (ret) {
+                  alert(JSON.stringify(ret));
+              } else {
+                  alert(JSON.stringify(err));
+              }
+          });
+      } else {
+          defaultToast("提现失败，请重新登录");
+          pageJump('login', '../login.html', 'user_withdraw');
+      }
+    }
+
+</script>
+
+</html>

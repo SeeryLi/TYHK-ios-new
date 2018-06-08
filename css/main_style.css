@@ -1,0 +1,327 @@
+/*公共*/
+img[src=""],img:not([src]){
+      opacity:0;
+ }
+
+.dis{
+  display: none;
+}
+
+.show{
+  display: block !important;
+}
+
+.fontSize{
+  font-size:0.75rem !important;
+  margin-top: 1rem;
+}
+/*clinical_data_frm 病例资料页面*/
+
+.cdr_warp_box{
+  padding: 0 0.75rem;
+  overflow: hidden;
+}
+
+.border-se {
+    width: 100%;
+    height: 0.5rem;
+    background-color: #EFF2F7;
+}
+
+.cdr_base_title{
+  width: 100%;
+  height: 2.25rem;
+  line-height: 2.25rem;
+  color: #222;
+  font-size: 0.75rem;
+}
+
+.cdr_photo_box{
+  position: relative;
+  width: 100%;
+  height: 7.5rem;
+  background-color: #EFF2F7;
+  overflow: hidden;
+}
+
+#cdr_user_photo_pic{
+  margin: auto;
+  /*width: 100% !important;*/
+  height: 7.6rem !important;
+}
+
+.cdr_ico_userP{
+  position: absolute;
+  top: calc(50% - 1.75rem);
+  left:calc(50% - 1.75rem);
+  max-width: 3.5rem;
+  max-height: 3.5rem;
+  z-index: 3;
+}
+
+.textarea-div {
+    width: 100%;
+    height: 8.75rem;
+    position: relative;
+    background: #EFF2F7;
+}
+
+.textarea-div>textarea {
+    margin: 0;
+    height: 85%;
+    padding: 0.5rem;
+    font-size: 0.65rem;
+    word-wrap: break-word;
+    overflow:auto;
+    overflow-x: hidden;
+}
+
+.textarea-div>p {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.4rem;
+}
+
+
+/*patient_data_frm 患者资料页面*/
+
+.pdf_l_div{
+  color: #222 !important;
+  font-size: 0.75rem !important;
+}
+
+.pdf_r_div{
+  color: #555 !important;
+  font-size: 0.75rem !important;
+}
+
+.pdf_bor_no{
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+}
+
+.pdf_photo_div{
+  padding: 0.5rem 0;
+  width: 100%;
+  height: 4.5rem;
+  line-height: 3.5rem;
+}
+
+.pdf_span{
+  color: #222;
+  font-size: 0.75rem;
+}
+
+.pdf_photo_r{
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-right: 0.75rem;
+  overflow: hidden;
+  float: right;
+}
+
+#pdf_life_photo{
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.pad_main_text{
+  padding-top: 0.7rem;
+  color: #555;
+  font-size: 0.75rem;
+  word-wrap: break-word;
+}
+
+.pdf_title{
+  color: #222;
+  font-size: 0.75rem;
+  width: 100%;
+  height: 2.25rem;
+  line-height: 2.25rem;
+  border-bottom: 1px solid #E1E1E1;
+}
+
+.pdf_li{
+  padding: 0 0.75rem;
+}
+
+.pdf_dialogImg{
+  padding: 0.75rem;
+  width: 100%;
+  background-color: rgba(0,0,0,.3);
+  position: fixed;
+  top: 0;
+  z-index: 999;
+}
+
+.pdf_boxImg{
+  width: auto;
+  height: 75%;
+  position: relative;
+  top: 12.5%;
+  text-align: center;
+  animation: showdialog 0.3s;
+  -moz-animation: showdialog  0.3s; /* Firefox */
+  -webkit-animation: showdialog  0.3s; /* Safari and Chrome */
+  -o-animation: showdialog  0.3s; /* Opera */
+}
+
+.pdf_boxImg>img{
+  margin: auto;
+  /*max-height: 12.5rem;*/
+  max-height: 100%;
+}
+
+@keyframes showdialog{
+    0%{ opacity: 0; transform: translate(800px, 0) }
+    100%(opacity: 1; transform: translate(0, 0) )
+}
+
+/*visit_report_frm 复诊报告頁面*/
+
+.vrf_man_div{
+  padding: 0.75rem;
+  width: 100%;
+  height: 7.5rem;
+}
+
+.vrf_title{
+  color: #222;
+  font-size: 0.8rem;
+}
+
+.vrf_fle{
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  margin-top: 0.8rem;
+}
+
+.vrf_fle_div{
+  position: relative;
+  margin-left: 0.375rem;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  background-color: #F5F5F5;
+  text-align: center;
+  height: 3.75rem;
+}
+
+.vrf_fle_div:first-child{
+  margin-left: 0 !important;
+}
+
+.vrf_fle_div>p{
+  font-size:1.75rem;
+  color: #3FC190;
+}
+
+.vrf_fle_div>span{
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  left:0;
+  bottom: 0.5rem;
+  color: #999;
+  font-size: 0.5rem;
+
+}
+
+.vrf_up,.vrf_down{
+  display: none;
+  position: absolute;
+  right: 0.5rem;
+  top: 1.3rem;
+  color: #ECB368;
+  font-size: 0.5rem;
+}
+
+.vrf_linellae{
+  width: 100%;
+  height: 11.25rem;
+}
+
+.vrf_circle{
+  width: 100%;
+  height: 15rem;
+  margin-bottom: 1rem;
+}
+
+/*test_sleep_frm 睡眠质量测试页面*/
+
+.tsf_title{
+  padding-left: 0.75rem;
+  width: 100%;
+  height: 1.5rem;
+  line-height: 1.5rem;
+  color: #999;
+  font-size: 0.65rem;
+  background-color: #EFF2F7;
+}
+
+.tsf_content_box{
+  padding: 1.25rem 1.5rem 0;
+}
+
+.tsf_chaild_p{
+  text-align: center;
+  color: #999;
+}
+
+.tsf_child_span1,.tsf_child_span2,.tsf_info_title{
+  font-size: 0.85rem;
+}
+
+.tsf_child_span1{
+  color: #3FC190;
+}
+
+.tsf_child_span2{
+  color: #999;
+}
+
+.tsf_info_title{
+  margin-top: 1.15rem;
+  color: #222;
+  text-align: center;
+}
+
+.tsf_main_box{
+  margin-top: 1.5rem;
+}
+
+.tsf_time_div{
+  float: left;
+  margin-left: 0.3rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  line-height: 2.25rem;
+  border-radius: 2.25rem;
+  border: 1px solid #E1E1E1;
+  color: #555;
+  font-size: 0.85rem;
+}
+
+.tsf_time_div:first-child{
+  margin-left: 0 !important;
+}
+
+.tsf_time_div:nth-child(7){
+  margin-left: 0 !important;
+}
+.tsf_time_div:nth-child(13){
+  margin-left: 0 !important;
+}
+.tsf_time_div:nth-child(19){
+  margin-left: 0 !important;
+}
+
+.tsf_color{
+  background-color: #3FC190 !important;
+  color: #fff !important;
+}

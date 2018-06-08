@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>医生主页</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+    <style media="screen">
+    .dmw_div{
+      display: none;
+      position: fixed;
+      bottom: 0;
+      z-index: 999;
+      background-color: rgba(0, 0, 0, 0.4);
+      width: 100%;
+      height: 50px;
+    }
+    .show{
+      display: block !important;
+    }
+    </style>
+</head>
+
+<body>
+    <header id="header" class="aui-bar aui-bar-nav aui-bar-light title-a">
+        <div class="aui-pull-left aui-btn" onclick="goBack()">
+            <span class="aui-iconfont aui-icon-left span-left2"></span>
+        </div>
+        <div class="aui-title"><b>医生主页</b></div>
+    </header>
+
+    <footer id="footer" class="nav-footer" onclick="jumpToProfessionConsult()">
+        <div id='consult-status'>
+            专业咨询（￥<span id="consultMoney"></span>）
+        </div>
+    </footer>
+
+    <footer id="footer2" class="nav-footer aui-hide" onclick="bindDoctor()">
+        <div id='bindDoctor'>
+            绑定医生
+        </div>
+    </footer>
+    <!-- 遮罩 -->
+    <div class="dmw_div">
+    </div>
+</body>
+
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+
+
+<script type="text/javascript">
+    var mDoctorId;
+    var mDoctorName;
+    var hireGold;
+    apiready = function() {
+
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        var header = $api.byId('header');
+        var headerH = $api.offset(header).h;
+        var footer = $api.byId('footer');
+        var footerH = $api.offset(footer).h;
+        api.openFrame({
+            name: 'doctor_main_frame',
+            url: 'doctor_main_frame.html',
+            rect: {
+                x: 0,
+                y: headerH,
+                w: "auto",
+                h: api.winHeight - headerH - footerH
+            },
+            pageParam: {
+                name: 'doctor_main',
+                doctorId: api.pageParam.doctorId
+            },
+            bounces: false,
+            bgColor: 'rgba(0,0,0,0)',
+            vScrollBarEnabled: false,
+            hScrollBarEnabled: false
+        });
+        changeFooter();
+    };
+
+    // 修改footer样式
+    function changeFooter(){
+      if(api.pageParam.fromDoctorList){
+        $('#footer2').removeClass('aui-hide');
+        $('#footer').addClass('aui-hide');
+      }
+    }
+
+    /** 获取医生的基本信息*/
+    function getDocInfo(doctorInfo) {
+        var realGold;
+        hireGold = doctorInfo.hireGold;
+        mDoctorId = doctorInfo.doctroId;
+        mDoctorName = doctorInfo.doctorName;
+        changeFooter();
+        if( getStorage('bindDoctorId') ){
+          if(getStorage('bindDoctorId') != doctorInfo.doctroId){
+            $api.text($api.byId('bindDoctor'), '已有绑定医生');
+            $("#footer2").attr("onclick","");
+          }else if(getStorage('bindDoctorId') == doctorInfo.doctroId){
+            $('#footer2').addClass('aui-hide');
+            $('#footer').removeClass('aui-hide');
+          }
+        }
+        if(doctorInfo.activityGold != 0){
+          realGold = doctorInfo.activityGold;
+        }else{
+          realGold = doctorInfo.hireGold;
+        }
+        if (doctorInfo.consultEnable == 1) {
+            $api.byId('consultMoney').innerText = realGold;
+        } else {
+            $api.text($api.byId('consult-status'), '咨询已暂停');
+            $api.attr($api.byId('footer'), 'onclick', '');
+        }
+    }
+
+    function finishPay(){
+        $("#footer").attr("onclick", "null");
+        $api.text($api.byId('consult-status'), '咨询已支付');
+    }
+    /** 跳转到专业咨询添加界面*/
+    function jumpToProfessionConsult() {
+        api.execScript({
+            frameName: 'doctor_main_frame',
+            script: 'dmfDialog();'
+        });
+        $(".dmw_div").addClass("show");
+        // 取消touchmove
+        $(".dmw_div").bind('touchmove', function(event) {
+            return false;
+        });
+    }
+
+    //绑定医生
+    function bindDoctor(){
+      api.confirm({
+          title: '绑定医生',
+          msg: '医生一旦绑定，不能更改成其他医生，确定绑定？',
+          buttons: ['确定', '取消']
+      }, function(ret, err) {
+          var index = ret.buttonIndex;
+          if(ret.buttonIndex == 1){
+            api.ajax({
+                url: setVoidTakeDrugSer,
+                method: 'post',
+                data: {
+                    values: {
+                        'userId': userId,
+                        "doctorId": mDoctorId,
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            },function(ret, err){
+              if(ret){
+                setStorage('bindDoctorId',mDoctorId);
+                setTimeout(function(){
+                  $('#footer2').addClass('aui-hide');
+                  $('#footer').removeClass('aui-hide');
+                },0)
+              }
+            });
+          }
+      });
+    }
+
+  // 关闭遮罩
+  function offDia(){
+    $(".dmw_div").removeClass("show");
+  }
+</script>
+
+</html>

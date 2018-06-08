@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>知识库列表</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/home_page_win.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/consult_doctor.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/mescroll.min.css">
+    <link rel="stylesheet" type="text/css" href="../../css/indentification_dialog.css" />
+</head>
+
+<body>
+    <div id="repository-list-mescroll" class="container-div mescroll">
+        <ul id="repository-list">
+        </ul>
+    </div>
+
+    <div class="aui-grid dialog_container">
+        <div id="repository-papertype" class="aui-row warp_bg">
+            <div class="main_childer" onclick="typeClick('')">
+                <div>全部</div>
+            </div>
+        </div>
+    </div>
+
+    <script id="repositoryListScript" type="text/template">
+        {{for(var i = 0;i < it.length;i++){ }}
+         <li class="aui-list-item" onclick="jumpRepositoryInfo('{{=it[i].paperId}}','{{=it[i].price}}')">
+            <div class="aui-list-item-inner">
+                <div class="aui-row">
+                    <div class="main-divs">
+                        <div class="main-left">
+                            <p>{{=it[i].title}}</p>
+                            <p>
+                                <!-- {{if(it[i].price == '0'){ }}
+                                <span class="price">免费</span> {{ }else{ }}
+                                <span class="price-color">{{=it[i].price}}阳光币</span> {{}}} -->
+                                <span class="amount">{{=it[i].hits}}阅读</span></p>
+                        </div>
+                        <div class="main-right">
+                            <img id='{{=it[i].paperId}}' src="{{=it[i].fileUrl}}" alt="">
+                             <!-- {{iCache('{{=it[i].fileUrl}}', '{{=it[i].paperId}}','{{=it[i].paperId}}');}} -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </li>
+            {{}}}
+    </script>
+
+
+    <script id="repositoryPaperScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){}}
+         <div class="main_childer" onclick="typeClick('{{=it[i].id}}')">
+            <div>{{=it[i].name}}</div>
+         </div>
+        {{}}}
+    </script>
+
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/fastclick.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript" src="../../script/commit/image-cache.js"></script>
+<script type="text/javascript" src="../../script/mescroll.min.js"></script>
+<script type="text/javascript" src="../../script/modules/repository/repositoryUtils.js"></script>
+<script type="text/javascript">
+    var flags = '';
+    var mescroll;
+
+    apiready = function() {
+        getPaperType();
+        FastClick.attach(document.body);
+        api.addEventListener({
+            name: 'resetIndex'
+        }, function(ret, err) {
+            console.log(JSON.stringify(ret));
+            if (ret) {
+                flags = '';
+                mescroll.resetUpScroll( true );
+            }
+        });
+        //创建MeScroll对象,内部已默认开启下拉刷新,自动执行up.callback,重置列表数据;
+        mescroll = new MeScroll("repository-list-mescroll", {
+          up: {
+              auto: false, //是否在初始化时以上拉加载的方式自动加载第一页数据; 默认false
+              clearEmptyId: "repository-list",
+              isBounce: false, //此处禁止ios回弹
+              callback: upCallback, //上拉回调,此处可简写; 相当于 callback: function (page) { upCallback(page); }
+              toTop: { //配置回到顶部按钮伤害反弹伤害反弹
+                  src: "../../image/mescroll-totop.png", //默认滚动到1000px显示,可配置offset修改
+              }
+          }
+        });
+    };
+
+    /*上拉加载的回调 page = {num:1, size:10}; num:当前页 从1开始, size:每页数据条数 */
+    function upCallback(page) {
+        getListDataFromNet(flags,page.num, page.size, function(curPageData) {
+            //mescroll会根据传的参数,自动判断列表如果无任何数据,则提示空;列表无下一页数据,则提示无更多数据;
+            //console.log("page.num=" + page.num + ", page.size=" + page.size + ", curPageData.length=" + curPageData.length);
+            if (curPageData.length < page.num) {
+              mescroll.endSuccess(curPageData.length, false);
+            }else{
+              mescroll.endSuccess(curPageData.length, true);
+            }
+            $api.append($api.byId("repository-list"), doT.template($api.html($api.byId("repositoryListScript")))(curPageData));
+        }, function() {
+            //联网失败的回调,隐藏下拉刷新和上拉加载的状态;
+            defaultToast('数据加载失败，请稍后重试');
+            mescroll.endErr();
+        });
+    }
+
+    /**上拉加载更多*/
+    function getListDataFromNet(type,pageNum, pageSize, successCallback, errorCallback) {
+
+      var userId = getStorage('userId');
+      if (typeof(userId) == 'undefined') {
+          userId = '';
+      }
+      api.ajax({
+          url: getRepositorySer,
+          method: 'post',
+          data: {
+              values: {
+                  'userId': userId,
+                  'uploaderId': '',
+                  'flags': type + '',
+                  'searchWords': '',
+                  'sortType': '',
+                  'queryStartDate': '',
+                  'queryEndDate': '',
+                  'queryStartNumber': (pageNum - 1)*pageSize + '',
+                  'queryLimit': pageSize + '',
+                  'queryType': '',
+                  'time': new Date().getTime(),
+                  'deviceId': api.deviceId,
+                  'sign': ''
+              },
+          }
+      }, function(ret, err) {
+          if (ret) {
+              if (ret.success) {
+                  var repositoryList = ret.data.repositories;
+                  successCallback && successCallback(repositoryList);
+              } else {
+                errorCallback && errorCallback();
+              }
+          } else {
+              errorCallback && errorCallback();
+          }
+      });
+    }
+
+    /** 弹出筛选框*/
+    function dialogOpen() {
+        var pardiv = $(".dialog_container").eq(0);
+        var frameH = api.frameHeight;
+        var frameW = api.frameWidth;
+
+        // 取消touchmove
+        pardiv.bind('touchmove', function(event) {
+            return false;
+        });
+        if (!(pardiv.hasClass("show"))) {
+            // pardiv.height(frameH);
+            pardiv.css({
+                "height": frameH,
+                "width": frameW
+            });
+            pardiv.addClass("show");
+        }
+        $(".main_childer").each(function() {
+            $(this).click(function() {
+                $(".main_childer").removeClass("show-color");
+                $(this).addClass("show-color");
+                pardiv.removeClass("show");
+            });
+        });
+
+        pardiv.click(function(){
+          pardiv.removeClass("show");
+        });
+    }
+
+    /**点击筛选*/
+    function typeClick(type){
+      flags = type;
+      mescroll.resetUpScroll( true );
+    }
+
+    /** 获取知识库类别*/
+    function getPaperType() {
+        var userId = getStorage('userId');
+        if (typeof(userId) == 'undefined') {
+            userId = '';
+        }
+        api.ajax({
+            url: getPaperTypeSer,
+            method: 'post',
+            data: {
+                values: {
+                    'userId': userId,
+                    'time': new Date().getTime(),
+                    'deviceId': api.deviceId,
+                    'sign': ''
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.success) {
+                    var paperList = ret.data.paperTypeList;
+                    if (typeof(paperList) != "undefined") {
+                        $api.append($api.byId("repository-papertype"), doT.template($api.html($api.byId("repositoryPaperScript")))(paperList));
+                        api.parseTapmode();
+                    }
+                } else {}
+                //console.log("getPaperType ret-->" + JSON.stringify(ret));
+            } else {
+                //console.log("getPaperType err-->" + JSON.stringify(err));
+            }
+        });
+    }
+
+    /** 跳转知识库详情*/
+    function jumpRepositoryInfo(repositoryId,price) {
+      if (price >= 0) {
+        if (getStorage('userId')) {
+            var userType = getStorage('userType');
+            var userAppType = getStorage('userAppType');
+            if (userAppType == '1') {
+              if (userType == '1' || userType == '2' || userType == '4') {
+                showDialog(userType);
+                return;
+              }
+            }
+            api.openWin({
+                name: 'repository_detail_win',
+                url: './repository_detail_win.html',
+                pageParam: {
+                    repositoryId: repositoryId,
+                    price: price
+                }
+            });
+        } else {
+            pageJump('login', '../login.html', 'repository_list_frm');
+        }
+      }else{
+        api.openWin({
+            name: 'repository_detail_win',
+            url: './repository/repository_detail_win.html',
+            pageParam: {
+                repositoryId: repositoryId,
+                price:price
+            }
+        });
+      }
+    }
+
+
+
+</script>
+
+</html>

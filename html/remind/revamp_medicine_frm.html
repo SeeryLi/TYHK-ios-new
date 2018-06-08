@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>修改服药单</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/common/color.css">
+    <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/remind.css">
+    <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/revamp_medicine.css" />
+</head>
+
+<body>
+    <div class="warp_content">
+        <ul id='medicinal-revamp-list'></ul>
+    </div>
+
+    <script id="medicinalDataScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){ }}
+          <li class="box_div_par">
+              <div class="border-se"></div>
+              <div class="delete_ico_div" onclick="deleteIco('{{=i}}',this)">
+                  <img class="delete_ico" src="../../image/remind/drug_del.png" alt="">
+              </div>
+              <div class="child_div bottom_bar">
+                  <div class="dot_div"></div>
+                  <span class="name_span">{{=it[i].drugName}}</span>
+              </div>
+              <div class="child_div bottom_bar">
+                  <div class="each-med-left col153">每日服药次数</div>
+                  <div>
+                      <div id='add-medicines-dosage-unit' class="each-med-right add-med-text">次</div>
+                      <div class="aui-bar aui-bar-btn aui-bar-btn-sm bar-btn-style">
+                          <div class="aui-bar-btn-item" onclick="timesChange('min','{{=i}}')">
+                              <i class="aui-iconfont aui-icon-minus"></i>
+                          </div>
+                          <div class="aui-bar-btn-item">
+                              <input id='add-medicines-dosage' type="text" name="{{=i}}" readonly class="aui-input aui-text-center" value="{{=it[i].everydayNum}}">
+                          </div>
+                          <div class="aui-bar-btn-item" onclick="timesChange('add','{{=i}}')">
+                              <i class="aui-iconfont aui-icon-plus"></i>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="child_div">
+                  <span class="base_num">每次服药数量</span>
+                  <div class="box_input">
+                      <input type="text" class="haveDrugAmount" oninput="changeMedicinalData({{=i}},'eatSig',this)" value="{{=it[i].eatSig}}" placeholder="输入数量"> {{=it[i].smallUnit}}
+                  </div>
+              </div>
+          </li>
+      {{}}}
+   </script>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript">
+    var takeDrugNews = new Array();
+    apiready = function() {
+        getPatientPaper();
+    }
+
+    //删除
+    function deleteIco(index,el) {
+        $(el).parent().remove();
+        takeDrugNews.splice(index,1);
+        $api.html($api.byId('medicinal-revamp-list'), '');
+        $api.append($api.byId('medicinal-revamp-list'), doT.template($api.html($api.byId("medicinalDataScript")))(takeDrugNews));
+    }
+
+    /** 同步修改列表数据*/
+    function changeMedicinalData(index,type,_this){
+      if (type == 'dayNum') {
+        takeDrugNews[index].everydayNum = _this;
+      }else if (type == 'eatSig') {
+        var value = $api.trimAll($api.val(_this));
+        takeDrugNews[index].eatSig = value;
+      }
+    }
+
+    /**获取患者的服药单*/
+    function getPatientPaper() {
+        var userId = getStorage('userId');
+        if (userId) {
+            api.ajax({
+                url: getUserTakeDrugRecordSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "deviceId": api.deviceId,
+                        "patientId": api.pageParam.patientId,
+                        'takeDrugId':api.pageParam.takeDrugId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    takeDrugNews = ret.data.takeDrugNewsList;
+                    takeDrugId = ret.data.takeDrugId;
+                    $api.html($api.byId('medicinal-revamp-list'), '');
+                    $api.append($api.byId('medicinal-revamp-list'), doT.template($api.html($api.byId("medicinalDataScript")))(takeDrugNews));
+                } else {
+                }
+            });
+        }
+    }
+
+    /** 正则验证小数医生输入服药数量*/
+    function check() {
+        var patten=/^[1-9]\d*.{0,2}\d{0,1}$|^0.[1-9]{0,2}$/;
+        var result = true;
+        $(".haveDrugAmount").each(function() {
+            if (!patten.test(this.value)) {
+                alert("请输入正确的服药数量！");
+                result = false;
+            }
+        })
+        return result;
+    }
+    //修改天数
+    function timesChange(arg,index) {
+        var self = index;
+        var timesCount = $("input[name = "+self+"]").eq(0).val();
+        if (arg == "add") {
+            if (timesCount == "睡前") {
+                $("input[name = "+self+"]").eq(0).val(1)
+            } else if (timesCount == "4") {
+                return;
+            } else {
+              $("input[name = "+self+"]").eq(0).val(Number(timesCount) + 1);
+            }
+        } else {
+            if (timesCount == "睡前") {
+                return;
+            } else if (timesCount == 1) {
+                $("input[name = "+self+"]").eq(0).val("睡前");
+            } else {
+                $("input[name = "+self+"]").eq(0).val(Number(timesCount) - 1);
+            }
+        }
+        changeMedicinalData(self,'dayNum',$("input[name = "+self+"]").eq(0).val());
+    }
+
+
+
+    /** 修改服药单*/
+    function updatePaper(){
+      if (!check()) {
+        return;
+      }
+      var userId = getStorage('userId');
+      var newMedicinalArr = new Array();
+      for (var i = 0; i < takeDrugNews.length; i++) {
+          var newMedicina = new Object();
+          newMedicina.drugName = takeDrugNews[i].drugName;
+          newMedicina.eatSig = takeDrugNews[i].eatSig;
+          newMedicina.everydayNum = takeDrugNews[i].everydayNum;
+          newMedicinalArr.push(newMedicina);
+      }
+      if (typeof(takeDrugId) != 'undefined' && takeDrugId && userId) {
+        showToast('');
+        api.ajax({
+            url: updateTakeDrugSer,
+            method: 'post',
+            data: {
+                values: {
+                  "userId": api.pageParam.patientId,
+                  "deviceId": api.deviceId,
+                  'takeDrugId':takeDrugId,
+                  'TakeDrugRecordFormer':JSON.stringify(newMedicinalArr),
+                  "consultId":api.pageParam.consultId,
+                  "doctorId": userId,
+                  "time": new Date().getTime(),
+                  "sign": ""
+                },
+            }
+        },function(ret, err){
+            toast.hide();
+            if (ret) {
+                if(ret.success){
+                  api.sendEvent({
+                      name: 'closeRemindWin',
+                  });
+                }
+                api.sendEvent({
+                    name: 'updateRemind',
+                });
+                api.closeWin();
+            }
+            if(err){
+              if(err.status == -1){
+                defaultToast('有用户在进行操作此服药单,请等待！');
+              }
+            }
+        });
+      }
+    }
+</script>
+
+</html>

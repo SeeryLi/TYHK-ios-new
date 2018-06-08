@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>咨询设置</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/userMain.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/doctor_message_frm.css" />
+
+</head>
+
+<body>
+    <div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-list-in">
+            <div class="border-se"></div>
+            <li class="aui-list-item" onclick="pageJumpCheckLogin('doctor_change_consult_cost','../user/doctor_change_consult_cost.html','../../login.html','doctor_consult_setting_frm')">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="base_title">咨询费用￥</div>
+                    <div class="aui-list-item-right">
+                        <div id='doctor-consult-cost'>0</div>
+                    </div>
+                </div>
+            </li>
+            <div class="base_hint">
+                *暂停咨询服务后患者将无法对您进行咨询
+            </div>
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="base_title">暂停咨询</div>
+                    <div class="aui-list-item-right">
+                        <input id='doctor-change-consult-state' type="checkbox" class="aui-switch">
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</body>
+<script type="text/javascript" src="../../../script/api.js"></script>
+<script type="text/javascript" src="../../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        getDoctorConcultState();
+    };
+
+    /** 获取医生咨询信息*/
+    function getDoctorConcultState() {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: getDoctorConsultMoneySer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                console.log("getDoctorConcultState-->" + JSON.stringify(ret));
+                if (ret) {
+                    if (ret.success) {
+                        var consultEnable = ret.data.consultEnable;
+                        $api.byId('doctor-consult-cost').innerHTML = ret.data.hireGold;
+                        setStorage("doctorHireGold",ret.data.hireGold)
+                        if (consultEnable == '1') {
+                            $api.byId("doctor-change-consult-state").checked = false;
+                        } else {
+                            $api.byId("doctor-change-consult-state").checked = true;
+                        }
+                    } else {
+                        defaultToast(ret.message);
+                    }
+
+                } else {
+                    defaultToast(err.message);
+                }
+            });
+        } else {
+            pageJump('login', '../../login.html', 'doctor_consult_setting_frm');
+        }
+    }
+
+    /** 点击确定*/
+    function clickOk() {
+        var isConsult = $api.byId("doctor-change-consult-state").checked;
+        var consultStatus = 1;
+        if (isConsult) {
+            consultStatus = 0;
+        }
+        console.log('consultStatus--.' + consultStatus);
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: editDoctorConsultStatusSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "consultStatus": consultStatus + '',
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                console.log("editDoctorConsultStatusSer-->" + JSON.stringify(ret));
+                if (ret) {
+                    defaultToast(ret.message);
+                    if (ret.success) {
+                        api.closeWin();
+                    }
+
+                } else {
+                    defaultToast(err.message);
+                }
+            });
+        } else {
+            pageJump('login', '../../login.html', 'doctor_consult_setting_frm');
+        }
+    }
+
+    /** 设置咨询费用*/
+    function setCost(cost) {
+        $api.byId('doctor-consult-cost').innerHTML = cost;
+    }
+</script>
+
+</html>

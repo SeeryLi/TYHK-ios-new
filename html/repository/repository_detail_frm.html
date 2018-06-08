@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>知识库详情</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/repository_detail_frm.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+</head>
+
+<body>
+  <!-- <div class="aui-btn" onclick="buyRepository()">购买</div> -->
+  <div class="container-div">
+        <div class="main_title_div">
+          <div class="main_title_pho">
+            <img id="repository-detail-header" src=" " alt="">
+          </div>
+          <div class="maxin_title_right">
+            <p id="repository-detail-name"></p>
+            <p id="repository-skill-name">擅长：失眠、焦虑、抑郁、精神分裂等等系列精神分裂等等系列精神分裂等等系列精神分裂等等系列</p>
+          </div>
+        </div>
+        <div class="border-se"></div>
+        <main>
+          <div class="main_text_boxs">
+              <h3 id='repository-detail-title' class="caption_p"></h1>
+              <p class="amount_p"><span id="repository-detail-read"></span>阅读</p>
+              <article class="text_box">
+                  <p id="repository-detail-content">
+                  </p>
+              </article>
+          </div>
+      </main>
+    </div>
+    <!-- 遮罩 -->
+    <div class="warp-shade" id="repository-detail-buy" onclick="getUserMoney()">
+      <img src="../../image/find_grad-min.png" alt="" width="100%"/>
+      <div class="shade_div">
+          <span>继续阅读</span><img src="../../image/konw_more.png" alt="">
+      </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    var userId = getStorage('userId');
+    var dialog = new auiDialog();
+    /** 是否免费 0：免费 大于0：付费*/
+    var price = 1;
+    var conbox = $(".container-div");
+    var dialogdiv = $(".warp-shade");
+    apiready = function() {
+      var frameH = api.frameHeight;
+      $(".container-div").height(frameH);
+      price = api.pageParam.price;
+      console.log('price-->' + price);
+      // 免费、付费
+      // if(price == '0'){
+      //   conbox.css("overflow","auto");
+      //   dialogdiv.css("display","none");
+      // }else {
+      //   conbox.css("overflow","hidden");
+      //   dialogdiv.css("display","block");
+      // }
+      conbox.css("overflow","hidden");
+      dialogdiv.css("display","block");
+      getRepositoryInfo();
+    };
+
+    /** 获取知识库详情*/
+    function getRepositoryInfo() {
+
+        api.ajax({
+            url: getRepositoryInfoSer,
+            method: 'post',
+            data: {
+                values: {
+                    'userId': userId,
+                    'repositoryId': api.pageParam.repositoryId,
+                    'time': new Date().getTime(),
+                    'deviceId': api.deviceId,
+                    'sign': ''
+                },
+            }
+        }, function(ret, err) {
+            console.log("getRepositoryInfoSer ret-->" + JSON.stringify(ret));
+            if (ret) {
+              if (ret.success) {
+                $('#repository-detail-read').text(ret.data.repositoryInfo.hits);
+                $('#repository-detail-title').text(ret.data.repositoryInfo.title);
+                $('#repository-detail-name').text(ret.data.uploaderInfo.name);
+                $('#repository-detail-content').text(ret.data.repositoryInfo.content);
+                $('#repository-skill-name').text('擅长:' + ret.data.uploaderInfo.skillType)
+                $api.attr($api.byId('repository-detail-header'), 'src', ret.data.uploaderInfo.photo);
+                if (ret.data.repositoryInfo.purchasStatus == 1 || ret.data.repositoryInfo.price == 0) {
+                  conbox.css("overflow","auto");
+                  dialogdiv.css("display","none");
+                }else{
+                  conbox.css("overflow","hidden");
+                  dialogdiv.css("display","block");
+                }
+              }else{
+                defaultToast(ret.message);
+              }
+            } else {
+                defaultToast(err.message);
+                console.log("getRepositoryInfoSer err-->" + JSON.stringify(err));
+            }
+        });
+    }
+
+    /** 购买知识库*/
+    function buyRepository() {
+
+        api.ajax({
+            url: purchaseRepositorySer,
+            method: 'post',
+            data: {
+                values: {
+                    'userId': userId,
+                    'repositoryId': api.pageParam.repositoryId,
+                    'time': new Date().getTime(),
+                    'deviceId': api.deviceId,
+                    'sign': ''
+                },
+            }
+        }, function(ret, err) {
+
+            if (ret) {
+              if (ret.success) {
+                conbox.css("overflow","auto");
+                dialogdiv.css("display","none");
+                getRepositoryInfo();
+                api.sendEvent({
+                  name: 'getUserInfo',
+                  extra: {
+                    userId: getStorage('userId'),
+                  }
+                });
+              }else{
+                defaultToast(ret.message);
+              }
+              console.log("buyRepository ret-->" + JSON.stringify(ret));
+            } else {
+              defaultToast(err.message);
+              console.log("buyRepository err-->" + JSON.stringify(err));
+            }
+        });
+    }
+
+    /** 获取用户当前金币*/
+    function getUserMoney(){
+      var userId = getStorage("userId");
+      if (userId) {
+          api.ajax({
+              url: getMyCurrencySer,
+              method: 'post',
+              data: {
+                  values: {
+                      "userId": userId,
+                      "time": new Date().getTime(),
+                      "deviceId": api.deviceId,
+                      "sign": ""
+                  },
+              }
+          }, function(ret, err) {
+              console.log("getUserMoney-->" + JSON.stringify(ret));
+              if (ret) {
+                if(ret.success){
+                  showDialog(ret.data.sunGold);
+                }else{
+                  defaultToast('获取用户阳光币失败，请稍后再试');
+                }
+              } else {
+                defaultToast('获取用户阳光币失败，请稍后再试');
+              }
+          });
+      } else {
+          pageJump('login', '../login.html', 'repository_detail_frm');
+      }
+    }
+
+    /** 支付弹出框*/
+    function showDialog(allnumber){
+
+      dialog.alert({
+          title:"支付阳光币",
+          msg:'<h2 style="color:#ECB368;">-'+ (price || 0) +'</h2><p style="color:#999999;font-size:0.75rem;margin-top:0.75rem;">当前阳光币' +( allnumber || 0) +'</p>',
+          buttons:['<img src="../../image/home_form_pop_close.png"/>','确定']
+      },function(ret){
+          console.log(JSON.stringify(ret));
+          if (ret.buttonIndex == 2) {//点击确定
+            buyRepository();
+            dialog.close();
+          }
+      })
+    }
+</script>
+
+</html>

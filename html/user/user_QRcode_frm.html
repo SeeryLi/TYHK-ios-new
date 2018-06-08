@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>咨询设置</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/userMain.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/doctor_user_QRcode_frm.css" />
+
+</head>
+
+<body>
+    <div class="aui-content">
+        <div id="ptoto">
+            <img id="userQRHeader" />
+        </div>
+        <div style='margin-top:1rem'>
+            <h4 style='text-align:center' id="userQRName"></h4>
+        </div>
+        <div id="gr-code">
+            <img id="userQRImg">
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        getQRCode();
+    };
+
+    /** 获取二维码*/
+    function getQRCode() {
+        api.ajax({
+            url: getQRCodeSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": getStorage('userId'),
+                    "deviceId": api.deviceId,
+                    "time": new Date().getTime(),
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            console.log('getQRCode-->' + JSON.stringify(ret));
+            if (ret) {
+                if (ret.success) {
+                    $api.text($api.byId('userQRName'), ret.data.userName);
+                    $api.attr($api.byId('userQRHeader'), 'src', ret.data.photo);
+                    $api.attr($api.byId('userQRImg'), 'src', ret.data.MyQr);
+                }
+            } else {}
+        });
+
+    }
+</script>
+
+</html>

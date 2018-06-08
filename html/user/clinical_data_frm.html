@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" name="format-detection" content="telephone=no" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main_style.css" />
+</head>
+
+<body>
+    <div class="border-se"></div>
+    <div class="cdr_warp_box">
+        <div class="cdr_base_title">
+            添加一张生活照
+        </div>
+        <div class="cdr_photo_box">
+            <img id="cdr_user_photo_pic" src="" alt="">
+            <img class="cdr_ico_userP" onclick="getPicture('library')" src="../../image/user/my_pic.png" alt="">
+        </div>
+        <div class="cdr_base_title" style="margin-top:0.5rem;">
+            病例描述
+        </div>
+        <div class="textarea-div">
+            <textarea class="bd-ys3" id="cdr_disease_description" oninput="wordsDeal(this)" maxlength="200" name="mechanism.researchObjectives" placeholder="详细描述您的症状、病例、身体状况，有助于医生准确的分析~"></textarea>
+            <p><span id="professionTextCount">0</span>/200</p>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        //初始化数据 判断缓存是否有数据
+        initclinicalData();
+    }
+
+    function initclinicalData() {
+        var clinicalData = getStorage("clinicalData");
+        var userId = getStorage("userId");
+        if (clinicalData) {
+            $("#cdr_disease_description").val(clinicalData.description);
+            $("#cdr_user_photo_pic").attr("src", servicePath + clinicalData.imgPath);
+            $('#professionTextCount').text($("#cdr_disease_description").val().length);
+        } else {
+            //获取用户信息方法
+            api.ajax({
+                url: getPatientDataByUserIdSer,
+                method: 'post',
+                data: {
+                    values: {
+                        userId: userId
+                    }
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if (ret.success) {
+                        $("#cdr_disease_description").val(ret.data.description);
+                        $("#cdr_user_photo_pic").attr("src", servicePath + ret.data.imgPath);
+                        setStorage("clinicalData", ret.data);
+                        $('#professionTextCount').text($("#cdr_disease_description").val().length);
+                    }else {
+                        defaultToast("请求失败，请稍后再试");
+                    }
+
+                } else {
+                    defaultToast("请求失败，请稍后再试");
+                }
+            });
+        }
+
+    }
+
+    /** 获取图片*/
+    function getPicture(source) {
+        api.getPicture({
+            sourceType: source,
+            encodingType: 'jpg',
+            mediaValue: 'pic',
+            destinationType: 'url',
+            quality: 50,
+        }, function(ret, err) {
+            if (ret) {
+              if (ret.data != '' && typeof(ret.data) != 'undefined') {
+                $api.attr($api.dom('#cdr_user_photo_pic'), 'src', ret.data);
+              }
+                console.log("err-->" + JSON.stringify(err));
+            }
+        });
+    }
+
+    /** 文字限制*/
+    function wordsDeal(this_) {
+        var count = $(this_).val().length;
+        if(count>200){
+          $(this_).val( $(this_).val().slice(0,200) );
+        }
+        $('#professionTextCount').text($(this_).val().length);
+    }
+
+
+    // 上传生活照和病例
+    function cldPhoto() {
+        var userId = getStorage("userId");
+        var description = $("#cdr_disease_description").val();
+        var userPhoto = $("#cdr_user_photo_pic").attr("src");
+        description = $.trim(description);
+        if (userPhoto == '') {
+            toast.fail({
+                title: "请上传生活照！",
+                duration: 2000
+            });
+            return;
+        }
+        if (description == '') {
+            toast.fail({
+                title: "请输入病例信息！",
+                duration: 2000
+            });
+            return;
+        };
+        api.ajax({
+            url: insertIndividualCaseSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": userId,
+                    'description': description + ''
+                },
+                files: {
+                    file: userPhoto
+                }
+            }
+        }, function(ret, err) {
+            toast.hide();
+            if (ret) {
+                if (ret.success) {
+                    toast.custom({
+                        title: "提交成功！",
+                        html: '<i class="aui-iconfont aui-icon-laud"></i>',
+                        duration: 500
+                    });
+                    if (userPhoto.indexOf("http") == 0) {
+                        var httpPhoto = userPhoto.replace("http://139.199.108.19:8080/", "/")
+                        ret.data.imgPath = httpPhoto;
+                    }
+                    setStorage("clinicalData", ret.data);
+                    setTimeout(function() {
+                        api.closeWin();
+                    }, 1000);
+                } else {
+                    defaultToast('提交失败，请稍后再试');
+                }
+
+            } else {
+                // alert(JSON.stringify(err));
+            }
+        });
+
+    }
+</script>
+
+</html>

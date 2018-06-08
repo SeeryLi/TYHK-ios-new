@@ -1,0 +1,54 @@
+body{
+  background-color: #EFF2F7;
+}
+
+.warp_div_par{
+  padding-bottom: 0.5rem;
+  width: 100%;
+}
+
+.main_list{
+  position: relative;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
+  width: 100%;
+  height: 3.5rem;
+  background-color: #fff;
+}
+
+.money_p{
+  margin-top: 0.77rem;
+  margin-right: 0.75rem;
+  text-align: right;
+  color: #ECB368;
+  font-size: 0.85rem;
+}
+
+.li_ico{
+  display: inline-block;
+  max-width: 2.27rem;
+  max-height: 2.27rem;
+}
+
+.li_div_right{
+  display: inline-block;
+  margin-left: 0.2rem;
+}
+
+.p_1{
+  color: #000;
+  font-size: 0.75rem;
+}
+
+.p_2{
+  color: #999;
+  font-size: 0.5rem;
+}
+
+.money_span{
+  position: absolute;
+  right: 0.75rem;
+  top: 0.725rem;
+  color: #ECB368;
+  font-size: 0.6rem;
+}

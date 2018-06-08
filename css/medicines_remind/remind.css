@@ -1,0 +1,308 @@
+body{
+  background-color: #EFF2F7;
+}
+
+.med-note-main {
+    width: 100%;
+    padding: 0 0.75rem;
+    background: rgb(239, 242, 247);
+}
+
+.aui-radio:checked, .aui-radio.aui-checked, .aui-checkbox:checked, .aui-checkbox.aui-checked{
+    background-color: rgb(63,193,144) !important;
+    border: solid 1px rgb(63,193,144) !important;
+}
+.aui-radio{
+    height: 0.75rem;
+    width: 0.75rem;
+    vertical-align: middle!important;
+}
+.med-note-main>.note {
+    font-size: 0.65rem;
+    color: rgb(153, 153, 153);
+    margin-top: 0.425rem;
+    padding: 0 0.2rem;
+}
+
+.main-title {
+    width: 100%;
+    height: 3.25rem;
+    line-height: 1.75rem;
+    padding: 0.5rem 0.75rem;
+    background-color: #fff;
+    font-size: 0.75rem;
+}
+
+.title-left {
+    float: left;
+    height: 100%;
+}
+.title-mid{
+    float: left;
+    height: 100%;
+    margin-left: 0.475rem;
+}
+.title-mid > .hour{
+    height: 1.1375;
+    line-height: 1.1375rem;
+    vertical-align: middle;
+    color:rgba(34,34,34,1);
+    font-size:0.85rem;
+}
+.title-mid > .date{
+    height: 1.1375;
+    line-height: 1.1375rem;
+    vertical-align: middle;
+    color:rgba(153,153,153,1);
+    font-size: 0.6rem;
+}
+.title-right > .aui-list-item-inner {
+    height: 100%;
+}
+
+.title-right label span{
+    margin-left: 0.25rem;
+    font-size: 0.75rem!important;
+}
+.title-right > input{
+    vertical-align: middle!important;
+    max-width: 3rem;
+    text-align: center;
+    background-color: #EFF2F7;
+}
+.title-left>img {
+    display: inline-block;
+    max-width: 2.275rem !important;
+    max-height: 2.275rem !important;
+    border-radius: 50%;
+    vertical-align: middle;
+    position: relative;
+}
+
+.name-box {
+    color: #222;
+    margin-left: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.title-right {
+    float: right;
+    color: #222;
+    font-size: 0.85rem;
+    height: 100%;
+}
+
+.each-med {
+    height: 2.25rem;
+    line-height: 2.25rem;
+    padding: 0 0.75rem;
+    overflow: hidden;
+    background: #fff;
+}
+
+.box_li{
+  width: 100%;
+  height: auto;
+  padding: 0 0.75rem;
+  overflow: hidden;
+  background: #fff;
+}
+
+.bor_solid{
+  border-bottom: 1px solid #ebebeb;
+}
+.bor_solid:last-child{
+  border: 0;
+}
+
+.timer_inp{
+  margin-top: 0.3rem;
+  height: 1.5rem !important;
+}
+
+.timer_inp>input{
+  height: 100%;
+}
+
+.each-med-left {
+    float: left;
+    height: 1.5rem;
+    font-size: 0.75rem;
+    color: #555;
+}
+
+.each-med-right {
+    float: right;
+    height: 100%;
+    line-height: 1.5rem;
+    font-size: 0.65rem;
+    color: rgb(153, 153, 153);
+}
+
+.med_text{
+  line-height: 2.25rem !important;
+}
+.add-med-text{
+  line-height: 2.5rem !important;
+  display:inline-block;
+  float:right
+}
+
+.medicinalList>li {
+    margin-bottom: 0.5rem;
+}
+
+.sure-block {
+    width: 100%;
+    height: 2.25rem;
+    position: fixed;
+    bottom: 0;
+}
+
+.sure-block>div {
+    height: 2.25rem;
+    line-height: 2.25rem;
+    font-size: 0.85rem;
+    float: left;
+    text-align: center;
+}
+
+.wrong-img{
+    margin-top: 6.175rem;
+}
+
+.wrong {
+    width: 50%;
+    background-color: #fff;
+    color: #555555;
+}
+
+.right {
+    width: 50%;
+    background-color: rgb(63, 193, 144);
+    color: #fff;
+}
+.change-med-list{
+    width: 50%;
+    color:rgba(63,193,144,1);
+    background: #fff
+}
+.add-drug{
+    width: 100%;
+    color: #fff;
+    background:rgba(63,193,144,1);
+}
+.add-drug img{
+    width: 0.75rem;
+    height: 0.75rem;
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -0.25rem;
+}
+.add-new-med{
+    width: 50%;
+    background:rgba(63,193,144,1);
+    color: #fff;
+}
+.sure-block .confirm{
+    width: 38%;
+    background:rgba(63,193,144,1);
+    color: #fff;
+}
+.sure-block .subtotal{
+    background: #fff;
+    color:rgba(236,179,104,1);
+    width: 62%;
+}
+.wrong-img{
+    text-align: center;
+}
+.wrong-img>img{
+    max-width: 11.5rem;
+    max-height:11.5rem;
+    display: inline-block;
+}
+.if-show-details{
+    height: 1.5rem;
+    line-height: 1.5rem;
+    text-align: center;
+    font-size: 0.65rem;
+    color:rgba(85,85,85,1);
+    background: #fff;
+}
+.med-title{
+    margin-left: 0.75rem;
+    color:rgba(153,153,153,1)!important;
+    font-size: 0.75rem!important;
+}
+.med-name{
+    font-size:0.75rem;
+    color:#222 !important;
+}
+.add-med-list .each-med-right{
+    font-size: 0.75rem!important;
+}
+.no_drug{
+    width: 100%;
+    margin-top:11.925rem;
+    text-align: center;
+    font-size:0.8rem;
+    color:rgba(153,153,153,1);
+}
+.drug-list li{
+    margin-top: 0.525rem;
+    padding:0.5rem;
+}
+
+.border-se {
+    width: 100%;
+    height: 0.5rem;
+    background-color: #EFF2F7;
+}
+
+.col34{
+  float: right!important;
+  margin-right: 0.25rem !important;
+  width: auto !important;
+  height: 100%!important;
+  text-align: right;
+  font-size: 0.7rem !important;
+}
+
+.text_font{
+  font-size: 0.65rem !important;
+}
+
+.showshow{
+    display: none;
+    transition: all 1s;
+    -moz-transition: all 1s; /* Firefox 4 */
+    -webkit-transition: all 1s; /* Safari 和 Chrome */
+    -o-transition: all 1s; /* Opera */
+}
+.add-med-each{
+  height: 2.5rem;
+  line-height: 2.5rem;
+  padding: 0 0.75rem;
+  overflow: hidden;
+  background: #fff;
+}
+.bar-btn-style{
+  width: 8rem;
+  float: right;
+  max-height: 1.5rem;
+  margin-top: 0.5rem;
+  margin-right: 0.5rem;
+}
+.take-drug-days{
+  margin-left:0.75rem;
+  margin-top:0.75rem;
+  font-size:0.75rem;
+}
+.take-drug-days span{
+   font-size:0.75rem;
+   color:#222;
+}
+.aui-bar-btn-item{
+    border-color: #EBEBEB!important;
+}

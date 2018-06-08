@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>提醒列表页</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/remind.css" />
+
+</head>
+
+<body>
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+        <div></div>
+        <div class="bottom-br">
+        <div class="aui-pull-left aui-btn">
+            <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+        </div>
+        <div class="aui-title"><b>编辑服药提醒<b></div>
+    </div>
+  </header>
+
+  <footer class="nav-footer" id="footer" onclick="saveEdit()" style="height:2.25rem;line-height:2.25rem;">
+    <div class="sure-block">
+        <div class="add-drug">
+            <span>保存修改</span>
+        </div>
+    </div>
+  </footer>
+
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-popup.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-range.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/doT.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        var header = $api.byId('header');
+        var headerH = $api.offset(header).h;
+        var footer = $api.byId('footer');
+        var footerH = $api.offset(footer).h;
+        api.openFrame({
+            name: 'edit_remind_result_right_frm',
+            url: './edit_remind_result_right_frm.html',
+            rect: {
+                x: 0,
+                y: headerH,
+                w: 'auto',
+                h: api.winHeight - headerH - footerH
+            },
+            pageParam: {
+                takeDrugId: api.pageParam.takeDrugId
+            },
+            bounces: false,
+            bgColor: 'rgba(0,0,0,0)',
+            vScrollBarEnabled: true,
+            hScrollBarEnabled: false
+        });
+    };
+
+    function saveEdit(){
+        api.execScript({
+            frameName: 'edit_remind_result_right_frm',
+            script: 'changeRemindTime();'
+
+        });
+    }
+</script>
+
+</html>

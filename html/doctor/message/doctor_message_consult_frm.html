@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>咨询设置</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/baseMessage_frm.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/mescroll.min.css" />
+</head>
+
+<body>
+    <div id="chatListMescroll" class="container-div mescroll">
+        <div class="aui-content">
+            <ul id="chatList"></ul>
+            <div id="chatTemplate"></div>
+        </div>
+    </div>
+
+    <script id="chatScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){ }}
+            <section class="aui-chat">
+                <div class="aui-chat-header">{{=it[i].createDate}}</div>
+                    <div class="aui-chat-item aui-chat-left" style="float:none;">
+                    <div class="aui-chat-media">
+                        <img src="../../../image/consult_message.png" />
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">资讯消息</div>
+                        <div class="aui-chat-content" onclick="jumpToSureInfo('{{=it[i].type}}','{{=it[i].typeId}}','{{=it[i].userId}}')">
+                            <span>{{=it[i].news}}</span>
+                            <br><br><a href="javascript:void(0)">点击查看详情</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {{ } }}
+    </script>
+</body>
+<script type="text/javascript" src="../../../script/api.js"></script>
+<script type="text/javascript" src="../../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../../script/doT.min.js"></script>
+<script type="text/javascript" src="../../../script/mescroll.min.js"></script>
+<script type="text/javascript">
+    var queryStartTime = '';
+    var queryEndTime = '';
+    var queryStartNumber = 0;
+    var mescroll;
+    apiready = function() {
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        getCurrentNotes();
+        //创建MeScroll对象,内部已默认开启下拉刷新,自动执行up.callback,重置列表数据;
+        mescroll = new MeScroll("chatListMescroll", {
+            down: {
+                auto: false, //是否在初始化时以上拉加载的方式自动加载第一页数据; 默认false
+                callback: downCallback //下拉回调
+            }
+        });
+    };
+
+
+    /*下拉刷新的回调 */
+    function downCallback(){
+        //联网加载数据
+        getListDataFromNet(function(data){
+            //联网成功的回调,隐藏下拉刷新的状态
+            mescroll.endSuccess();
+        }, function(){
+            //联网失败的回调,隐藏下拉刷新的状态
+            mescroll.endErr();
+        });
+    }
+
+    /*联网加载列表数据*/
+    function getListDataFromNet(successCallback,errorCallback) {
+        //延时一秒,模拟联网
+        setTimeout(function () {
+            queryStartNumber += 2;
+            // var newArr=[];
+            var timestamp = new Date().getTime();
+            var userId = getStorage("userId");
+            if (userId == "") {
+                pageJump("login", "../login.html", "consult")
+                return;
+            }
+            api.ajax({
+                url: getMyNoticesSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "queryStartNumber": queryStartNumber,
+                        "queryLimit": 2,
+                        "queryType": 3,
+                        "queryStartTime": queryStartTime,
+                        "queryEndTime": queryEndTime,
+                        "deviceId": api.deviceId,
+                        "time": timestamp,
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                toast.hide();
+                if (ret) {
+                    if (ret.success) {
+                        var requests = ret.data.records.reverse();
+                        $api.prepend($api.byId("chatTemplate"), doT.template($api.html($api.byId("chatScript")))(requests));
+                        api.parseTapmode();
+                    } else {
+                        defaultToast(ret.message);
+                    }
+                    successCallback&&successCallback();
+                } else {
+                    errorCallback&&errorCallback();
+                    defaultToast(err.message)
+                }
+            });
+        },1000)
+    }
+
+
+    /** 查询当前聊天记录*/
+    function getCurrentNotes() {
+        var timestamp = new Date().getTime();
+        var userId = getStorage("userId");
+        if (userId == "") {
+            pageJump("login", "../../login.html", "consult")
+            return;
+        }
+        api.ajax({
+            url: getMyNoticesSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": userId,
+                    "queryStartNumber": 0,
+                    "queryLimit": 2,
+                    "queryType": 3,
+                    "queryStartTime": queryStartTime,
+                    "queryEndTime": queryEndTime,
+                    "deviceId": api.deviceId,
+                    "time": timestamp,
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            toast.hide();
+            if (ret) {
+                if (ret.success) {
+                    var requests = ret.data.records.reverse();
+                    $api.html($api.byId("chatTemplate"), "");
+                    $api.append($api.byId("chatTemplate"), doT.template($api.html($api.byId("chatScript")))(requests));
+                    api.parseTapmode();
+                } else {
+                    defaultToast(ret.message);
+                }
+            } else {
+                defaultToast(err.message)
+            }
+        });
+    }
+
+    /** 跳转到咨询界面*/
+    function jumpToSureInfo(type, typeId, userId) {
+        var timestamp = new Date().getTime();
+        if (type == 3) {
+            api.ajax({
+                url: getConsultChatInfoSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "consultId": typeId,
+                        "deviceId": api.deviceId,
+                        "time": timestamp,
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if (ret.success) {
+                        api.openWin({
+                            name: 'consult_profession_chat_win',
+                            url: '../../consult/consult_profession_chat_win.html',
+                            pageParam: {
+                                name: 'doctor_consult',
+                                consultId: ret.data.consultId,
+                                consultStatus: ret.data.consultState,
+                                consultType: ret.data.consultRecord.consultType
+                            },
+                        });
+                    } else {
+                        defaultToast(ret.message);
+                    }
+                } else {
+                    defaultToast(err.message)
+                }
+            });
+        } else if (type == 4) {
+            api.ajax({
+                url: getConsultCommentAndRatingSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "consultId": typeId,
+                        "deviceId": api.deviceId,
+                        "time": timestamp,
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if (ret.success) {
+
+                    } else {
+                        defaultToast(ret.message);
+                    }
+                } else {
+                    defaultToast(err.message)
+                }
+            });
+        }
+    }
+</script>
+
+</html>

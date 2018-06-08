@@ -1,0 +1,51 @@
+img[src=""], img:not([src]) {
+    opacity: 0;
+}
+
+.user-indentification-margin {
+    margin: 1rem 1.5rem;
+}
+
+.user-indentification-img {
+    position: relative;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url(../../image/user/log_card.png);
+    min-height: 8.5rem;
+}
+
+.user-indentificaion-title {
+    font-size: 0.65rem;
+    color: rgba(153, 153, 153, 1);
+    line-height: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.user-indentificaion-pic {
+    position: absolute;
+    display: block;
+    height: 7rem;
+    width: 10.5rem;
+    top: calc(50% - 3.5rem);
+    left: calc(50% - 5rem);
+    border-radius: 5px;
+}
+
+.user-indentificaion-camera {
+    position: absolute;
+    display: block;
+    max-height: 3.5rem;
+    max-width: 3.5rem;
+    top: calc(50% - 1.75rem);
+    left: calc(50% - 1.75rem);
+}
+
+.aui-btn-block {
+    height: 2.5rem;
+}
+
+.aui-btn {
+    border-radius: 1.125rem;
+    background-color: #3FC190;
+    margin-top: 1.85rem;
+}

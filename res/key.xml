@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<security>
+  <item name="wxPay_appId" value="wx25c353098c4bcee2"/>
+  <item name="wxPay_mchId" value="1505042611"/>
+  <!-- <item name="wxPay_partnerKey" value="tf@645367"/> -->
+  <item name="wxPay_notifyUrl" value="http://139.199.108.19:8080/api/tenpay/notify" />
+</security>

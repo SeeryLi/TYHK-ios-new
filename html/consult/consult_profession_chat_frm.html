@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="multipart/form-data; charset=utf-8" />
+    <title>专业咨询--聊天界面</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/doctor_main.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/starRating.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/consult_profession_chat_frm.css" />
+</head>
+
+<body>
+    <ul class="aui-chat" id="chatList">
+    </ul>
+    <script id="chatDataScript" type="text/template">
+
+      {{for(var i = 0;i< it.length;i++){ }}
+
+        {{if(it[i].fromUserId == getStorage('userId')){ }}
+          {{if(it[i].messageType == '0'){ }}
+            <li>
+              <div class="aui-chat-item aui-chat-right">
+                    <div class="aui-chat-media">
+                        {{if(it[i].fromUserPhoto == ''){ }}
+                          <img class="right_photo" src="../../image/user/user_defult.png"/>
+                        {{ }else{ }}
+                          <img class="right_photo" src="{{=it[i].fromUserPhoto}}"/>
+                        {{ }}}
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">{{=it[i].fromUserName}}</div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{=it[i].tmMessage}}
+                        </div>
+                    </div>
+                </div>
+          </li>
+
+        {{ }else if(it[i].messageType == '1'){ }}
+          <li>
+            <div class="aui-chat-item aui-chat-right">
+                  <div class="aui-chat-media">
+                    {{if(it[i].fromUserPhoto == ''){ }}
+                      <img class="right_photo" src="../../image/user/user_defult.png" />
+                    {{ }else{ }}
+                      <img class="right_photo" src="{{=it[i].fromUserPhoto}}"/>
+                    {{ }}}
+                  </div>
+                  <div class="aui-chat-inner">
+                      <div class="aui-chat-name">{{=it[i].fromUserName}}</div>
+                      <div class="aui-chat-content">
+                          <div class="aui-chat-arrow"></div>
+                          <img class="imgCache"  id="{{=it[i].id}}" src="" onclick=""  srcs="{{=it[i].tmMessage}}"/>
+                      </div>
+                  </div>
+              </div>
+          </li>
+        {{ }else if(it[i].messageType == '2'){ }}
+        <li>
+          <div class="aui-chat-item aui-chat-right" onclick="playConsultVoice('right','{{=it[i].fileId}}','{{=it[i].tmMessage}}','{{=it[i].fileId}}')">
+                <div class="aui-chat-media">
+                  {{if(it[i].fromUserPhoto == ''){ }}
+                    <img class="right_photo" src="../../image/user/user_defult.png"/>
+                  {{ }else{ }}
+                    <img class="right_photo" src="{{=it[i].fromUserPhoto}}"/>
+                  {{ }}}
+                </div>
+                <div class="aui-chat-inner">
+                    <div class="aui-chat-name">{{=it[i].fromUserName}}</div>
+                    <div id='{{=it[i].fileId}}' class="aui-chat-content right_par" onclick="rightIco('{{=it[i].fileId}}')" style="width:7.5rem !important;text-align:left;">
+                        <div class="right_ico"></div>
+      	                <div class="aui-chat-arrow"></div>
+      	                {{=it[i].audioTime}}″
+      	            </div>
+                </div>
+            </div>
+        </li>
+        {{}else if(it[i].messageType == '3'){ }}
+        <li>
+          <div class="aui-chat-item aui-chat-right" onclick="jumpChangeedRemind('{{=it[i].tmMessage}}')">
+            <div class="aui-chat-media">
+              {{if(it[i].fromUserPhoto == ''){ }}
+                <img class="right_photo" src="../../image/user/user_defult.png" />
+              {{ }else{ }}
+                <img class="right_photo" src="{{=it[i].fromUserPhoto}}"/>
+              {{ }}}
+            </div>
+                <div class="aui-chat-inner">
+                    <div class="aui-chat-name">{{=it[i].fromUserName}}</div>
+                    <div class="aui-chat-content" style="width:120% !important;">
+                        <div class="aui-chat-arrow"></div>
+                        <img class="details_ico" src="../../image/remind/drug_mod.png" alt="">
+                        <div class="details_right">
+                          <p>修改的服药单</p>
+                          <span>点击查看</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+      </li>
+        {{ }else if(it[i].messageType == '4'){ }}
+        <li>
+          <div class="aui-chat-item aui-chat-right" onclick="jumpPay('{{=it[i].tmMessage}}')">
+            <div class="aui-chat-media">
+              {{if(it[i].fromUserPhoto == ''){ }}
+                <img class="right_photo" src="../../image/user/user_defult.png"/>
+              {{ }else{ }}
+                <img class="right_photo" src="{{=it[i].fromUserPhoto}}"/>
+              {{ }}}
+            </div>
+                <div class="aui-chat-inner">
+                    <div class="aui-chat-name">{{=it[i].fromUserName}}</div>
+                    <div class="aui-chat-content" style="width:120% !important;">
+                        <div class="aui-chat-arrow"></div>
+                        <img class="details_ico" src="../../image/remind/con_chat_xtyd.png" alt="">
+                        <div class="details_right">
+                          <p>添加的服药单</p>
+                          <span>点击查看</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+      </li>
+        {{}}}
+      {{ }else{ }}
+          {{if(it[i].messageType == '0'){ }}
+            <li>
+              <div class="aui-chat-item aui-chat-left">
+                    <div class="aui-chat-media" onclick="checkInfo()" >
+                        {{if(it[i].fromUserPhoto == ''){ }}
+                          <img class="left_photo" src="../../image/user/user_defult.png"/>
+                        {{ }else{ }}
+                          <img class="left_photo" src="{{=it[i].fromUserPhoto}}"/>
+                        {{ }}}
+                    </div>
+                    <div class="aui-chat-inner">
+                        <div class="aui-chat-name">{{=it[i].fromUserName}}</div>
+                        <div class="aui-chat-content">
+                            <div class="aui-chat-arrow"></div>
+                            {{=it[i].tmMessage}}
+                        </div>
+                    </div>
+                </div>
+          </li>
+
+        {{ }else if(it[i].messageType == '1'){ }}
+          <li>
+            <div class="aui-chat-item aui-chat-left">
+                  <div class="aui-chat-media" onclick="checkInfo()">
+                    {{if(it[i].fromUserPhoto == ''){ }}
+                      <img class="left_photo" src="../../image/user/user_defult.png"/>
+                    {{ }else{ }}
+                      <img class="left_photo" src="{{=it[i].fromUserPhoto}}"/>
+                    {{ }}}
+                  </div>
+                  <div class="aui-chat-inner">
+                      <div class="aui-chat-name">{{=it[i].fromUserName}}</div>
+                      <div class="aui-chat-content">
+                          <div class="aui-chat-arrow"></div>
+                          <img class="imgCache"  id='{{=it[i].id}}' src=""   srcs="{{=it[i].tmMessage}}"/>
+                      </div>
+                  </div>
+              </div>
+          </li>
+        {{ }else if(it[i].messageType == '2'){ }}
+        <li>
+          <div class="aui-chat-item aui-chat-left" onclick="playConsultVoice('left','{{=it[i].fileId}}','{{=it[i].tmMessage}}','{{=it[i].fileId}}')">
+                <div class="aui-chat-media" onclick="checkInfo()">
+                  {{if(it[i].fromUserPhoto == ''){ }}
+                    <img class="left_photo" src="../../image/user/user_defult.png"/>
+                  {{ }else{ }}
+                    <img class="left_photo" src="{{=it[i].fromUserPhoto}}"/>
+                  {{ }}}
+                </div>
+                <div class="aui-chat-inner">
+                    <div class="aui-chat-name">{{=it[i].fromUserName}}</div>
+                    <div id='{{=it[i].fileId}}' class="aui-chat-content left_par" onclick="leftIco('{{=it[i].fileId}}')" style="width:7.5rem !important;text-align:right;">
+                        <div class="left_ico"></div>
+      	                <div class="aui-chat-arrow"></div>
+      	                {{=it[i].audioTime}}″
+      	            </div>
+                </div>
+            </div>
+        </li>
+
+      {{}else if(it[i].messageType == '3'){ }}
+      <li>
+        <div class="aui-chat-item aui-chat-left" onclick="jumpChangeedRemind('{{=it[i].tmMessage}}')">
+          <div class="aui-chat-media" onclick="checkInfo()">
+            {{if(it[i].fromUserPhoto == ''){ }}
+              <img class="left_photo" src="../../image/user/user_defult.png"/>
+            {{ }else{ }}
+              <img class="left_photo" src="{{=it[i].fromUserPhoto}}"/>
+            {{ }}}
+          </div>
+              <div class="aui-chat-inner">
+                  <div class="aui-chat-name">{{=it[i].fromUserName}}</div>
+                  <div class="aui-chat-content" style="width:60% !important;">
+                      <div class="aui-chat-arrow"></div>
+                      <img class="details_ico" src="../../image/remind/drug_mod.png" alt="">
+                      <div class="details_right">
+                        <p>修改的服药单</p>
+                        <span>点击查看</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+    </li>
+    {{}else if(it[i].messageType == '4'){ }}
+      <li>
+        <div class="aui-chat-item aui-chat-left"  onclick="jumpPay('{{=it[i].tmMessage}}')">
+          <div class="aui-chat-media" onclick="checkInfo()">
+            {{if(it[i].fromUserPhoto == ''){ }}
+              <img class="left_photo" src="../../image/user/user_defult.png"/>
+            {{ }else{ }}
+              <img class="left_photo" src="{{=it[i].fromUserPhoto}}"/>
+            {{ }}}
+          </div>
+              <div class="aui-chat-inner">
+                  <div class="aui-chat-name">{{=it[i].fromUserName}}</div>
+                  <div class="aui-chat-content" style="width:60% !important;">
+                      <div class="aui-chat-arrow"></div>
+                      <img class="details_ico" src="../../image/remind/con_chat_xtyd.png" alt="">
+                      <div class="details_right">
+                        <p>添加的服药单</p>
+                        <span>点击查看</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </li>
+    {{ }}}
+  {{ }}}
+  {{ }}}
+  </script>
+
+  <!-- 活动价 -->
+  <script id="priceScript" type="text/template">
+    {{ if(it.activePrice!=0){ }}
+    <ul class="dmf_ul pricetagbox">
+        <li>
+          <p class="dmf_p">原价：<span class="dmf_span " style="text-decoration:line-through;">¥{{=it.oldPrice}}</span> </p>
+          <p class="dmf_p">活动价：<span class="dmf_span" id="realPrice">¥{{=it.activePrice}}</span></p>
+        </li>
+        <li>注:{{=it.note}}。</li>
+    </ul>
+    {{ }else{ }}
+    <ul class="dmf_ul pricetagbox">
+      <li>
+        <p class="dmf_p" style="margin-left:0">价格：<span class="dmf_span ">¥{{=it.oldPrice}}</span> </p>
+      </li>
+      <li>注:咨询有效期为24小时。</li>
+    </ul>
+    {{ } }}
+  </script>
+
+  <div class="dmf_dialog">
+    <div class="dmf_boxdiv">
+      <div class="dmf_header">
+          <img src="../../image/dialog_img.png" alt="">
+      </div>
+      <div class="dmf_content">
+          <li>·有效期内，您可以和医生不限次数进行一对一聊天咨询，获得问题解答，开具处方、购买药品等服务。</li>
+          <li>·有效期后，系统会自动关闭咨询聊天对话功能。您也可对医生提前评价结束咨询聊天。</li>
+          <div id="priceTagBox"> </div>
+          <button id="dmf_go_back" class="dmf_basebtn btn_go_back" type="button" name="button" onclick="dmfGoback()">取消</button>
+          <button id="dmf_buy" class="dmf_basebtn bth_bg" type="button" name="button" onclick="goPay()">购买</button>
+      </div>
+    </div>
+  </div>
+    <!-- 语音提示窗 -->
+    <div class="cpc_warp">
+        <div class="cpc_cilck">
+            <img class="cpc_ico" src="../../image/record.png" alt="">
+            <p id="timer_p">60s</p>
+            <p style="font-size0.65rem;">手指上滑，取消发送</p>
+        </div>
+        <div class="cpc_up">
+            <img class="cpc_ico" src="../../image/trash.png" alt="">
+            <p style="font-size0.65rem;margin-top:2rem;">松开手指，取消发送</p>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/jquery.md5.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/fileUtil.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/commit/fileDownload.js"></script>
+<script type="text/javascript" src="../../script/modules/consult/chatBoxUtil.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript" src="../../script/modules/zepto.min.js"></script>
+<!-- <script type="text/javascript" src="../../script/commit/image-cache.js"></script> -->
+<script type="text/javascript" src="../../script/hammer.js"></script>
+<script type="text/javascript" src="../../script/hammerPluin.js"></script>
+
+<script type="text/javascript">
+    var isBottom = true;
+    var scrollTop = 0;
+    var scrollHeight = 0;
+    var windowHeight = 0;
+    var chatRecordArr = new Array();
+    var patientId;
+    var requestId;
+    var newDoctorId;
+    var userId = getStorage('userId');
+    var frmH;
+    var consultState;
+    var realGold;
+    var chatListArr = [];
+    var ifCloseConsult = false;
+    apiready = function() {
+       frmH = api.frameHeight;
+       $("#chatList").height(frmH);
+        requestId = getUUID();
+        getConsultInfo();
+        api.parseTapmode();
+        api.sendEvent({
+            name: 'resetMyRequest'
+        });
+        setTimeout(function(){
+            checkScroll();
+        },1000)
+        setTimeout(function(){
+            _zyzImgCache();
+        },1500)
+    };
+
+    // 轮询3秒一次聊天记录
+    function setChatCheck(){
+      if(!ifCloseConsult){
+        checkIfNewMsg = setInterval(function(){
+           getNewConsultInfo();
+        }, 3000);
+        checkIfconsultEnd = setInterval(function(){
+          ifconsultEnd();
+        }, 5000);
+      }
+    }
+
+    function clearChatCheck(){
+      clearInterval(checkIfNewMsg);
+      clearInterval(checkIfconsultEnd);
+      checkIfNewMsg = null;
+    }
+
+    //轮询检查是否
+    var ifconsultEnd = function(){
+      api.ajax({
+        url: getConsultChatInfoSer,
+        method: 'post',
+        data: {
+            values: {
+                "userId": userId,
+                "consultId": api.pageParam.consultId,
+                "deviceId": api.deviceId,
+                "time": new Date().getTime(),
+                "sign": ""
+            },
+        }
+      }, function(ret, err) {
+          if (ret.success) {
+            if(ret.data.consultState == 4 || ret.data.consultState == 5 || ret.data.consultState == 6){
+              api.execScript({
+                name: 'consult_profession_chat_win',
+                script: 'getCountDown('+ 0 +')'
+              });
+              api.execScript({
+                name: 'consult_profession_chat_win',
+                script: 'endFromComment()'
+              });
+            }
+          }
+      });
+    }
+    //  检查是否有新消息更新
+    function getNewConsultInfo(){
+      api.ajax({
+          url: consultChatHistoryRecordsSer,
+          method: 'post',
+          data: {
+              values: {
+                  "userId": userId,
+                  "consultId": api.pageParam.consultId,
+                  "deviceId": api.deviceId,
+                  "queryLimit": "20",
+                  "queryTime": "",
+                  "time": new Date().getTime(),
+                  "sign": ""
+              },
+          }
+      }, function(ret, err) {
+          if (ret) {
+                consultState = ret.data.consultStatus;
+                if(ret.data.consultState == 4 || ret.data.consultState == 5 || ret.data.consultState == 6){
+                  api.execScript({
+                    name: 'consult_profession_chat_win',
+                    script: 'getCountDown('+ 0 +')'
+                  });
+                  api.execScript({
+                    name: 'consult_profession_chat_win',
+                    script: 'endFromComment()'
+                  });
+                }
+                api.execScript({
+                  name: 'consult_profession_chat_win',
+                  script: 'showEvaluate('+ ret.data.consultStatus +','+ ret.data.consultCommentStatus +' )'
+                });
+              var chatArr = ret.data.chatRecords;
+              if(chatArr.length > chatListArr.length){
+                var newAddChatArr = chatArr.slice(chatListArr.length);
+                chatListArr = chatArr;
+                $api.append($api.byId("chatList"), doT.template($api.html($api.byId("chatDataScript")))(newAddChatArr));
+            	setTimeout(function(){
+               		_zyzImgCache();
+                	checkScroll();
+      		    },1000)
+              }
+          }
+      });
+    }
+    /** 获取咨询详情*/
+    function getConsultInfo(){
+      var userId = getStorage("userId");
+      if (userId) {
+          api.ajax({
+              url: getConsultChatInfoSer,
+              method: 'post',
+              data: {
+                  values: {
+                      "userId": userId,
+                      "consultId": api.pageParam.consultId,
+                      "deviceId": api.deviceId,
+                      "time": new Date().getTime(),
+                      "sign": ""
+                  },
+              }
+          }, function(ret, err) {
+              if (ret) {
+                if (ret.success) {
+                  var data = ret.data.consultRecord;
+                  newDoctorId = ret.data.doctorId
+                  patientId = ret.data.patientId;
+                  consultState = ret.data.consultState;
+                  if (ret.data.consultState == '1' || ret.data.consultState == '2') {
+                      initChatBox();
+                  }
+                  if(ret.data.consultState == '2'){
+                    if(ret.data.time && ret.data.time != ''){
+                        if(ret.data.time < new Date().getTime()){
+                          api.ajax({
+                              url: doctorCloseConsultSer,
+                              method: 'post',
+                              data: {
+                                  values: {
+                                      "userId": newDoctorId,
+                                      "consultId": api.pageParam.consultId,
+                                      "deviceId": api.deviceId,
+                                      "time": new Date().getTime(),
+                                      "sign": ""
+                                  },
+                              }
+                          }, function(ret, err) {
+                              if (ret) {
+                                  if (ret.success) {
+                                      api.sendEvent({
+                                          name: 'endDoctorConsult',
+                                      });
+                                  }
+                              } else {
+                                  defaultToast(err.message);
+                              }
+                          });
+                        }else{
+                          api.execScript({
+                            name: 'consult_profession_chat_win',
+                            script: 'getCountDown('+ ret.data.time +')'
+                          });
+                        }
+                      }else {
+                        api.execScript({
+                          name: 'consult_profession_chat_win',
+                          script: 'getCountDown('+ 0 +')'
+                        });
+                      }
+                  }
+                  if(data.consultContent){
+                    var consultContentBean = new Object();
+                    consultContentBean.fromUserPhoto = data.patientPortrait;
+                    consultContentBean.messageType = '0';
+                    consultContentBean.fromUserName = data.patientName;
+                    consultContentBean.tmMessage = data.consultContent;
+                    consultContentBean.fromUserId = data.patientId;
+                    chatRecordArr.push(consultContentBean);
+                  }
+                  if (typeof(data.fileRecords) != 'undefined') {
+                    var consultFiles = data.fileRecords;
+                    for (var i = 0; i < consultFiles.length; i++) {
+                        var fileBean = new Object();
+                        fileBean.fromUserPhoto = data.patientPortrait;
+                        fileBean.fromUserName = data.patientName;
+                        fileBean.fromUserId = data.patientId;
+                        fileBean.tmMessage = consultFiles[i].filePath;
+                        fileBean.fileId = consultFiles[i].id;
+                        if (consultFiles[i].fileType == 'image') {
+                          fileBean.messageType = '1';
+                        }else{
+                          fileBean.messageType = '2';
+                          fileBean.audioTime = consultFiles[i].audioTime;
+                        }
+                        chatRecordArr.push(fileBean);
+                    }
+                  }
+                  $api.append($api.byId("chatList"), doT.template($api.html($api.byId("chatDataScript")))(chatRecordArr));
+                  getChatRecordsList();
+                }
+
+              } else {
+                console.log('get chat err-->' + JSON.stringify(err));
+              }
+              setConsultMoney();
+          });
+
+      } else {
+          defaultToast("请求失败，将重新登录");
+          pageJump('login', '../login.html', 'consult_profrssion_chat');
+      }
+      setTimeout(function(){
+        setChatCheck();
+      },1000)
+    }
+    //设置医生咨询收费
+    function setConsultMoney(){
+      var priceTag = {};
+      api.ajax({
+          url: getDoctorConsultMoneySer,
+          method: 'post',
+          data: {
+              values: {
+                  "userId": newDoctorId,
+                  "deviceId": api.deviceId,
+                  "time": new Date().getTime(),
+                  "sign": ""
+              },
+          }
+      }, function(ret, err) {
+          if (ret) {
+              if (ret.success) {
+                    priceTag.oldPrice = ret.data.hireGold;
+                    priceTag.activePrice = ret.data.activityGold;
+                    priceTag.note = ret.data.note;
+                    if(ret.data.consultEnable == 0){
+                      closePop();
+                      ifCloseConsult = true;
+                      api.execScript({
+                        name: 'consult_profession_chat_win',
+                        script: 'doctorStopConsult()'
+                      });
+                    }else{
+                      if(ret.data.activityGold != 0){
+                        realGold = ret.data.activityGold;
+                      }else{
+                        realGold = ret.data.hireGold;
+                      }
+                      $api.html($api.byId("priceTagBox"),"");
+                      $api.append($api.byId("priceTagBox"), doT.template($api.html($api.byId("priceScript")))(priceTag));
+                      if(priceTag.activePrice && priceTag.activePrice!=''){
+                        api.execScript({
+                          name: 'consult_profession_chat_win',
+                          script: 'getConsultMoney('+ realGold +')'
+                        });
+                      }else{
+                        api.execScript({
+                          name: 'consult_profession_chat_win',
+                          script: 'getConsultMoney('+ priceTag.oldPrice +')'
+                        });
+                      }
+                    }
+              } else {
+                  defaultToast(ret.message);
+              }
+          } else {
+              defaultToast(err.message);
+          }
+      });
+    }
+
+    // 付钱看病
+    function goPay(){
+      var userId = getStorage('userId');
+      if(getStorage('userAppType') != 2){
+          return;
+      }
+      var wxPay = api.require('wxPay');
+      var wxPayArg = {};
+      api.ajax({
+          url: wxPayPrepaySer,
+          method: 'post',
+          data: {
+              values: {
+                  "userId": userId ,
+                  "doctorId": newDoctorId,
+                  "type": '2',
+                  "price": realGold + '',
+                  "requestId": requestId,
+              },
+          }
+      }, function(ret, err) {
+          if (ret) {
+                  wxPayArg.package = ret.package;
+                  wxPayArg.sign = ret.sign;
+                  wxPayArg.orderId = ret.prepayid;
+                  wxPayArg.noncestr = ret.noncestr;
+                  wxPayArg.timestamp = ret.timestamp;
+                  wxPayArg.apiKey = ret.appid;
+                  wxPayArg.sign = ret.sign;
+                  wxPay.payOrder({
+                          apiKey: 'wx25c353098c4bcee2',
+                          orderId: wxPayArg.orderId,
+                          mchId: '1505042611',
+                          nonceStr: wxPayArg.noncestr,
+                          timeStamp: wxPayArg.timestamp,
+                          package: 'Sign=WXPay',
+                          sign: wxPayArg.sign
+                      }, function(ret, err) {
+                          if (ret.status) {
+                              alert('支付成功');
+                              dmfGoback();
+                              askAgainFrm();
+                          } else {
+                              alert('支付失3213313败');
+                          }
+                      });
+          } else {
+              console.log('getpatientPaper-->' + JSON.stringify(err));
+          }
+      });
+    }
+    /** 获取咨询聊天列表*/
+    function getChatRecordsList() {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: consultChatHistoryRecordsSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "consultId": api.pageParam.consultId,
+                        "deviceId": api.deviceId,
+                        "queryLimit": "20",
+                        "queryTime": "",
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                      consultState = ret.data.consultStatus;
+                      api.execScript({
+                        name: 'consult_profession_chat_win',
+                        script: 'showEvaluate('+ ret.data.consultStatus +','+ ret.data.consultCommentStatus +' )'
+                      });
+                    chatListArr = ret.data.chatRecords;
+                    $api.append($api.byId("chatList"), doT.template($api.html($api.byId("chatDataScript")))(chatListArr));
+
+                } else {
+                  // console.log('get chat err-->' + JSON.stringify(err));
+                }
+            });
+
+        } else {
+            defaultToast("请求失败，将重新登录");
+            pageJump('login', '../login.html', 'consult_profrssion_chat');
+        }
+    }
+
+    function checkInfo(){
+        if(userId == newDoctorId){
+            pageUserInfo();
+        }else{
+            pageDoctorInfo();
+        }
+        cancelBubble();
+    }
+
+    // 用户生活照与病例
+    function pageUserInfo(){
+      api.openWin({
+        name: 'patient_data_win',
+        url: '../user/patient_data_win.html',
+        pageParam: {
+            patientId: patientId
+        }
+      });
+      cancelBubble();
+    }
+
+    function pageDoctorInfo(){
+        api.openWin({
+          name: 'doctor_info_win',
+          url: '../consult/doctor_info_win.html',
+          pageParam: {
+              doctorId: newDoctorId
+          }
+        });
+        cancelBubble();
+    }
+
+    // 取消点击冒泡事件
+    function cancelBubble(e) {
+      var evt = e ? e : window.event;
+         if (evt.stopPropagation) {
+            evt.stopPropagation();
+         }else {
+            evt.cancelBubble = true;
+         }
+     }
+
+    /** 绑定快速咨询*/
+    function boundConsult(){
+      var userId = getStorage("userId");
+      if (userId) {
+      api.ajax({
+          url: doctorOpenConsultSer,
+          method: 'post',
+          data: {
+              values: {
+                  userId: userId,
+                  "consultId": api.pageParam.consultId,
+                  "deviceId": api.deviceId,
+                  "time": new Date().getTime(),
+                  "sign": ""
+              },
+          }
+      },function(ret, err){
+          if (ret) {
+              if (ret.success) {
+                api.sendEvent({
+                    name: 'refreshDoctorConsult',
+                });
+                api.sendEvent({
+                    name: 'refreshDoctorConsultLib',
+                });
+              }else{//绑定失败，退出界面
+                defaultToast(ret.message);
+                api.closeWin();
+              }
+          } else {
+              defaultToast(err.message);
+              api.closeWin();
+          }
+      });
+    }else{
+      defaultToast("请求失败，将重新登录");
+      pageJump('login', '../login.html', 'consult_profrssion_chat');
+    }
+    }
+
+    //图片缓存
+    function _zyzImgCache(){
+            var imgDir = "fs://images/";
+            var srcs = $("img.imgCache");
+            if(srcs.length > 0){
+                var imgObj = $("img.imgCache").first();
+                    var imgUrl = imgObj.attr("srcs");
+                    var imgMd5 = $.md5(imgUrl);
+                    var fs = api.require('fs');
+                    fs.exist({
+                        path: imgDir + imgMd5
+                    },function(ret,err){
+                        if(ret.exist){
+                            imgObj.attr("src",api.fsDir+"/images/"+imgMd5);
+                            imgObj.removeClass("imgCache");
+                            _zyzImgCache();
+                        }else {
+                                api.download({
+                                        url : imgUrl,
+                                        savePath : imgDir+imgMd5,
+                                        report : false,
+                                        cache : true,
+                                        allowResume : true
+                                    }, function(ret, err) {
+                                        if (ret) {
+                                                imgObj.attr("src",ret.savePath);
+                                                imgObj.removeClass("imgCache");
+                                                _zyzImgCache();
+                                        } else {
+                                            var value = err.msg;
+                                        };
+                                });
+                        }
+                    });
+            }
+    }
+
+
+    //判断是否下拉scrolltoview
+    function checkScroll(){
+        var setHeight = 0;
+        $('.aui-chat-item').each(
+            function(){
+            setHeight += $(this).get(0).offsetHeight;
+            }
+        )
+        if(setHeight > api.frameHeight){
+            $('.aui-chat-item :last').get(0).scrollIntoView();
+        }
+    }
+
+    // right语音图标
+    function rightIco(id){
+      stopPlay();
+      $('#' + id).find(".right_ico").eq(0).toggleClass("right_ico_2");
+    }
+
+    // left语音图标
+    function leftIco(id){
+      stopPlay();
+      $('#' + id).find(".left_ico").eq(0).toggleClass("left_ico_2");
+    }
+
+    /** 停止动画*/
+    function stopPlay(){
+      $(".right_par").find(".right_ico_2").eq(0).removeClass("right_ico_2");
+      $(".right_par").find(".right_par>div").eq(0).addClass("right_ico");
+      $(".left_par").find(".left_ico_2").eq(0).removeClass("left_ico_2");
+      $(".left_par").find(".left_par>div").eq(0).addClass("left_ico");
+    }
+
+    /** 关闭对话框输入*/
+    function closePop(){
+      hideBox();
+      closeBox();
+    }
+
+    /** 跳转服药界面*/
+    function jumpToMedicinalRemind(){
+      var consultId  = api.pageParam.consultId;
+      api.openWin({
+          name: 'change_med_list_win',
+          url: '../remind/change_med_list_win.html',
+          pageParam: {
+              patientId: patientId,
+              consultId: consultId
+          }
+      });
+    }
+
+    /**患者端点击修改的服药单*/
+    function jumpChangeedRemind(takeDrugId){
+      api.openWin({
+          name: 'hz_verify_win',
+          url: '../remind/hz_verify_win.html',
+          pageParam: {
+              patientId: patientId,
+              takeDrugId: takeDrugId
+          }
+      });
+    }
+
+    // dialog
+    function dmfDialog(){
+      api.ajax({
+          url: findConsultWithDoctorSer,
+          method: 'post',
+          data: {
+              values: {
+                  userId: userId,
+                  doctorId:newDoctorId
+              },
+          }
+      },function(ret, err){
+          if (ret) {
+            if(ret.data.consultId && ret.data.consultId != ''){
+              api.openWin({
+                  name: 'consult_profession_chat_win',
+                  url: './consult_profession_chat_win.html',
+                  reload:true,
+                  pageParam: {
+                      consultId: ret.data.consultId
+                  }
+              });
+            } else{
+              $(".dmf_dialog").bind('touchmove', function(event) {
+                  return false;
+              });
+              var frmH = api.frameHeight;
+              $(".dmf_dialog").height(frmH);
+              $(".dmf_dialog").addClass("show");
+            }
+          } else {
+              defaultToast(err.message);
+              api.closeWin();
+          }
+      });
+
+    }
+    // GOBACK
+    function dmfGoback(){
+        api.execScript({
+            Name: 'consult_profession_chat_win',
+            script: 'offDia();'
+        });
+        $(".dmf_dialog").removeClass("show");
+    }
+    /**继续咨询*/
+    function askAgainFrm(){
+        var userId = getStorage("userId");
+        if (userId) {
+        api.ajax({
+            url: newMessageWithPhysicianSer,
+            method: 'post',
+            data: {
+                values: {
+                    'userId': userId,
+                    "doctorId": newDoctorId,
+                    "requestId": requestId,
+                    "deviceId": api.deviceId,
+                    "time": new Date().getTime(),
+                    "sign": ""
+                },
+            }
+        },function(ret, err){
+            if (ret) {
+                if (ret.success) {
+                        api.execScript({
+                          name: 'home_page_win',
+                          script: "refreshConsultId(ret.data.consultId)"
+                        });
+                        api.sendEvent({
+                            name: 'refreshConsultId',
+                            extra: {
+                              key1: ret.data.consultId,
+                          }
+                        });
+                        api.openWin({
+                            name: 'consult_profession_chat_win',
+                            url: './consult_profession_chat_win.html',
+                            reload:true,
+                            pageParam: {
+                                consultId: ret.data.consultId
+                            }
+                        });
+                }else{//绑定失败，退出界面
+                  defaultToast(ret.message);
+                  api.closeWin();
+                }
+            } else {
+                defaultToast(err.message);
+                api.closeWin();
+            }
+        });
+      }else{
+        defaultToast("请求失败，将重新登录");
+        pageJump('login', '../login.html', 'consult_profrssion_chat');
+      }
+    }
+
+    /** 跳转到支付新药品界面*/
+    function jumpPay(arg){
+      api.openWin({
+          name: 'shopping_list_win',
+          url: '../remind/shopping_list_win.html',
+          pageParam: {
+            drugMouldId: arg ,
+            doctorId : newDoctorId,
+          }
+      });
+    }
+    /** 图片点击查看大图*/
+    function showPicture(el){
+    }
+
+
+    /** 录音提示窗*/
+    function recordDown() {
+        $(".cpc_warp,.cpc_cilck").addClass("show");
+        $("#timer_p").text(voiceDuration + '″');
+    }
+
+    function recordDownT() {
+        $(".cpc_warp,.cpc_cilck").removeClass("show");
+    }
+
+    function recordUp() {
+        $(".cpc_cilck").removeClass("show");
+        $(".cpc_up").addClass("show");
+    }
+
+    function recordUpT() {
+        $(".cpc_warp,.cpc_up").removeClass("show");
+    }
+
+    function recordUpTd() {
+        $(".cpc_cilck").addClass("show");
+        $(".cpc_up").removeClass("show");
+    }
+</script>
+
+</html>

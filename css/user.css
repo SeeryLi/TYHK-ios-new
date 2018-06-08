@@ -1,0 +1,160 @@
+
+body{
+  background-color: #EFF2F7;
+}
+
+.head_photo{
+  height: 4rem;
+}
+
+.aui-list-item-right {
+    color: #999999 !important;
+}
+
+.user-title {
+    color: #222222 !important;
+}
+
+.user-conmmit {
+    color: #3FC190 !important;
+}
+
+.user-input {
+    color: #222;
+    line-height: 0px;
+    padding-left: 0.75rem;
+    height: 2.2rem;
+}
+
+.user-input>input{
+  font-size: 0.75rem;
+  color: #222;
+  font: initial;
+}
+
+.bg_color{
+  background-color: #fff;
+}
+
+#userHeaderImg{
+  max-height:2.5rem;
+  max-width:2.5rem;
+  margin:4px;
+  border:1px solid #EBEBEB;
+  border-radius:1.5rem;
+}
+
+.aui-list-item-inner {
+    color: #222222 !important;
+}
+
+.border-se {
+    width: 100%;
+    height: 0.5rem;
+    background-color: #EFF2F7;
+}
+
+.user-setting-list-left {
+    font-size: 0.75rem !important;
+    color: #222 !important;
+}
+
+.user-setting-list-right {
+    font-size: 0.75rem !important;
+    color: rgba(153, 153, 153, 1) !important;
+    line-height: 0px;
+}
+
+.user-login-out-btn {
+    width: 600px;
+    height: 90px;
+    background: rgba(230, 61, 74, 1);
+    border-radius: 45px
+}
+
+.aui-list .aui-list-item,.aui-list{
+  background-image: none;
+}
+
+.border_solid{
+  width: 100%;
+  height: 1px;
+  background-color: #E1E1E1;
+}
+
+.border_solid.posi{
+  position: absolute;;
+  bottom: 0;
+}
+
+.par_box{
+  padding-left:0.75rem;
+  position:relative;
+}
+
+.radio_input{
+  position:absolute;
+  right:0.75rem;
+}
+
+.aui-content-padded{
+  margin-top: 1.5rem;
+}
+
+.none_border{
+  background-image: none !important;
+}
+
+.info-title{
+  font-size: 0.75rem;
+  font-weight: normal;
+  color: #222;
+}
+.info-text{
+  font-size: 0.75rem;
+  font-weight: normal;
+  color: #999;
+}
+.my-address{
+  max-width: 10rem;
+  overflow: hidden;
+  display: block;
+  white-space: nowrap;
+  text-overflow:ellipsis;
+}
+.address-item{
+    font-size:0.75rem;
+    color:#222;
+    font-weight: normal;
+}
+.address-item span{
+    position: relative;
+    top: -0.5rem;
+}
+
+.address-inner input{
+    font-weight: normal;
+}
+.address-inner textarea{
+    font-weight: normal;
+    height: 100%!important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.address-inner input::placeholder{
+    color: #999;
+    font-size: 0.75rem;
+    font-weight: normal;
+}
+.address-inner textarea::placeholder{   /* Mozilla Firefox 19+ */
+    color: #999;
+    font-size: 0.75rem;
+    font-weight: normal;
+}
+.address-border-b{
+    border-bottom: 1px solid #ebebeb;
+}
+.textarea-height{
+    height: 3.75rem;
+}

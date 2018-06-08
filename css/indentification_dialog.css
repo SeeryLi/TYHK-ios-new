@@ -1,0 +1,30 @@
+.aui-dialog.aui-dialog-in{
+  height: 14.5rem;
+}
+
+.aui-dialog-btn{
+  border-radius: 1rem;
+  border: 1px solid;
+  background-color: #3FC190;
+  margin: 0 1.2rem 0.75rem;
+  color: #fff;
+}
+
+.aui-dialog-header{overflow: hidden;}
+
+.aui-dialog-header>img{
+  position: relative;
+  left: calc(50% - 3.5rem);
+  max-width: 7rem;
+  max-height: 7rem;
+}
+
+.aui-dialog{width: auto;top: calc(50% - 7.25rem) !important;margin-top: 0 !important;}
+
+.aui-dialog-footer{background:none;}
+
+.aui-dialog.aui-dialog-in{overflow: hidden;}
+
+.aui-dialog-footer>div:first-child{display: none;}
+
+.aui-dialog-footer>img{width: 2rem;height: 2rem;}

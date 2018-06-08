@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>咨询库</title>
+      <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+      <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+      <link rel="stylesheet" type="text/css" href="../../css/header_title.css" />
+      <link rel="stylesheet" type="text/css" href="../../css/style.css" />
+      <link rel="stylesheet" type="text/css" href="../../css/consult/consult_record.css" />
+      <link rel="stylesheet" type="text/css" href="../../css/mescroll.min.css">
+      <script type="text/javascript" src="../../script/api.js"></script>
+      <script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+      <script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+      <script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+      <script type="text/javascript" src="../../script/commit/utils.js"></script>
+      <script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+      <script type="text/javascript" src="../../script/doT.min.js"></script>
+      <script type="text/javascript" src="../../script/doT.min.js"></script>
+      <script type="text/javascript" src="../../script/commit/fileDownload.js"></script>
+      <script type="text/javascript" src="../../script/modules/consult/consultVoicePlay.js"></script>
+      <script type="text/javascript" src="../../script/mescroll.min.js"></script>
+
+  </head>
+  <body>
+    <div id="dortor-consult-lib-mescroll" class="aui-content aui-margin-b-15 mescroll">
+
+        <ul id="dortor-consult-lib" class="aui-list aui-media-list">
+        </ul>
+    </div>
+
+    <!-- 无记录状态 -->
+    <div id="doctor-consult-lib-empty" class="record-div" style="display:none;">
+      <img src="../../image/doctor/my_zxk_no.png" alt="">
+    </div>
+
+    <script id="consutlLibScript" type="text/template">
+        <!-- 咨询状态,1:未解答,2:新回复,3:超期,4:已结束 -->
+        {{for(var i = 0;i< it.length;i++){ }}
+         <li onclick="jumpToConsultInfo('{{=it[i].consultId}}','{{=it[i].consultState}}','{{=it[i].consultType}}')">
+             <div class="border-se"></div>
+             <div class="main-title">
+               <div class="title-left">
+                   {{if(it[i].doctorPortrait == ''){ }}
+                     <img class='consult-record-img' src='../../image/user/user_defult.png' />
+                   {{ }else{ }}
+                     <img class='consult-record-img' src='{{=it[i].patientPortrait}}' />
+                   {{}}}
+                 <span class="name-box">{{=it[i].patientName}}</span>
+               </div>
+               <div class="title-right">
+                 {{ if(it[i].consultState == '1'){ }}
+                   <span>
+                    待回复
+                   </span>
+                 {{ }}}
+               </div>
+             </div>
+             <div class="content-main">
+               <!-- 文本 -->
+               <div class="info-div">
+                 {{=it[i].consultContent}}
+               </div>
+               {{if(it[i].voicePath){ }}
+               <!-- 语音-->
+               <div class="recording-div" onclick="plyM('{{=it[i].voiceFileId}}','{{=it[i].voicePath}}','{{=it[i].voiceFileId}}')">
+                 <img src="../../image/home_form_sus.png" alt="ply" id='{{=it[i].voiceFileId}}'>
+                 <span>语音消息</span>
+               </div>
+               {{ }}}
+               <span class="time-recording">{{=it[i].consultTime}}</span>
+             </div>
+        </li>
+        {{ }}}
+      </script>
+  </body>
+
+  <script type="text/javascript">
+      var mescroll;
+      apiready = function(){
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        setListener();
+        //创建MeScroll对象,内部已默认开启下拉刷新,自动执行up.callback,重置列表数据;
+        mescroll = new MeScroll("dortor-consult-lib-mescroll", {
+          up: {
+              auto: false, //是否在初始化时以上拉加载的方式自动加载第一页数据; 默认false
+              clearEmptyId: "dortor-consult-lib",
+              isBounce: false, //此处禁止ios回弹
+              callback: upCallback, //上拉回调,此处可简写; 相当于 callback: function (page) { upCallback(page); }
+              toTop: {
+                  src: "../../image/mescroll-totop.png",
+              },
+          }
+        });
+      };
+
+      /** 设置监听*/
+      function setListener(){
+        api.addEventListener({
+            name: 'resetIndex'
+        }, function(ret, err) {
+            console.log(JSON.stringify(ret));
+            if (ret) {
+              mescroll.resetUpScroll( true );
+            }
+        });
+        api.addEventListener({
+            name: 'voicePlay'
+        }, function(ret, err){
+            if( ret ){
+              funcGoto(ret);
+            }
+        });
+        api.addEventListener({
+            name: 'refreshDoctorConsultLib'
+        }, function(ret, err){
+            if( ret ){
+              mescroll.resetUpScroll( true );
+            }
+        });
+        api.addEventListener({
+            name: 'clearData'
+        }, function(ret, err){
+            if( ret ){
+              $api.css($api.byId('dortor-consult-lib-mescroll'), 'display: none;');
+              $api.html($api.byId("dortor-consult-lib"), "");
+              $api.css($api.byId("doctor-consult-lib-empty"),"display: block;");
+            }
+        });
+      }
+
+      /*上拉加载的回调 page = {num:1, size:10}; num:当前页 从1开始, size:每页数据条数 */
+      function upCallback(page) {
+        getConsultList(page.num, page.size, function(curPageData) {
+            //mescroll会根据传的参数,自动判断列表如果无任何数据,则提示空;列表无下一页数据,则提示无更多数据;
+            //console.log("page.num=" + page.num + ", page.size=" + page.size + ", curPageData.length=" + curPageData.length);
+            if (page.num == 1 && curPageData.length == 0) {
+              $api.css($api.byId('dortor-consult-lib-mescroll'), 'display: none;');
+              $api.css($api.byId('doctor-consult-lib-empty'), 'display: block;');
+            }else{
+              if (curPageData.length < page.num) {
+                mescroll.endSuccess(curPageData.length, false);
+              }else{
+                mescroll.endSuccess(curPageData.length, true);
+              }
+              $api.append($api.byId("dortor-consult-lib"), doT.template($api.html($api.byId("consutlLibScript")))(curPageData));
+            }
+
+        }, function() {
+            //联网失败的回调,隐藏下拉刷新和上拉加载的状态;
+            mescroll.endErr();
+        });
+      }
+
+      /** 查询咨询记录*/
+      function getConsultList(pageNum, pageSize, successCallback, errorCallback) {
+          var userId = getStorage("userId");
+          if (userId == "") {
+              pageJump("login", "../login.html", "consult");
+              return;
+          }
+          api.ajax({
+              url: fastConsultWaitingForReplySer,
+              method: 'post',
+              data: {
+                  values: {
+                      "userId": userId,
+                      "doctorId": userId,
+                      "sortType": "",
+                      "queryLimit": pageSize + '',
+                      "queryStartTime": '',
+                      "queryEndTime": '',
+                      "queryStartNumber": (pageNum - 1)*pageSize + '',
+                      "listUse": "",
+                      "time": new Date().getTime(),
+                      "deviceId": api.deviceId,
+                      "sign": ""
+                  },
+              }
+          }, function(ret, err) {
+              //console.log("getConsultList-->" + JSON.stringify(ret));
+              if (ret) {
+                if (ret.success) {
+                  var recordList = ret.data.records;
+                  successCallback && successCallback(recordList);
+                }else{
+                  errorCallback && errorCallback();
+                }
+              } else {
+                errorCallback && errorCallback();
+              }
+          });
+      }
+
+      /** 跳转到咨询界面*/
+      function jumpToConsultInfo(consultID,consultStatu,consultType){
+          stopPlayVoice();
+          api.openWin({
+              name: 'consult_profession_chat_win',
+              url: '../consult/consult_profession_chat_win.html',
+              pageParam: {
+                  name:'doctor_consult_lib',
+                  consultId: consultID,
+                  consultStatus:consultStatu,
+                  consultType:consultType
+              },
+          });
+      }
+
+  </script>
+  </html>

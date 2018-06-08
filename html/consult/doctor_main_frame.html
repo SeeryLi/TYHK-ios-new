@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>医生主页信息</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/doctor_main.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/starRating.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/add_consult_frame.css" />
+
+</head>
+
+<body>
+    <div class="container-div">
+        <div class="warp-boxDiv">
+            <!-- img -->
+            <div class="photo-img">
+                <img id="doctorHeader" src="../../image/user/user_defult.png" />
+            </div>
+            <!-- doctor-info -->
+            <div class="warp-right">
+                <div class="baseBox1">
+                    <span id="doctorName"><b></b></span>
+                </div>
+                <div class="baseBox2">
+                    <span id="doctorFile"></span>
+                    <p class="bor-p"></p>
+                    <span class="baseBox2_span2" id="doctorLevel"></span>
+                </div>
+            </div>
+        </div>
+        <div class="baseInfo-1" id="doctorPermission">
+            <div class="info-1">
+                <h2 id="doctorRat"></h2>
+                <p>评价星级(星)</p>
+                <div class="solid-div"></div>
+            </div>
+            <div class="info-1">
+                <h2 id="doctorConsultCount"></h2>
+                <p>咨询数(次)</p>
+                <div class="solid-div"></div>
+            </div>
+            <div class="info-1">
+                <h2 id="doctorWorkYear"></h2>
+                <p>从业年限(年)</p>
+            </div>
+        </div>
+        <div class="baseInfo-2">
+            <div class="info-2" id="doctorPermission">
+                <img src="../../image/con_doc_yes.png" />
+                <span>医师认证</span>
+            </div>
+            <div class="info-2" id="doctorConsultOpen">
+                <img src="../../image/con_doc_yes.png" />
+                <span>专业咨询</span>
+            </div>
+            <div class="info-2" id="doctorAnswerQic">
+                <img src="../../image/con_doc_yes.png" />
+                <span>快速回复</span>
+            </div>
+            <div class="info-2">
+            </div>
+        </div>
+        <!-- style-border -->
+        <div class="border-se"></div>
+        <div class="hospitalName">
+            <div><b>执业医院</b></div>
+            <div>
+                <img src="../../image/con_doc_hos.png" alt="">
+                <span id="doctorHospital"></span>
+            </div>
+        </div>
+        <!-- style-border -->
+        <div class="border-se"></div>
+        <div class="baseInfo-3">
+            <div class="info-3">
+                <b>擅长介绍</b>
+            </div>
+            <div id="doctorSkill">
+            </div>
+        </div>
+        <!-- style-border -->
+        <div class="border-se"></div>
+        <div class="info-3" onclick="jumpToComments()">
+            <b>患者评价</b>
+            <span id="number-span"></span>
+            <div class="more-div">
+                更多
+                <img src="../../image/home_more.png" alt="">
+            </div>
+        </div>
+        <div class="content_div">
+            <!-- 无评论状态 -->
+            <img id="nothing" src="../../image/con_chat_no@3x.png" alt="" style="display:none;">
+            <ul id="doctor-comment">
+                <!-- 评论列表 -->
+
+            </ul>
+        </div>
+    </div>
+    <!-- style-border -->
+    <div class="border-se"></div>
+    </div>
+
+    <script id="doctorPermissionScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){}}
+         <div class="info-2" id="doctorPermission">
+            <img src="../../image/con_doc_yes.png" />
+            <span>{{=it[i]}}}</span>
+         </div>
+        {{}}}
+    </script>
+
+    <script id="doctorCommentScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){ }}
+         <li>
+            <div class="info-2">
+                <div class="main-div">
+                    <div class="title_box">
+                        {{ if({{=it[i].patientPortrait}}){ }}
+                        <img id="ph-img" src="{{=it[i].patientPortrait}}" alt="">
+                         {{ }else{ }}
+                        <img id="ph-img" src="../../image/user/user_defult.png" alt="">
+                         {{ }}}
+                          <span class='doctor-comment-name'>{{=it[i].patientName}}</span>
+                          <span class='doctor-comment-data'>{{=it[i].commentDate}}</span>
+                        <!-- 评价等级 -->
+                        <div class="star_level">
+                            {{ if(it[i].rating >= 1){ }}
+                              <img src="../../image/con_chat_eva.png" alt="">
+                            {{ }if(it[i].rating >= 2){ }}
+                              <img src="../../image/con_chat_eva.png" alt="">
+                            {{ }if(it[i].rating >= 3){ }}
+                              <img src="../../image/con_chat_eva.png" alt="">
+                            {{ }if(it[i].rating >= 4){ }}
+                              <img src="../../image/con_chat_eva.png" alt="">
+                            {{ }if(it[i].rating >= 5){ }}
+                              <img src="../../image/con_chat_eva.png" alt="">
+                            {{ }}}
+                        </div>
+                    </div>
+                    <div class="cont_text">
+                        <p>{{=it[i].comment}}</p>
+                    </div>
+                </div>
+            </div>
+          </li>
+        {{ }}}
+    </script>
+    <!-- dialog -->
+
+    <!-- 活动价 -->
+    <script id="priceScript" type="text/template">
+      {{ if(it.activePrice!=0){ }}
+      <ul class="dmf_ul pricetagbox">
+          <li>
+            <p class="dmf_p">原价：<span class="dmf_span " style="text-decoration:line-through;">¥{{=it.oldPrice}}</span> </p>
+            <p class="dmf_p">活动价：<span class="dmf_span" id="realPrice">¥{{=it.activePrice}}</span></p>
+          </li>
+          <li>注:{{=it.note}}。</li>
+      </ul>
+      {{ }else{ }}
+      <ul class="dmf_ul pricetagbox">
+        <li>
+          <p class="dmf_p" style="margin-left:0">价格：<span class="dmf_span ">¥{{=it.oldPrice}}</span> </p>
+        </li>
+        <li>注:咨询有效期为24小时。</li>
+      </ul>
+      {{ } }}
+    </script>
+
+    <div class="dmf_dialog">
+      <div class="dmf_boxdiv">
+        <div class="dmf_header">
+            <img src="../../image/dialog_img.png" alt="">
+        </div>
+        <div class="dmf_content">
+            <li>·有效期内，您可以和医生不限次数进行一对一聊天咨询，获得问题解答，开具处方、购买药品等服务。</li>
+            <li>·有效期后，系统会自动关闭咨询聊天对话功能。您也可对医生提前评价结束咨询聊天。</li>
+            <div id="priceTagBox"> </div>
+            <button id="dmf_go_back" class="dmf_basebtn btn_go_back" type="button" name="button" onclick="dmfGoback()">取消</button>
+            <button id="dmf_buy" class="dmf_basebtn bth_bg" type="button" name="button" onclick="goPay()">购买</button>
+        </div>
+      </div>
+    </div>
+</body>
+
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/encryption.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/modules/money/moneyUtil.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+
+<script type="text/javascript">
+    var doctorId = '';
+    var requestId;
+    var realGold;
+    var indentificationUrl = '../user/user_indentification_win.html';
+    apiready = function() {
+        getDoctorInfo();
+        requestId = getUUID();
+    };
+
+    /** 获取医生信息*/
+    function getDoctorInfo() {
+        var userId = getStorage("userId");
+        if (typeof(userId) == 'undefined') {
+          userId = '';
+        }
+        api.ajax({
+            url: getDoctorInfoSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": userId,
+                    "doctorId": api.pageParam.doctorId,
+                    "time": new Date().getTime(),
+                    "deviceId": api.deviceId,
+                    "sign": "",
+                    "queryLimit": 5,
+                    "queryStartNumber":0,
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.success) {
+                    var priceTag = {};
+                    priceTag.oldPrice = ret.data.hireGold;
+                    priceTag.activePrice = ret.data.activityGold;
+                    priceTag.note = ret.data.note;
+                    doctorId = ret.data.doctroId;
+                    hireGold = ret.data.hireGold;
+                    if(ret.data.activityGold != 0){
+                      realGold = ret.data.activityGold;
+                    }else{
+                      realGold = ret.data.hireGold;
+                    }
+                    $api.html($api.byId("priceTagBox"),"");
+                    $api.append($api.byId("priceTagBox"), doT.template($api.html($api.byId("priceScript")))(priceTag));
+                    $api.byId("doctorName").innerText = ret.data.doctorName;
+                    $api.byId("doctorFile").innerText = ret.data.clinicalDepartment;
+                    $api.byId("doctorLevel").innerText = ret.data.doctorRank;
+                    $api.byId("doctorRat").innerText = ret.data.rating;
+                    $api.byId("doctorConsultCount").innerText = ret.data.answerTotal;
+                    $api.byId("doctorWorkYear").innerText = ret.data.workSeniority;
+                    $api.byId("doctorHospital").innerText = ret.data.hospitalName;
+                    $api.byId("doctorSkill").innerText = ret.data.skilledTypes;
+                    if (ret.data.doctorPortrait) {
+                        $api.attr($api.byId('doctorHeader'), 'src', ret.data.doctorPortrait);
+                    } else {
+                        $api.attr($api.byId('doctorHeader'), 'src', '../../image/user/user_defult.png');
+                    }
+                    api.execScript({
+                        name: 'doctor_main_win',
+                        script: 'getDocInfo(' + JSON.stringify(ret.data) + ');'
+                    });
+                    $api.html($api.byId("PriceTagBox"), "");
+                    $api.append($api.byId("PriceTagBox"), doT.template($api.html($api.byId("priceTagScript")))(priceTag));
+                    if (ret.data.consultEnable == 0) {
+                      $api.addCls($api.byId('doctorConsultOpen'), 'dis');
+                    }
+                    var commentList = ret.data.comment;
+                    if (typeof(commentList) != 'undefined' && commentList.length > 0) {
+                        $api.css($api.byId("nothing"),"display:none;");
+                        $api.html($api.byId("doctor-comment"), "");
+                        $api.append($api.byId("doctor-comment"), doT.template($api.html($api.byId("doctorCommentScript")))(commentList));
+                        api.parseTapmode();
+                    }else{
+                       $api.css($api.byId("nothing"),"display:block;");
+                    }
+                } else {
+                    defaultToast(ret.message);
+                }
+            } else {
+                console.log(JSON.stringify(err));
+            }
+        });
+    }
+
+    function goPay(){
+        var userId = getStorage("userId");
+                var wxPay = api.require('wxPay');
+                if (userId) {
+                    var wxPayArg = {};
+                    api.ajax({
+                        url: wxPayPrepaySer,
+                        method: 'post',
+                        data: {
+                            values: {
+                                "userId": userId ,
+                                "doctorId": doctorId,
+                                "type": 2,
+                                "price": realGold + '',
+                                "requestId": requestId,
+                            },
+                        }
+                    }, function(ret, err) {
+                      console.log(JSON.stringify(err));
+                        if (ret) {
+                                wxPayArg.package = ret.package;
+                                wxPayArg.sign = ret.sign;
+                                wxPayArg.orderId = ret.prepayid;
+                                wxPayArg.noncestr = ret.noncestr;
+                                wxPayArg.timestamp = ret.timestamp;
+                                wxPayArg.apiKey = ret.appid;
+                                wxPayArg.sign = ret.sign;
+                                wxPay.payOrder({
+                                        apiKey: 'wx25c353098c4bcee2',
+                                        orderId: wxPayArg.orderId,
+                                        mchId: '1505042611',
+                                        nonceStr: wxPayArg.noncestr,
+                                        timeStamp: wxPayArg.timestamp,
+                                        package: 'Sign=WXPay',
+                                        sign: wxPayArg.sign
+                                    }, function(ret, err) {
+                                        if (ret.status) {
+                                            alert('支付成功');
+                                            dmfGoback();
+                                            api.execScript({
+                                                name: 'doctor_main_win',
+                                                script: 'finishPay();'
+                                            })
+                                            api.ajax({
+                                                url: newMessageWithPhysicianSer,
+                                                method: 'post',
+                                                data: {
+                                                    values: {
+                                                        'userId': userId,
+                                                        "doctorId": doctorId,
+                                                        "requestId": requestId,
+                                                        "deviceId": api.deviceId,
+                                                        "time": new Date().getTime(),
+                                                        "sign": ""
+                                                    },
+                                                }
+                                            },function(ret, err){
+                                                if (ret) {
+                                                    if (ret.success) {
+                                                            api.execScript({
+                                                              name: 'home_page_win',
+                                                              script: "refreshConsultId(requestId)"
+                                                            });
+                                                            api.sendEvent({
+                                                                name: 'refreshConsultId',
+                                                                extra: {
+                                                                  key1: requestId,
+                                                              }
+                                                            });
+                                                            api.openWin({
+                                                                name: 'consult_profession_chat_win',
+                                                                url: './consult_profession_chat_win.html',
+                                                                reload:true,
+                                                                pageParam: {
+                                                                    consultId: requestId,
+                                                                    IfDoctorPageEnter : true
+                                                                }
+                                                            });
+                                                    }else{
+                                                      defaultToast(ret.message);
+                                                      api.closeWin();
+                                                    }
+                                                } else {
+                                                    defaultToast(err.message);
+                                                    api.closeWin();
+                                                }
+                                            });
+                                        } else {
+                                            alert('支付失败');
+                                        }
+                                    });
+                        } else {
+                        }
+                    });
+                }
+    }
+    /** 跳转到医生评论界面*/
+    function jumpToComments() {
+        api.openWin({
+            name: 'doctor_comments_win',
+            url: './doctor_comments_win.html',
+            pageParam: {
+                doctorId: doctorId
+            }
+        });
+    }
+
+    // dialog
+    function dmfDialog(){
+      // 取消touchmove
+      $(".dmf_dialog").bind('touchmove', function(event) {
+          return false;
+      });
+      var frmH = api.frameHeight;
+      $(".dmf_dialog").height(frmH);
+      $(".dmf_dialog").addClass("show");
+    }
+
+    // GOBACK
+    function dmfGoback(){
+        api.execScript({
+            Name: 'doctor_main_win',
+            script: 'offDia();'
+        });
+        $(".dmf_dialog").removeClass("show");
+    }
+</script>
+
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/main_style.css" />
+</head>
+
+<body>
+    <div class="pdf_warp_box">
+        <div class="border-se"></div>
+        <ul class="aui-list aui-list-in pdf_bor_no">
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-title pdf_l_div">姓名</div>
+                    <div class="aui-list-item-right pdf_r_div" id="pdf_name"></div>
+                </div>
+            </li>
+
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-title pdf_l_div">性别</div>
+                    <div class="aui-list-item-right pdf_r_div" id="pdf_sex"></div>
+                </div>
+            </li>
+
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-title pdf_l_div">年龄</div>
+                    <div class="aui-list-item-right pdf_r_div" id="pdf_age"></div>
+                </div>
+            </li>
+
+            <li class="aui-list-item pdf_bor_no">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-title pdf_l_div">学历</div>
+                    <div class="aui-list-item-right pdf_r_div" id="pdf_education">本科</div>
+                </div>
+            </li>
+            <li class="aui-list-item pdf_bor_no">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-title pdf_l_div">就诊卡号</div>
+                    <div class="aui-list-item-right pdf_r_div" id="cardNum"></div>
+                </div>
+            </li>
+            <div class="border-se"></div>
+            <li class="aui-list-item">
+                <div class="pdf_photo_div">
+                    <span class="pdf_span">生活照</span>
+                    <div class="pdf_photo_r">
+                        <img id="pdf_life_photo" src="" alt="" onclick="openImg()">
+                    </div>
+                </div>
+            </li>
+            <div class="border-se"></div>
+            <li class="pdf_li">
+                <div class="pdf_title">
+                    病例描述
+                </div>
+                <div class="pad_main_text" id="pad_main_text">
+
+                </div>
+            </li>
+        </ul>
+
+        <!-- dialog -->
+        <div class="pdf_dialogImg dis">
+            <div class="pdf_boxImg">
+                <img id="pdf_image" src="../../image/my_mon_mrdl.png" alt="">
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript">
+            var patientId;
+            var timestamp = new Date().getTime();
+            var userAppType = getStorage('userAppType')
+            var userId = getStorage('userId')
+
+    apiready = function() {
+            getUserData();
+          }
+            // 获取用户data
+          function getUserData(){
+              if( userAppType == 4 ){
+                  patientId = api.pageParam.patientId;
+              }else{
+                  patientId = userId;
+              }
+              api.ajax({
+                  url: getPatientDataByUserIdSer,
+                  method: 'post',
+                  data: {
+                      values: {
+                          "userId": patientId,
+                          "time": timestamp,
+                          "deviceId": api.deviceId,
+                          "sign": ""
+                      }
+                  }
+              }, function(ret, err) {
+                  if (ret) {
+                      if (ret.success) {
+                          console.log(JSON.stringify(ret));
+                          var userName = ret.data.name;
+                          var userAge = ret.data.age;
+                          var userEducation = ret.data.education;
+                          var userSex = ret.data.sex;
+                          var visCardId = ret.data.visCardId;
+                          imgPath = servicePath + ret.data.imgPath;
+                          var description = ret.data.description;
+                          if(userSex == 1){
+                              $("#pdf_sex").text("男");
+                          }else{
+                            $("#pdf_sex").text("女");
+                          }
+                          $("#pdf_name").text(userName);
+                          $("#pdf_age").text(userAge);
+                          $("#pdf_education").text(userEducation);
+                          $("#cardNum").text(visCardId);
+                          $("#pdf_life_photo").attr("src",imgPath);
+                          $("#pdf_image").attr("src",imgPath);
+                          $("#pad_main_text").text(description);
+                      }
+
+                  } else {
+                    console.log(JSON.stringify(err));
+                  }
+              });
+          }
+
+          // 点击查看图片
+          function openImg(){
+            var frmH = api.frameHeight;
+            $(".pdf_dialogImg").height(frmH);
+            $(".pdf_dialogImg").removeClass("dis");
+            $(".pdf_dialogImg").addClass("show");
+            if($(".pdf_dialogImg").hasClass("show")){
+              $(".pdf_dialogImg").click(function(){
+                $(".pdf_dialogImg").removeClass("show");
+                $(".pdf_dialogImg").addClass("dis");
+              });
+            }
+          }
+</script>
+
+
+</html>

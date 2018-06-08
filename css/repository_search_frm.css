@@ -1,0 +1,15 @@
+body {
+    background-color: #EFF2F7;
+}
+
+.base_hint {
+    position: relative;
+    top: 7rem;
+    text-align: center;
+    color: #999999;
+    font-size: 0.85rem;
+}
+
+.bg_color_li{
+  background-color: #fff;
+}

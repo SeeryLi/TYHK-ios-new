@@ -1,0 +1,77 @@
+body{
+  background-color: #EFF2F7;
+}
+
+.money-recharge-pay {
+    font-size: 15px;
+    font-family: PingFang-SC-Medium;
+    color: rgba(34, 34, 34, 1);
+    line-height: 0px;
+    position:inherit;
+    margin-left: 10px;
+}
+
+.money_div{
+  width: 100%;
+  height: 2rem;
+  line-height: 2rem;
+  padding-left: .75rem;
+  font-size: 0.65rem;
+  color: #555;
+  background-color: #EFF2F7;
+}
+
+.base_pardiv{
+  width: 100%;
+  min-height: 9.5rem;
+  padding: 0 0.75rem;
+}
+
+.flex_boxdiv>div:first-child{
+  margin-left: 0 !important;
+}
+
+.flex_boxdiv{
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.box_child_div{
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  padding-top: 0.75rem;
+  margin: 0.5rem 0 0 0.5rem;
+  width: 8rem;
+  height: 3.75rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  border: 1px solid #F9E8D1;
+}
+
+.box_child_div>p{
+  color: #ECB368;
+  font-size: 0.85rem;
+}
+
+.box_child_div>span{
+  color: #555;
+  font-size: 0.65rem;
+}
+
+.bg{background-color: #F9E8D1;}
+
+.aui-btn-block{height:2.25rem;line-height:2.25rem;}
+
+.aui-btn-success{border-radius: 1.125rem;background-color: #3FC190;margin-top: 1.85rem;}
+
+.aui-btn-success:active{background-color: #00897b !important;}
+
+.aui-list-item{background-image: none !important;}
+
+.aui-radio:checked{background-color: #3FC190 !important;border: 1px solid #3FC190!important;}
+
+.aui-list .aui-list-item-inner{min-height: 3.75rem;}

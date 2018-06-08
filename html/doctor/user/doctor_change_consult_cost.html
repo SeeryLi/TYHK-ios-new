@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>咨询费用修改</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/user.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/header_title.css" />
+    <script type="text/javascript" src="../../../script/api.js"></script>
+    <script type="text/javascript" src="../../../script/jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="../../../script/aui/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../../script/aui/aui-toast.js"></script>
+    <script type="text/javascript" src="../../../script/commit/utils.js"></script>
+    <script type="text/javascript" src="../../../script/commit/encryption.js"></script>
+    <script type="text/javascript" src="../../../script/commit/servicePath.js"></script>
+</head>
+
+<body>
+
+    <header id="header" class="aui-bar aui-bar-nav title-a">
+      <div></div>
+        <div>
+            <div class="aui-pull-left aui-btn">
+                <span class="aui-iconfont aui-icon-left back-span-green" onclick="goBack()"></span>
+            </div>
+            <div class="aui-title head-title"><b>咨询费用<b></div>
+              <div class="aui-pull-right aui-btn title-right-text" onclick="consultCostChange()">
+                  <span>确定</span>
+              </div>
+        </div>
+    </header>
+    <div class="border-se"></div>
+    <li class="aui-list-item bg_color">
+        <div class="aui-list-item-inner">
+            <div class="aui-list-item-input user-input">
+                <input id="doctor-consult-cost-input" type="number"  oninput="if(value.length>9)value=value.slice(0,9)"  onblur="this.v();" placeholder="请输入咨询费用">
+            </div>
+        </div>
+    </li>
+
+</body>
+
+<script type="text/javascript">
+    apiready = function() {
+      var header = document.querySelector('#header');
+      initHireGold();
+      $api.fixStatusBar(header);
+    };
+
+
+    function initHireGold(){
+      var hireGold = getStorage("doctorHireGold");
+      $("#doctor-consult-cost-input").val(hireGold);
+    }
+
+    /** 正则验证小数*/
+    function check() {
+        var patrn = /^\d+(\.\d+)?$/;
+        var result = true;
+        $("#doctor-consult-cost-input").each(function() {
+            if (!patrn.exec(this.value)) {
+                alert("请输入正确的咨询费用！");
+                result = false;
+            }
+        })
+        return result;
+    }
+
+
+    /** 咨询费用修改*/
+    function consultCostChange() {
+        var cost = $api.trimAll($api.val($api.byId('doctor-consult-cost-input')));
+        if(cost < 0 || cost == 0){
+          alert("请输入正确的咨询费用！");
+          return ;
+        }
+        check();
+        var userId = getStorage("userId");
+        if (cost == "") {
+            defaultToast("请输入咨询费用");
+            return;
+        }
+
+        if (userId) {
+            api.ajax({
+                url: editDoctorConsultPriceSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "cost": cost,
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                console.log("consultCostChange-->" + JSON.stringify(ret));
+                if (ret) {
+                  if (ret.success) {
+                    setStorage("doctorHireGold",cost)
+                    api.execScript({
+                        name: 'doctor_consult_setting_win',
+                        script: 'setCost('+ JSON.stringify(cost) +');'
+                    });
+                  }
+                  defaultToast(ret.message);
+                  api.closeWin({
+                    name : 'doctor_change_consult_cost'
+                  });
+                } else {
+                  defaultToast(err.message);
+                }
+            });
+
+        } else {
+            pageJump('login', '../../login.html', 'doctor_change_consult_cost');
+        }
+
+    }
+</script>
+
+</html>

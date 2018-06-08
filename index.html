@@ -1,0 +1,403 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>底部导航</title>
+    <link rel="stylesheet" type="text/css" href="./css/api.css" />
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <link rel="stylesheet" type="text/css" href="./css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="./css/header_title.css" />
+    <link rel="stylesheet" type="text/css" href="./css/add_consult_frame.css" />
+    <script type="text/javascript" src="./script/api.js"></script>
+</head>
+
+<body>
+    <div id="wrap" class="flex-wrap flex-vertical" style="overflow:hidden !important;">
+        <header id="header">
+            <!-- 患者 -->
+            <ul id="home-normal-title" class='dis'>
+                <li class="border-b active"><b>首页</b></li>
+                <li class="border-b">
+                    <header class="aui-bar aui-bar-nav aui-bar-light title-a">
+                        <div class="aui-pull-left aui-btn aui-btn-outlined" onclick="showDialog()">
+                            <img src="./image/nav_scr.png" width="25px" height="25px" />
+                        </div>
+                        <div class="aui-title"><b>知识库</b></div>
+                        <div class="aui-pull-right aui-btn aui-btn-outlined" onclick="pageJump('repository_search_win','./html/repository/repository_search_win.html','index')">
+                            <img src="./image/repository/icon_search.png" width="25px" height="25px" />
+                        </div>
+                    </header>
+                </li>
+                <!-- <li class="border-b">
+                    <header class="aui-bar aui-bar-nav aui-bar-light title-a">
+                        <div></div>
+                        <div class="aui-title"><b>圈子</b></div>
+                        <div class="aui-pull-right aui-btn aui-btn-outlined">
+                            <img src="./image/nav_back.png" width="25px" height="25px" />
+                        </div>
+                    </header>
+                </li> -->
+                <li class="border-b">
+                    <header class="aui-bar aui-bar-nav aui-bar-light title-a">
+                        <div></div>
+                        <div class="aui-title"><b>我的</b></div>
+                        <div class="aui-pull-right aui-btn aui-btn-outlined mar-r">
+                            <img src="./image/nav_news.png" width="25px" height="25px" onclick="pageJumpCheckLogin('user_notices_win','./html/user/user_notices_win.html','./html/login.html','index')" />
+                        </div>
+                        <div class="aui-pull-right aui-btn aui-btn-outlined mar-l" onclick="pageJumpCheckLogin('setting','./html/user/setting.html','./html/login.html','index')">
+                            <img src="./image/nav_set.png" width="25px" height="25px" />
+                        </div>
+                    </header>
+                </li>
+            </ul>
+
+            <!-- 医生 -->
+            <ul id="home-doctor-title" class='dis'>
+                <li class="border-b active">
+                    <header class="aui-bar aui-bar-nav aui-bar-light title-a">
+                        <div></div>
+                        <div class="aui-title"><b>咨询中</b></div>
+                        <div class="aui-pull-right aui-btn" onclick="pageJumpCheckLogin('doctor_consult_his_win','./html/doctor/consult/doctor_consult_his_win.html','./html/login.html','index')">
+                            <img src="./image/nav_back.png" width="25px" height="25px" />
+                        </div>
+                    </header>
+                </li>
+                <!-- <li class="border-b">
+                    <header class="aui-bar aui-bar-nav aui-bar-light title-a">
+                        <div></div>
+                        <div class="aui-title"><b>咨询库</b></div>
+                    </header>
+                </li> -->
+                <li class="border-b">
+                    <header class="aui-bar aui-bar-nav aui-bar-light title-a">
+                        <div></div>
+                        <div class="aui-title"><b>消息</b></div>
+                    </header>
+                </li>
+                <li class="border-b">
+                    <header class="aui-bar aui-bar-nav aui-bar-light title-a">
+                        <div></div>
+                        <div class="aui-title"><b>我的</b></div>
+                    </header>
+                </li>
+            </ul>
+        </header>
+        <div id="main" class="flex-con show">
+        </div>
+        <div id="footer" class="border-t show">
+            <ul class="flex-wrap">
+                <li tapmode="hover" onclick="randomSwitchBtn( this , '0' );" class="flex-con active"></li>
+                <li tapmode="hover" onclick="randomSwitchBtn( this , '1' );" class="flex-con"></li>
+                <!-- <li tapmode="hover" onclick="randomSwitchBtn( this , '2' );" class="flex-con"></li> -->
+                <li tapmode="hover" onclick="randomSwitchBtn( this , '3' );" class="flex-con"></li>
+            </ul>
+        </div>
+
+        <div id="footer-doctor" class="border-t dis">
+            <ul class="flex-wrap">
+                <li tapmode="hover" onclick="randomSwitchBtnDoctor( this , '0' );" class="flex-con active"></li>
+                <!-- <li tapmode="hover" onclick="randomSwitchBtnDoctor( this , '1' );" class="flex-con"></li> -->
+                <li tapmode="hover" onclick="randomSwitchBtnDoctor( this , '2' );" class="flex-con"></li>
+                <li tapmode="hover" onclick="randomSwitchBtnDoctor( this , '3' );" class="flex-con"></li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="script/aui/aui-slide.js"></script>
+<script type="text/javascript" src="script/modules/indexPage.js"></script>
+<script type="text/javascript" src="script/fastclick.js"></script>
+<script type="text/javascript" src="script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="script/commit/utils.js"></script>
+<script type="text/javascript" src="script/api.js"></script>
+<script type="text/javascript" src="script/db/dbSyncUtils.js"></script>
+<script type="text/javascript" src="script/modules/remind/remindDBUtils.js"></script>
+<!-- <script type="text/javascript" src="script/modules/JPushUtil.js"></script> -->
+<script type="text/javascript" src="script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="script/commit/servicePath.js"></script>
+<script type="text/javascript">
+    var userType;
+    var clock = null;
+    apiready = function() {
+        var header = $api.byId('header');
+        $api.fixStatusBar(header);
+        // $api.setStorage('ifSendNote',true);
+        api.setStatusBarStyle({
+            style: 'dark'
+        });
+        // iphoneX 底部
+        $api.fixTabBar($api.byId('footer'));
+        $api.fixTabBar($api.byId('footer-doctor'));
+        //IOS设置bar
+        function fixIos7Bar_API(el) {
+            if (!$api.isElement(el)) {
+                // console.warn('$api.fixIos7Bar Function need el param, el param must be DOM Element');
+                return;
+            }
+            var strDM = $api.getStorage('SYSTEMTYPE');
+            if (strDM == 'ios') {
+                var strSV = $api.getStorage('SYSTEMVERSION');
+                var numSV = parseInt(strSV, 10);
+                var fullScreen = $api.getStorage('FULLSCREEN');
+                var iOS7StatusBarAppearance = $api.getStorage('IOS7STATUSBARAPPEARANCE');
+                if (numSV >= 7 && fullScreen == 'false' && iOS7StatusBarAppearance) {
+                    el.style.paddingTop = '20px';
+                }
+            }
+        }
+
+        function fixStatusBar_API(el) {
+            if (!$api.isElement(el)) {
+                // console.warn('$api.fixStatusBar Function need el param, el param must be DOM Element');
+                return;
+            }
+            var sysType = $api.getStorage('SYSTEMTYPE');
+            if (sysType == 'ios') {
+                fixIos7Bar_API(el);
+            } else if (sysType == 'android') {
+                var ver = $api.getStorage('SYSTEMVERSION');
+                ver = parseFloat(ver);
+                if (ver >= 4.4) {
+                    el.style.paddingTop = '25px';
+                }
+            }
+        };
+
+        // api.addEventListener({
+        //     name: 'refreshHomeResult'
+        // }, function(ret, err) {
+        //     if (ret) {
+        //       showNewNote();
+        //     }
+        // });
+
+        api.addEventListener({
+            name: 'resetIndex'
+        }, function(ret, err) {
+            if (ret) {
+                initHomePage(ret.value.userType);
+            }
+        });
+        api.addEventListener({
+            name: 'offline'
+        }, function(ret, err) {
+            alert('网络连接已断开');
+        });
+
+        initEventListener();
+        initDB();
+        userType = getStorage('userAppType');
+        initHomePage(userType);
+        subscribe();
+        if(getStorage('userAppType') == 2){
+          getUserInfo();
+          setPortCheck();
+        }
+    }
+
+    function getUserInfo() {
+        if(getStorage('userId') && getStorage('userId') != '') {
+            api.ajax({
+                url: getUserInfoSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": getStorage('userId'),
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if (ret.success) {
+                        setStorage('isConfirm', ret.data.isConfirm);
+                        if (ret.data.isConfirm == 0) {
+                          api.openWin({
+                              name: 'remind_main_win',
+                              url: './html/remind/remind_main_win.html',
+                              bounces: false,
+                              bgColor: 'rgba(239,242,247,1)',
+                              vScrollBarEnabled: false,
+                              hScrollBarEnabled: false
+                          });
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+
+    function showDialog() {
+        FastClick.attach(document.body);
+        var jsfun = 'dialogOpen();';
+        api.execScript({
+            frameName: 'repository_list_frm',
+            script: jsfun
+        });
+    }
+
+
+    /** 配置首页数据*/
+    function initHomePage(userType) {
+       //setStorage('userId','');
+        //funIniGroup();
+
+        if (userType == '4') { //医生
+            $('#home-normal-title').removeClass('show');
+            $('#home-normal-title').addClass('dis');
+            $('#home-doctor-title').removeClass('dis');
+            $('#home-doctor-title').addClass('show');
+            $('#footer').removeClass('show');
+            $('#footer').addClass('dis');
+            $('#footer-doctor').removeClass('dis');
+            $('#footer-doctor').addClass('show');
+            funIniGroupDoctor();
+            var header = $api.byId('header');
+            var headerH = $api.offset(header).h;
+            var footer = $api.byId('footer-doctor');
+            var footerH = $api.offset(footer).h;
+            $('#main').css({
+                'height': api.winHeight - headerH - footerH,
+                'width': api.winWidth
+            });
+        } else { //患者
+            //prescriptionVerify();
+            $('#home-normal-title').removeClass('dis');
+            $('#home-normal-title').addClass('show');
+            $('#home-doctor-title').removeClass('show');
+            $('#home-doctor-title').addClass('dis');
+            $('#footer').removeClass('dis');
+            $('#footer').addClass('show');
+            $('#footer-doctor').removeClass('show');
+            $('#footer-doctor').addClass('dis');
+            funIniGroup();
+            var header = $api.byId('header');
+            var headerH = $api.offset(header).h;
+            var footer = $api.byId('footer');
+            var footerH = $api.offset(footer).h;
+            $('#main').css({
+                'height': api.winHeight - headerH - footerH,
+                'width': api.winWidth
+            });
+            if (userType == '2') {
+              checkIfDrugNotTaken();
+            }
+        }
+    }
+
+    /** 验证药方是否发生变化*/
+    function prescriptionVerify() {
+        var userId = getStorage('userId');
+        if (userId) {
+            api.ajax({
+                url: prescriptionVerifySer,
+                method: 'post',
+                data: {
+                    values: {
+                        'userId': userId,
+                        'time': new Date().getTime(),
+                        'deviceId': api.deviceId,
+                        'sign': ''
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                } else {
+                    console.log('prescriptionVerify-->' + JSON.stringify(err));
+                }
+            });
+        } else {
+            pageJump('login', './html/login.html', 'index');
+        }
+    }
+
+    /** 检查是否有未服药需要确认*/
+    function checkIfDrugNotTaken (){
+        var userId = getStorage('userId');
+        if (userId) {
+            api.ajax({
+                url: getNotEatTakeDrugNewsSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId + '',
+                        "patientId": userId + '',
+                        "queryStartNumber": 0,
+                        "queryLimit": "100",
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if(ret.data.takeDrugNewsList.length != 0){
+                        api.openWin({
+                            name: 'remind_taken_win',
+                            url: './html/remind/remind_taken_win.html',
+                            pageParam: {
+                                checkData: ret
+                            }
+                        });
+                    }
+                } else {
+                    console.log('checkIfDrugNotTaken-->' + JSON.stringify(err));
+                }
+            });
+        } else {
+            pageJump('login', './html/login.html', 'index');
+        }
+    }
+    function setPortCheck(){
+      var checkAccountIfPass = setInterval(function(){
+        api.ajax({
+            url: getUserInfoSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": getStorage('userId'),
+                    "deviceId": api.deviceId,
+                    "time": new Date().getTime(),
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+                if (ret.success) {
+                    setStorage('userType', ret.data.userType);
+                    setStorage('userAppType', ret.data.userAppType);
+                    setStorage('takeDrugId', ret.data.takeDrugId);
+                    setStorage('isConfirm', ret.data.isConfirm);
+                    if(ret.data.isConfirm == 0){
+                      clearInterval(checkAccountIfPass);
+                      api.openWin({
+                          name: 'remind_main_win',
+                          url: './remind/remind_main_win.html',
+                          bounces: false,
+                          bgColor: 'rgba(239,242,247,1)',
+                          vScrollBarEnabled: false,
+                          hScrollBarEnabled: false
+                      });
+                    }
+                }
+        });
+      }, 5000);
+    }
+    //唤起闹钟
+    function subscribe() {
+        clock = api.require('clock');
+        clock.getPermission(function(ret, err) {
+        });
+        clock.subscribe(function(ret, err) {
+        console.log("我点了第"+ret.clickIndex+"个按钮");
+        })
+    }
+
+</script>

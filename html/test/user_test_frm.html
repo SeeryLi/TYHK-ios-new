@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/user_test_frm.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+</head>
+
+<body>
+    <div class="aui-content">
+        <ul class="aui-list aui-form-list">
+            <li>
+                <div class="title_info">
+                    提醒：请根据您过去2周状况，选出符合您的选项卡。
+                </div>
+            </li>
+            <li>
+                <div class="main_num">
+                    <p class="pagination"><span id="quesion-id" class="pagination_span">1</span>/<span id="question-count"></span></p>
+                </div>
+            </li>
+            <div class="main_content">
+                <p id="question-title" class="main_p"></p>
+            </div>
+            <ul id="question-options" class="box-content">
+            </ul>
+        </ul>
+        <!--  按钮-->
+        <!-- <div class="aui-content-padded bth-log1">
+            <div id="question-btn" class="aui-btn aui-btn-success aui-btn-block" onclick="nextQuestion()">
+                下一题
+            </div>
+        </div> -->
+    </div>
+
+    <script id="questionOptionScript" type="text/template">
+        {{for(var i = 0;i< it.length;i++){ }}
+         <li>
+            <div class="box-text" onclick="basePickon(this,{{=it[i].optionScore}})">
+                     <span>{{=it[i].optionFlag}}</span>
+                    <span>{{=it[i].optionContent}}</span>
+                    <img class="pick_on" src="../../image/home_list_right.png" alt="">
+            </div>
+        </li>
+        {{}}}
+    </script>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<!-- <script type="text/javascript" src="../../script/fastclick.js"></script> -->
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript">
+    var isChoice = false;
+    var testLength ;
+    var questionList;
+    var answerId = 0;
+    apiready = function() {
+        // FastClick.attach(document.body); //300ms延迟取消
+        api.parseTapmode();
+        getQuestionList();
+        answerId = 0;
+        questionList = new Array();
+        $api.html($api.byId('question-options'), '');
+        $('#quesion-id').text(1 + '');
+    };
+
+    /**选中*/
+    function basePickon(el, optionScore) {
+        $(".box-text").attr("onclick", "null");//设置只能选择一次
+        $(".pick_on").removeClass("show");
+        $(el).children(".pick_on").addClass("show");
+        questionList[answerId - 1].score = optionScore;
+        isChoice = true;
+        setTimeout(
+            function(){
+                if($('#quesion-id').text() < questionList){
+                    nextQuestion();
+                }else{
+                    commitResult();
+                }
+            },500);
+    }
+
+    /** 获取测试题目列表*/
+    function getQuestionList() {
+        var userId = getStorage("userId");
+        if (userId) {
+            api.ajax({
+                url: getTestCatalogueSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "directoryId": api.pageParam.questionId,
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    //console.log('getQuestionList ret-- >' + JSON.stringify(ret));
+                    if (ret.success) {
+                        questionList = ret.data;
+                        testLength = ret.data.length;
+                        if (questionList && questionList.length > 0) {
+                            $('#question-count').text(questionList.length + '');
+                            nextQuestion();
+                        }
+                    } else {
+                        defaultToast(ret.message);
+                    }
+                } else {
+                    defaultToast(err.message);
+                }
+            });
+        } else {
+            defaultToast("获取失败，将重新登录");
+            pageJump('login', '../login.html', 'user_test');
+        }
+    }
+
+    /**提交测试结果*/
+    function commitResult() {
+        var userId = getStorage("userId");
+        var scoreStr = 0;
+        for (var i = 0; i < questionList.length; i++) {
+            scoreStr += questionList[i].score;
+        }
+        showToast("");
+        if (userId) {
+            api.ajax({
+                url: commitTestResult,
+                method: 'post',
+                data: {
+                    values: {
+                        "directoryId": api.pageParam.questionId,
+                        "sorce": scoreStr + '',
+                        "userId": userId
+                    },
+
+                }
+            }, function(ret, err) {
+                toast.hide();
+                if (ret) {
+                    if (ret.success) {
+                        ret.data.pageName = 'user_test';
+                        api.openWin({
+                            name: 'test_record_detail',
+                            url: './test_record_detail.html',
+                            pageParam: {
+                                result: ret.data,
+                            }
+                        });
+                        api.sendEvent({
+                            name: 'refreshTestRecord',
+                        });
+
+                    } else {
+                        defaultToast(ret.message);
+                    }
+                } else {
+                    defaultToast(err.message);
+                }
+            });
+        } else {
+            defaultToast("提交失败，将重新登录");
+            pageJump('login', '../login.html', 'user_test');
+        }
+    }
+
+    // 下一题
+    function nextQuestion() {
+        // if (!isChoice && answerId > 0) {
+        //   defaultToast('请选择一个符合的答案');
+        //   return;
+        // }
+        if (questionList && questionList.length > 0) {
+            var questionJson = questionList[answerId];
+            if (answerId == questionList.length) {
+                commitResult();
+                return;
+            }
+            $('#question-title').text(questionJson.questionContent);
+            $('#quesion-id').text(answerId + 1 + '');
+            var questionOptions = questionJson.optionList;
+            $api.html($api.byId("question-options"), "");
+            if (questionOptions.length > 0) {
+              $api.html($api.byId('question-options'), '');
+              $api.append($api.byId("question-options"), doT.template($api.html($api.byId("questionOptionScript")))(questionOptions));
+
+            } else {
+                questionList[answerId].score = 0;
+            }
+
+            answerId++;
+            if (answerId == questionList.length) {
+                $('#question-btn').text('提交');
+            }
+            isChoice = false;
+        }
+    }
+</script>
+
+</html>

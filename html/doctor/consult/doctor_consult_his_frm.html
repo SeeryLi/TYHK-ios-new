@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>医生--历史咨询</title>
+      <link rel="stylesheet" type="text/css" href="../../../css/api.css" />
+      <link rel="stylesheet" type="text/css" href="../../../css/aui/aui.css" />
+      <link rel="stylesheet" type="text/css" href="../../../css/header_title.css" />
+      <link rel="stylesheet" type="text/css" href="../../../css/style.css" />
+      <link rel="stylesheet" type="text/css" href="../../../css/consult/consult_record.css" />
+      <link rel="stylesheet" type="text/css" href="../../../css/mescroll.min.css">
+      <script type="text/javascript" src="../../../script/api.js"></script>
+      <script type="text/javascript" src="../../../script/jquery-2.1.1.js"></script>
+      <script type="text/javascript" src="../../../script/aui/aui-dialog.js"></script>
+      <script type="text/javascript" src="../../../script/aui/aui-toast.js"></script>
+      <script type="text/javascript" src="../../../script/commit/utils.js"></script>
+      <script type="text/javascript" src="../../../script/commit/servicePath.js"></script>
+      <script type="text/javascript" src="../../../script/doT.min.js"></script>
+      <script type="text/javascript" src="../../../script/doT.min.js"></script>
+      <script type="text/javascript" src="../../../script/commit/fileDownload.js"></script>
+      <script type="text/javascript" src="../../../script/mescroll.min.js"></script>
+  </head>
+  <body>
+    <div id="dortor-consult-his-mescroll" class="container-div mescroll">
+
+        <ul id="dortor-consult-his-list">
+
+        </ul>
+        <!-- 无记录状态 -->
+        <div id="dortor-his-empty" class="record-div" style="display:none;">
+          <img src="../../../image/doctor/his_deta_no.png" alt="">
+        </div>
+    </div>
+
+    <script id="doctorConsutlRecordScript" type="text/template">
+        <!-- 咨询状态,1:未解答,2:新回复,3:超期,4:已结束 -->
+        {{for(var i = 0;i< it.length;i++){ }}
+         <li onclick="jumpToConsultInfo('{{=it[i].consultId}}','{{=it[i].consultState}}','{{=it[i].consultType}}')">
+             <div class="border-se"></div>
+             <div class="main-title">
+               <div class="title-left">
+                   {{if(it[i].patientPortrait == ''){ }}
+                     <img class='consult-record-img' src='../../../image/user/user_defult.png' />
+                   {{ }else{ }}
+                     <img class='consult-record-img' src='{{=it[i].patientPortrait}}' />
+                   {{}}}
+                   <span class="name-box">{{=it[i].patientName}}</span>
+               </div>
+               <div class="title-right">
+                 {{ if(it[i].consultState == '3'){ }}
+                   <span>
+                    超期
+                   </span>
+                 {{ }else if(it[i].consultState == '4'){ }}
+                   <span>
+                      已结束
+                   </span>
+                 {{ }else if(it[i].consultState == '5'){ }}
+                   <span>
+                      退款中
+                   </span>
+                 {{ }else if(it[i].consultState == '6'){ }}
+                   <span>
+                      已退款
+                   </span>
+                 {{ }}}
+               </div>
+             </div>
+             <div class="content-main">
+               <!-- 文本 -->
+               <div class="info-div">
+                 {{=it[i].consultContent}}
+               </div>
+               {{if(it[i].voicePath){ }}
+               <!-- 语音-->
+               <div class="recording-div" onclick="plyM('{{=it[i].voiceFileId}}','{{=it[i].voicePath}}','{{=it[i].voiceFileId}}')">
+                 <img src="../../../image/home_form_sus.png" alt="ply" id='{{=it[i].voiceFileId}}'>
+                 <span>语音消息</span>
+               </div>
+               {{}}}
+               <span class="time-recording">{{=it[i].consultTime}}</span>
+             </div>
+        </li>
+        {{ }}}
+
+      </script>
+  </body>
+
+  <script type="text/javascript">
+      var lastImg;
+      var lastFileId;
+      var mescroll;
+      apiready = function() {
+        var header = document.querySelector('#header');
+        $api.fixStatusBar(header);
+        api.addEventListener({
+            name: 'voicePlay'
+        }, function(ret, err){
+            if( ret ){
+              funcGoto(ret);
+            }
+        });
+        api.addEventListener({
+            name: 'refreshDoctorConsult'
+        }, function(ret, err) {
+            if (ret) {
+                mescroll.resetUpScroll(true);
+            }
+        });
+        //创建MeScroll对象,内部已默认开启下拉刷新,自动执行up.callback,重置列表数据;
+        mescroll = new MeScroll("dortor-consult-his-mescroll", {
+          up: {
+              auto: false, //是否在初始化时以上拉加载的方式自动加载第一页数据; 默认false
+              clearEmptyId: "dortor-consult-his-list",
+              isBounce: false, //此处禁止ios回弹
+              callback: upCallback, //上拉回调,此处可简写; 相当于 callback: function (page) { upCallback(page); }
+              toTop: {
+                  src: "../../../image/mescroll-totop.png",
+              },
+          }
+        });
+      };
+
+      /*上拉加载的回调 page = {num:1, size:10}; num:当前页 从1开始, size:每页数据条数 */
+      function upCallback(page) {
+        getConsultList(page.num, page.size, function(curPageData) {
+            //mescroll会根据传的参数,自动判断列表如果无任何数据,则提示空;列表无下一页数据,则提示无更多数据;
+            console.log("page.num=" + page.num + ", page.size=" + page.size + ", curPageData.length=" + curPageData.length);
+            if (curPageData.length < page.num) {
+              mescroll.endSuccess(curPageData.length, false);
+            }else{
+              mescroll.endSuccess(curPageData.length, true);
+            }
+            $api.append($api.byId("dortor-consult-his-list"), doT.template($api.html($api.byId("doctorConsutlRecordScript")))(curPageData));
+        }, function() {
+            //联网失败的回调,隐藏下拉刷新和上拉加载的状态;
+            mescroll.endErr();
+        });
+      }
+
+      /** 查询咨询记录*/
+      function getConsultList(pageNum, pageSize, successCallback, errorCallback) {
+          var userId = getStorage("userId");
+          if (userId == "") {
+              pageJump("login", "../login.html", "consult")
+              return;
+          }
+          api.ajax({
+              url: doctorConsultRecordsSer,
+              method: 'post',
+              data: {
+                  values: {
+                      "userId": userId,
+                      "doctorId": userId,
+                      "sortType": "",
+                      "queryLimit": pageSize +'',
+                      "queryStartTime": '',
+                      "queryEndTime": '',
+                      "queryStartNumber": (pageNum - 1)*pageSize + '',
+                      "listUse": "",
+                      "time": new Date().getTime(),
+                      "deviceId": api.deviceId,
+                      "sign": ""
+                  },
+              }
+          }, function(ret, err) {
+              //console.log("getConsultList-->" + JSON.stringify(ret));
+              //console.log("getConsultList-->" + JSON.stringify(err));
+              if (ret) {
+                if (ret.success) {
+                  var recordList = ret.data.records;
+                  successCallback && successCallback(recordList);
+                }else {
+                  defaultToast(ret.message);
+                  errorCallback && errorCallback();
+                }
+              } else {
+                defaultToast(err.message);
+                errorCallback && errorCallback();
+                  // alert(JSON.stringify(err));
+              }
+          });
+      }
+
+      /** 跳转到咨询界面*/
+      function jumpToConsultInfo(consultID,consultStatu,consultType){
+         stopPlayVoice();
+          api.openWin({
+              name: 'consult_profession_chat_win',
+              url: '../../consult/consult_profession_chat_win.html',
+              pageParam: {
+                  name:'doctor_consult_his_frm',
+                  consultId: consultID,
+                  consultStatus: consultStatu,
+                  consultType: consultType
+              },
+          });
+      }
+
+      // 语音播放状态切换
+    function plyM(id,path,voiceFileId){
+        var divimg = $("#" + id);
+        event.preventDefault();
+        event.stopPropagation();
+        if (divimg.attr("alt") == "ply") {
+            divimg.attr("src", "../../../image/home_form_play.png");
+            divimg.attr("alt", "gb");
+        } else {
+            divimg.attr("src", "../../../image/home_form_sus.png");
+            divimg.attr("alt", "ply");
+            api.stopPlay();
+            return;
+        }
+        if (typeof(lastFileId) != 'undefined' && lastFileId != voiceFileId) {
+          api.stopPlay();
+          if (typeof(lastImg) != 'undefined' && lastImg.attr('alt') == 'gb') {
+              lastImg.attr("src", "../../../image/home_form_sus.png");
+              lastImg.attr("alt", "ply");
+          }
+          lastImg = divimg;
+        }
+        if (typeof(lastImg) == 'undefined') {
+          lastImg = divimg;
+        }
+        lastFileId = voiceFileId;
+        var pathArrs = path.split("/");
+        var url = 'fs://' + voiceFileId + '.aac';
+        api.startPlay({
+            path: url
+        }, function(ret, err) {
+            divimg.attr("src","../../../image/home_form_sus.png");
+            divimg.attr("alt","ply");
+            if (ret) {
+            } else {
+              fileDownload(path,voiceFileId);
+            }
+        });
+   }
+
+   /** 播放录音*/
+   function funcGoto(ret){
+    //console.log('fungo-->' + JSON.stringify(ret));
+    var divimg = $("#" + ret.value.id);
+    api.stopPlay();
+    if (typeof(lastImg) != 'undefined' && lastImg.attr('alt') == 'gb') {
+        lastImg.attr("src", "../../../image/home_form_sus.png");
+        lastImg.attr("alt", "ply");
+    }
+    divimg.attr("src","../../../image/home_form_play.png");
+    divimg.attr("alt","gb");
+    lastImg = divimg;
+    lastFileId = ret.value.fileId;
+    api.startPlay({
+        path: ret.value.url
+    }, function(ret, err) {
+        divimg.attr("src","../../../image/home_form_sus.png");
+        divimg.attr("alt","ply");
+    });
+   }
+
+   /** 停止播放*/
+   function stopPlayVoice() {
+       api.stopPlay();
+       if (typeof(lastImg) != 'undefined') {
+           lastImg.attr("src", "../../../image/home_form_sus.png");
+           lastImg.attr("alt", "ply");
+       }
+   }
+
+  </script>
+  </html>

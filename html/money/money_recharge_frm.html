@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>
+        金币充值
+    </title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/userMain.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/money_recharge_frm.css" />
+</head>
+
+<body>
+    <div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-list-in">
+
+            <li>
+                <div class="money_div">
+                    <span>充值金额</span>
+                </div>
+            </li>
+
+            <li>
+              <div class="base_pardiv">
+                  <div class="flex_boxdiv">
+                    <div class="box_child_div">
+                        <p>充10元</p>
+                        <span>阳光币+100，赠送5</span>
+                    </div>
+
+                    <div class="box_child_div">
+                        <p>充20元</p>
+                        <span>阳光币+100，赠送5</span>
+                    </div>
+                  </div>
+
+                  <div class="flex_boxdiv">
+                    <div class="box_child_div">
+                        <p>充50元</p>
+                        <span>阳光币+100，赠送5</span>
+                    </div>
+
+                    <div class="box_child_div">
+                        <p>充100元</p>
+                        <span>阳光币+100，赠送5</span>
+                    </div>
+                  </div>
+
+              </div>
+            </li>
+
+            <li>
+                <div class="money_div">
+                    <span>付款方式</span>
+                </div>
+            </li>
+
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <img style='height:40px;width:40px;' src="../../image/login/login_weixin.png" />
+                    <div class="money-recharge-pay">微信支付</div>
+                    <div class="aui-list-item-right">
+                        <input type="radio" class="aui-radio" checked>
+                    </div>
+                </div>
+            </li>
+
+        </ul>
+
+        <div class="aui-content-padded bth-log1" onclick="getUserCurrency()">
+            <div class="aui-btn aui-btn-success aui-btn-block ">
+                立即支付
+            </div>
+        </div>
+
+    </div>
+</body>
+<script type="text/javascript" src="../../script/jquery-2.1.1.js"></script>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/fastclick.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+      // 清除300S延迟
+      FastClick.attach(document.body);
+      clickBg();
+    };
+
+    //点击着色
+    function clickBg(){
+      var div = $(".box_child_div");
+      div.each(function () {
+        $(this).click(function () {
+          div.removeClass('bg');
+          $(this).addClass('bg');
+        });
+      });
+    }
+</script>
+
+</html>

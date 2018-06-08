@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+  <title>服药提醒--患者付费</title>
+  <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+  <link rel="stylesheet" type="text/css" href="../../css/aui/aui.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/medicines_remind/shopping_list.css" />
+</head>
+<body >
+    <div class="warp_div_par">
+        <ul class="par_ul">
+            <div id="newDrugListTemplate"></div>
+        </ul>
+        <div id="allPriceTemplate"></div>
+    </div>
+
+    <script id="newDrugListScript" type="text/template">
+        {{for(var i=0;i< it.length;i++){ }}
+        <li class="main_list">
+          <img class="li_ico" src="../../image/remind/con_chat_xtyd.png" alt="">
+          <div class="li_div_right">
+            <p class="p_1">{{=it[i].drugName}}</p>
+            <p class="p_2"><span>每日{{=it[i].everydayNum}}次</span> <span>每次{{=it[i].eatSig}}{{=it[i].smallUnit}}</span> <span>一共{{=it[i].day}}天</span></p> </p>
+            <p class="p_2">{{=it[i].boxNum}}盒</p>
+          </div>
+          <span class="money_span">¥{{=it[i].price}}</span>
+        </li>
+        {{ } }}
+    </script>
+
+    <script id="allPriceScript" type="text/template">
+        <p class="money_p" style="font-size:0.75rem;">运费：¥10</p>
+        <p class="money_p">合计： ¥<span>{{=it.allPrice + 10}}</span></p>
+    </script>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-dialog.js"></script>
+<script type="text/javascript" src="../../script/aui/aui-toast.js"></script>
+<script type="text/javascript" src="../../script/commit/utils.js"></script>
+<script type="text/javascript" src="../../script/commit/servicePath.js"></script>
+<script type="text/javascript" src="../../script/doT.min.js"></script>
+<script type="text/javascript">
+    var takeDrugId;
+    var payPrice;
+    var tradeId = getUUID();
+    var wxPayArg={};
+    var UserAddress;
+    var checkpayListener;
+    var userId = getStorage("userId");
+    apiready = function(){
+        getNewDrugs();
+        ifAddressGot();
+        // payListener();
+    }
+
+    /**获取新开药品单子*/
+    function getNewDrugs() {
+        if (userId) {
+            api.ajax({
+                url: getNewDrugSer,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "newDrugMouldId": api.pageParam.drugMouldId,
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                    if (ret.success) {
+                        takeDrugId = ret.data.takeDrugId;
+                        newDrugList = ret.data;
+                        newDrugListRecords = ret.data.records;
+                        for(var i = 0 ;i<newDrugListRecords.length;i++){
+                          newDrugListRecords[i].price = priceCheck(newDrugListRecords[i].price);
+                        }
+                        if(ret.data.isPay == '1'){//已支付
+                            api.execScript({
+                                name: 'shopping_list_win',
+                                script: 'changePay()'
+                            });
+                        }
+                        newDrugList.allPrice = Number(priceCheck(newDrugList.allPrice));
+                        payPrice = Number(newDrugList.allPrice);
+                        $api.html($api.byId('newDrugListTemplate'), '');
+                        $api.append($api.byId('newDrugListTemplate'), doT.template($api.html($api.byId("newDrugListScript")))(newDrugListRecords));
+                        $api.html($api.byId('allPriceTemplate'), '');
+                        $api.append($api.byId('allPriceTemplate'), doT.template($api.html($api.byId("allPriceScript")))(newDrugList));
+                    }
+                } else {
+                    console.log('getpatientPaper-->' + JSON.stringify(err));
+                }
+            });
+        }
+    }
+    //price格式化,小数点后2位
+    function priceCheck(price){
+      if((price + '').indexOf('.') > -1){
+        return (price + '').slice(0,((price + '').indexOf('.')+3));
+      }else{
+        return price;
+      }
+    }
+    //去往支付
+    function goPayMoney() {
+            if(!UserAddress){
+            defaultToast('请先完善收货地址');
+            setTimeout(function(){
+                api.openWin({
+                    name: 'user_address_change',
+                    url: '../user/user_address_change.html',
+                });
+            },1000)
+        }else{
+            var wxPay = api.require('wxPay');
+            if (userId) {
+                api.ajax({
+                    url: wxPayPrepaySer,
+                    method: 'post',
+                    data: {
+                        values: {
+                            "userId": userId ,
+                            "doctorId": api.pageParam.doctorId ,
+                            "newDrugMouldId": api.pageParam.drugMouldId,
+                            "type": '1',
+                            // "price": payPrice + 10 + '',
+                            "price": 0.01,
+                        },
+                    }
+                }, function(ret, err) {
+                    if (ret) {
+                            wxPayArg.package = ret.package;
+                            wxPayArg.sign = ret.sign;
+                            wxPayArg.orderId = ret.prepayid;
+                            wxPayArg.noncestr = ret.noncestr;
+                            wxPayArg.timestamp = ret.timestamp;
+                            wxPayArg.apiKey = ret.appid;
+                            wxPayArg.sign = ret.sign;
+                            wxPay.payOrder({
+                                    apiKey: 'wx25c353098c4bcee2',
+                                    orderId: wxPayArg.orderId,
+                                    mchId: '1505042611',
+                                    nonceStr: wxPayArg.noncestr,
+                                    timeStamp: wxPayArg.timestamp,
+                                    package: 'Sign=WXPay',
+                                    sign: wxPayArg.sign
+                                }, function(ret, err) {
+                                    if (ret.status) {
+                                        alert('支付成功');
+                                        api.execScript({
+                                            name:'shopping_list_win',
+                                            script: 'changePay()'
+                                        });
+                                        checkpayListener = setInterval(function(){
+                                            payListener();
+                                        },1000);
+                                    } else {
+                                        alert('支付失败');
+                                    }
+                                });
+                    } else {
+                        console.log('getpatientPaper-->' + JSON.stringify(err));
+                    }
+                });
+            }
+        }
+    }
+
+    //支付成功后调用func
+    function payRet(){
+      var checkpayRet;
+      var newTakeDrugID = getStorage('newTakeDrugId');
+        api.ajax({
+            url: payNewDrugSer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": userId,
+                    "doctorId": api.pageParam.doctorId,
+                    "takeDrugId": newTakeDrugID,
+                    "newDrugMouldId": api.pageParam.drugMouldId,
+                    "deviceId": api.deviceId,
+                    "time": new Date().getTime(),
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+              if(ret.success){
+                  setStorage("takeDrugId", ret.data.takeDrugId);
+                  clearInterval('checkpayRet');
+                  api.closeToWin({
+                      name: 'consult_profession_chat_win',
+                      url: '../consult/consult_profession_chat_win.html',
+                  });
+              }
+            }
+            if(err){
+              if(err.status == -1){
+                checkpayRet = setInterval(function(){
+                  payRet();
+                }, 3000);
+              }
+            }
+        });
+    }
+
+    //监听支付成功推送
+    function payListener(){
+        api.ajax({
+            url: getIsPaySer,
+            method: 'post',
+            data: {
+                values: {
+                    "userId": id,
+                    "requestId": api.pageParam.drugMouldId,
+                    "deviceId": api.deviceId,
+                    "time": new Date().getTime(),
+                    "sign": ""
+                },
+            }
+        }, function(ret, err) {
+            if (ret) {
+              if(ret.success){
+                if(ret.data.isPay == '1'){
+                  clearInterval('checkpayListener');
+                  api.ajax({
+                      url: getUserInfoSer,
+                      method: 'post',
+                      data: {
+                          values: {
+                              "userId": id,
+                              "deviceId": api.deviceId,
+                              "time": new Date().getTime(),
+                              "sign": ""
+                          },
+                      }
+                  }, function(ret, err) {
+                      if (ret) {
+                        if(ret.success){
+                              if(ret.data.userType!='1'||ret.data.userType!='2'||ret.data.userType!='3'||ret.data.userType!='4'){
+                                  alert('您的账户有问题，请等待后台处理!');
+                                  return;
+                              }else{
+                                payRet();
+                              }
+                        }
+                      }
+                  })
+                }else{
+                  alert('您的账户有问题，请等待后台处理!');
+                  return;
+                }
+              }
+            }
+        })
+    }
+    //检查是否提交收货地址
+    function ifAddressGot(){
+            api.ajax({
+                url: getAddress,
+                method: 'post',
+                data: {
+                    values: {
+                        "userId": userId,
+                        "deviceId": api.deviceId,
+                        "time": new Date().getTime(),
+                        "sign": ""
+                    },
+                }
+            }, function(ret, err) {
+                if (ret) {
+                  if(ret.success){
+                    if(ret.data.address && ret.data.addressee && ret.data.contactPhone && ret.data.address != '' && ret.data.addressee != '' & ret.data.contactPhone != ''){
+                        UserAddress = true;
+                    }else {
+                        UserAddress = false;
+                    }
+                  }
+                }
+            });
+        }
+
+
+
+</script>
+</html>
