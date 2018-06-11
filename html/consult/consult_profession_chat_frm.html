@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="format-detection" content="telephone=no" />
+    <meta charset="utf-8" name="format-detection" content="telephone=no" />
     <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
     <meta http-equiv="Content-Type" content="multipart/form-data; charset=utf-8" />
     <title>专业咨询--聊天界面</title>
@@ -328,11 +327,9 @@
             name: 'resetMyRequest'
         });
         setTimeout(function(){
-            checkScroll();
-        },1000)
-        setTimeout(function(){
             _zyzImgCache();
-        },1500)
+            checkScroll();
+        },2000)
     };
 
     // 轮询3秒一次聊天记录

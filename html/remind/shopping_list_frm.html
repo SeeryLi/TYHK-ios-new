@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="format-detection" content="telephone=no" />
   <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
   <title>服药提醒--患者付费</title>
   <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
@@ -128,8 +129,8 @@
                             "doctorId": api.pageParam.doctorId ,
                             "newDrugMouldId": api.pageParam.drugMouldId,
                             "type": '1',
-                            // "price": payPrice + 10 + '',
-                            "price": 0.01,
+                            "price": payPrice + 10 + '',
+                            // "price": 0.01,
                         },
                     }
                 }, function(ret, err) {
@@ -212,6 +213,10 @@
 
     //监听支付成功推送
     function payListener(){
+      var id = getStorage("userId");
+      console.log('payListener');
+      console.log(id+'');
+      console.log(api.pageParam.drugMouldId+'');
         api.ajax({
             url: getIsPaySer,
             method: 'post',
@@ -225,10 +230,13 @@
                 },
             }
         }, function(ret, err) {
+          console.log(JSON.stringify(ret));
+          console.log(JSON.stringify(err));
             if (ret) {
               if(ret.success){
                 if(ret.data.isPay == '1'){
                   clearInterval('checkpayListener');
+                  console.log("ret.data.isPay == '1'");
                   api.ajax({
                       url: getUserInfoSer,
                       method: 'post',
@@ -241,9 +249,11 @@
                           },
                       }
                   }, function(ret, err) {
+                    console.log(JSON.stringify(ret));
+                    console.log(JSON.stringify(err));
                       if (ret) {
                         if(ret.success){
-                              if(ret.data.userType!='1'||ret.data.userType!='2'||ret.data.userType!='3'||ret.data.userType!='4'){
+                              if(ret.data.userType!='1'&& ret.data.userType!='2'&& ret.data.userType!='3'&& ret.data.userType!='4'){
                                   alert('您的账户有问题，请等待后台处理!');
                                   return;
                               }else{

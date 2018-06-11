@@ -217,8 +217,9 @@
             }, function(ret, err) {
                 if (ret) {
                     if (ret.success) {
+                      console.log(ret.data.isConfirm);
                         setStorage('isConfirm', ret.data.isConfirm);
-                        if (ret.data.isConfirm == 0) {
+                        if (ret.data.isConfirm != '' && ret.data.isConfirm == 0) {
                           api.openWin({
                               name: 'remind_main_win',
                               url: './html/remind/remind_main_win.html',

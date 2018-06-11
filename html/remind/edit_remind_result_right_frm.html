@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no" />
     <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
     <title>服药提醒</title>
     <link rel="stylesheet" type="text/css" href="../../css/api.css" />
@@ -121,6 +122,7 @@
 
     /**获取患者的服药单*/
     function getPatientPaper(){
+      console.log(321312);
       var userId = getStorage('userId');
       if (userId) {
         showToast("loading");
@@ -137,6 +139,8 @@
                 },
             }
         },function(ret, err){
+          console.log(JSON.stringify(ret));
+          console.log(JSON.stringify(err));
             toast.hide();
             if (ret) {
               if (ret.success) {

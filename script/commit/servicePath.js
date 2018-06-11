@@ -4,9 +4,9 @@ var title = "http";
 var port = "8080";
 
 //test-environment
-var environment = "119.27.189.175";
+// var environment = "119.27.189.175";
 //real-environment
-// var environment = "139.199.108.19";
+var environment = "139.199.108.19";
 
 var servicePath = title + '://' + environment + ':' + port;
 

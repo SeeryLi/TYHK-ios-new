@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no" />
     <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
     <title>添加药品</title>
     <link rel="stylesheet" type="text/css" href="../../css/api.css" />
@@ -193,6 +194,10 @@
         }
         if (eatCount == 'undefined' || eatCount == '' || eatCount == '0') {
             defaultToast('请填写服药数量');
+            return;
+        }
+        if(days<1){
+            defaultToast('服药天数为0!');
             return;
         }
         if (eatNumber > 4) {

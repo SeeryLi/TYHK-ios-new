@@ -19,6 +19,7 @@
   <preference name="statusBarAppearance" value="true"/>
   <preference name="backgroundMode" value="remote-notification"/>
   <preference name="softInputMode" value="resize"/>
+  <preference name="appCertificateVerify" value="false" />
   <permission name="readPhoneState"/>
   <permission name="camera"/>
   <permission name="record"/>

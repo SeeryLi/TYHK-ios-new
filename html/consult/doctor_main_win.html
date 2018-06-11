@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no" />
     <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
     <title>医生主页</title>
     <link rel="stylesheet" type="text/css" href="../../css/api.css" />
@@ -61,6 +62,7 @@
     var mDoctorId;
     var mDoctorName;
     var hireGold;
+    var userId = getStorage("userId")
     apiready = function() {
 
         var header = document.querySelector('#header');
@@ -166,6 +168,8 @@
                     },
                 }
             },function(ret, err){
+              console.log(JSON.stringify(ret));
+              console.log(JSON.stringify(err));
               if(ret){
                 setStorage('bindDoctorId',mDoctorId);
                 setTimeout(function(){

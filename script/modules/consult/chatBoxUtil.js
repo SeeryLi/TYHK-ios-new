@@ -180,7 +180,6 @@ function openBox(el) {
     mUIChatBox.open({
         placeholder: '输入发送内容',
         autoFocus: false,
-        //emotionPath: 'widget://image/emotion',
         styles: {
             inputBar: {
                 borderColor: '#FFF',
